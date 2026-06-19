@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  input,select,textarea,button{font-family:inherit;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:#1284D7 !important;box-shadow:0 0 0 3px rgba(18,132,215,.14);}
+  @keyframes gc_toast{from{opacity:0;transform:translateX(-50%) translateY(14px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+</style>
+</helmet>
+<div style="min-height:100vh;background:#F4F6F9;font-family:'Public Sans',system-ui,sans-serif;color:#39414E;-webkit-font-smoothing:antialiased;">
+
+  <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+    <header style="height:64px;background:#fff;border-bottom:1px solid #E5E9EF;display:flex;align-items:center;gap:28px;padding:0 32px;position:sticky;top:0;z-index:30;">
+      <div style="display:flex;align-items:center;gap:11px;cursor:pointer;" onClick="{{ goHome }}"><img src="assets/giro_logo.svg" alt="" style="height:42px;width:auto;display:block;"/><img src="assets/giro_nome.svg" alt="GiroChoffer" style="height:32px;width:auto;display:block;"/></div>
+      <nav style="display:flex;gap:4px;">
+        <sc-for list="{{ navItems }}" as="item" hint-placeholder-count="3">
+          <button onClick="{{ item.onClick }}" style="{{ item.style }}">{{ item.label }}</button>
+        </sc-for>
+      </nav>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:14px;">
+        <div style="text-align:right;line-height:1.3;">
+          <div style="font-size:13px;font-weight:700;color:#15191F;">{{ userName }}</div>
+          <div style="font-size:11px;color:#6C7682;">{{ userRoleLabel }}</div>
+        </div>
+        <div style="width:38px;height:38px;border-radius:50%;background:#0B3A66;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;font-family:'Archivo';">{{ userInitials }}</div>
+        <button onClick="{{ logout }}" style="padding:8px 14px;background:transparent;border:1px solid #E5E9EF;border-radius:8px;color:#6C7682;font-weight:600;font-size:13px;cursor:pointer;">Sair</button>
+      </div>
+    </header>
+  </sc-if>
+
+  <!-- ============ LANDING ============ -->
+  <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <header style="height:72px;max-width:1160px;margin:0 auto;display:flex;align-items:center;padding:0 32px;">
+        <div style="display:flex;align-items:center;gap:13px;"><img src="assets/giro_logo.svg" alt="" style="height:50px;width:auto;display:block;"/><img src="assets/giro_nome.svg" alt="GiroChoffer" style="height:38px;width:auto;display:block;"/></div>
+        <div style="margin-left:auto;display:flex;gap:12px;align-items:center;">
+          <button onClick="{{ goLogin }}" style="padding:11px 20px;background:transparent;border:none;color:#15191F;font-weight:600;font-size:15px;cursor:pointer;">Entrar</button>
+          <button onClick="{{ goCadMotorista }}" style="padding:11px 22px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">Criar conta</button>
+        </div>
+      </header>
+
+      <section style="max-width:1160px;margin:0 auto;padding:56px 32px 64px;display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;">
+        <div>
+          <div style="display:inline-block;background:#E7F2FB;color:#0E6CB0;font-weight:700;font-size:13px;padding:6px 14px;border-radius:999px;margin-bottom:22px;">Marketplace de fretes</div>
+          <h1 style="font-family:'Archivo';font-weight:900;font-size:52px;line-height:1.06;color:#0B1B2B;margin:0 0 20px;letter-spacing:-1px;">Sua carga conectada ao motorista certo.</h1>
+          <p style="font-size:18px;line-height:1.6;color:#4A5462;margin:0 0 32px;max-width:520px;">O GiroChoffer aproxima empresas que precisam transportar cargas e motoristas que buscam fretes — de forma simples, direta e sem intermediários.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <button onClick="{{ goCadEmpresa }}" style="padding:15px 30px;background:#1284D7;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;" style-hover="background:#0E6CB0">Sou empresa</button>
+            <button onClick="{{ goCadMotorista }}" style="padding:15px 30px;background:#0B3A66;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;" style-hover="background:#0a3158">Sou motorista</button>
+          </div>
+          <div style="display:flex;gap:32px;margin-top:40px;">
+            <div><div style="font-family:'Archivo';font-weight:800;font-size:26px;color:#0B3A66;">+2.400</div><div style="font-size:13px;color:#6C7682;">motoristas ativos</div></div>
+            <div><div style="font-family:'Archivo';font-weight:800;font-size:26px;color:#0B3A66;">+850</div><div style="font-size:13px;color:#6C7682;">empresas cadastradas</div></div>
+            <div><div style="font-family:'Archivo';font-weight:800;font-size:26px;color:#0B3A66;">27</div><div style="font-size:13px;color:#6C7682;">estados atendidos</div></div>
+          </div>
+        </div>
+        <div style="aspect-ratio:4/3;border-radius:18px;background:repeating-linear-gradient(135deg,#E9EEF4 0 14px,#EFF3F7 14px 28px);border:1px solid #E0E6ED;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;">
+          <div style="font-family:ui-monospace,monospace;font-size:13px;color:#8A95A3;background:#fff;padding:8px 16px;border-radius:8px;border:1px solid #E0E6ED;">[ foto: caminhão na estrada ]</div>
+          <div style="font-family:ui-monospace,monospace;font-size:11px;color:#A7B0BC;">1200 × 900</div>
+        </div>
+      </section>
+
+      <section style="background:#fff;border-top:1px solid #E5E9EF;border-bottom:1px solid #E5E9EF;">
+        <div style="max-width:1160px;margin:0 auto;padding:60px 32px;">
+          <h2 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;text-align:center;margin:0 0 8px;">Como funciona</h2>
+          <p style="text-align:center;color:#6C7682;font-size:16px;margin:0 0 44px;">Do anúncio da carga ao frete concluído em quatro passos.</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
+            <sc-for list="{{ steps }}" as="step" hint-placeholder-count="4">
+              <div style="text-align:center;padding:0 8px;">
+                <div style="width:52px;height:52px;border-radius:14px;background:#E7F2FB;color:#1284D7;font-family:'Archivo';font-weight:800;font-size:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">{{ step.n }}</div>
+                <div style="font-weight:700;font-size:16px;color:#15191F;margin-bottom:6px;">{{ step.t }}</div>
+                <div style="font-size:14px;color:#6C7682;line-height:1.5;">{{ step.d }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="max-width:1160px;margin:0 auto;padding:64px 32px;display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:34px;">
+          <div style="font-family:'Archivo';font-weight:800;font-size:13px;letter-spacing:.5px;color:#1284D7;text-transform:uppercase;margin-bottom:14px;">Para empresas</div>
+          <h3 style="font-family:'Archivo';font-weight:800;font-size:24px;color:#0B1B2B;margin:0 0 18px;">Encontre quem transporta sua carga</h3>
+          <sc-for list="{{ benefEmpresa }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><div style="width:8px;height:8px;border-radius:50%;background:#1284D7;margin-top:7px;flex:none;"></div><div style="font-size:15px;color:#39414E;">{{ b.t }}</div></div>
+          </sc-for>
+          <button onClick="{{ goCadEmpresa }}" style="margin-top:14px;padding:13px 26px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">Publicar uma carga</button>
+        </div>
+        <div style="background:#0B3A66;border-radius:16px;padding:34px;color:#fff;">
+          <div style="font-family:'Archivo';font-weight:800;font-size:13px;letter-spacing:.5px;color:#7FC0EE;text-transform:uppercase;margin-bottom:14px;">Para motoristas</div>
+          <h3 style="font-family:'Archivo';font-weight:800;font-size:24px;color:#fff;margin:0 0 18px;">Frete na sua rota, sem complicação</h3>
+          <sc-for list="{{ benefMotorista }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><div style="width:8px;height:8px;border-radius:50%;background:#7FC0EE;margin-top:7px;flex:none;"></div><div style="font-size:15px;color:#D6E4F2;">{{ b.t }}</div></div>
+          </sc-for>
+          <button onClick="{{ goCadMotorista }}" style="margin-top:14px;padding:13px 26px;background:#fff;color:#0B3A66;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;">Buscar fretes</button>
+        </div>
+      </section>
+
+      <section style="background:#fff;border-top:1px solid #E5E9EF;">
+        <div style="max-width:760px;margin:0 auto;padding:56px 32px;text-align:center;">
+          <h3 style="font-family:'Archivo';font-weight:800;font-size:24px;color:#0B1B2B;margin:0 0 8px;">Receba novidades e fretes em alta</h3>
+          <p style="color:#6C7682;margin:0 0 24px;">Cadastre seu e-mail e fique por dentro das novidades do GiroChoffer.</p>
+          <div style="display:flex;gap:10px;max-width:460px;margin:0 auto;">
+            <input type="email" placeholder="seu@email.com.br" style="flex:1;padding:13px 16px;border:1px solid #D9DEE6;border-radius:10px;font-size:15px;background:#fff;"/>
+            <button onClick="{{ onNewsletter }}" style="padding:13px 24px;background:#0B3A66;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;white-space:nowrap;">Inscrever</button>
+          </div>
+        </div>
+      </section>
+
+      <footer style="background:#0B1B2B;color:#9AA7B6;">
+        <div style="max-width:1160px;margin:0 auto;padding:36px 32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+          <div style="display:flex;align-items:center;gap:8px;"><img src="assets/giro_logo_branco.svg" alt="" style="height:28px;width:auto;display:block;"/><img src="assets/giro_nome.svg" alt="GiroChoffer" style="height:20px;width:auto;display:block;filter:brightness(0) invert(1);"/></div>
+          <div style="font-size:13px;">© {{ year }} GiroChoffer · Marketplace de fretes · Termos de uso · Privacidade</div>
+        </div>
+      </footer>
+    </div>
+  </sc-if>
+
+  <!-- ============ AUTH ============ -->
+  <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 24px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;cursor:pointer;" onClick="{{ goHomePublic }}"><img src="assets/giro_logo.svg" alt="" style="height:48px;width:auto;display:block;"/><img src="assets/giro_nome.svg" alt="GiroChoffer" style="height:36px;width:auto;display:block;"/></div>
+      <div style="width:100%;max-width:440px;background:#fff;border:1px solid #E5E9EF;border-radius:18px;padding:32px;box-shadow:0 4px 24px rgba(16,24,40,.05);">
+        <div style="display:flex;gap:4px;background:#F1F4F8;border-radius:12px;padding:4px;margin-bottom:26px;">
+          <button onClick="{{ auth.setCadastro }}" style="{{ auth.tabCad }}">Criar conta</button>
+          <button onClick="{{ auth.setLogin }}" style="{{ auth.tabLog }}">Entrar</button>
+        </div>
+        <h2 style="font-family:'Archivo';font-weight:800;font-size:24px;color:#0B1B2B;margin:0 0 22px;">{{ auth.titulo }}</h2>
+
+        <sc-if value="{{ auth.isCadastro }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:8px;">Quero me cadastrar como</label>
+            <div style="display:flex;gap:10px;margin-bottom:20px;">
+              <button onClick="{{ auth.pickMot }}" style="{{ auth.styMot }}">Motorista</button>
+              <button onClick="{{ auth.pickEmp }}" style="{{ auth.styEmp }}">Empresa</button>
+            </div>
+            <div style="margin-bottom:14px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">{{ auth.nomeLabel }}</label><input style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="{{ auth.nomePh }}"/></div>
+            <div style="margin-bottom:14px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">{{ auth.docLabel }}</label><input style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="{{ auth.docPh }}"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">E-mail</label><input type="email" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="email@dominio.com"/></div>
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Telefone</label><input style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="(11) 90000-0000"/></div>
+            </div>
+            <div style="margin-bottom:22px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Senha</label><input type="password" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="••••••••"/></div>
+            <button onClick="{{ auth.submit }}" style="width:100%;padding:14px;background:#1284D7;color:#fff;border:none;border-radius:11px;font-weight:700;font-size:16px;cursor:pointer;" style-hover="background:#0E6CB0">Criar conta e entrar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ auth.isLogin }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:8px;">Entrar como</label>
+            <div style="display:flex;gap:10px;margin-bottom:20px;">
+              <button onClick="{{ auth.pickMot }}" style="{{ auth.styMot }}">Motorista</button>
+              <button onClick="{{ auth.pickEmp }}" style="{{ auth.styEmp }}">Empresa</button>
+            </div>
+            <div style="margin-bottom:14px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">E-mail</label><input type="email" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="email@dominio.com"/></div>
+            <div style="margin-bottom:10px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Senha</label><input type="password" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;" placeholder="••••••••"/></div>
+            <div style="text-align:right;margin-bottom:22px;"><a style="font-size:13px;color:#1284D7;text-decoration:none;cursor:pointer;">Esqueci minha senha</a></div>
+            <button onClick="{{ auth.submit }}" style="width:100%;padding:14px;background:#1284D7;color:#fff;border:none;border-radius:11px;font-weight:700;font-size:16px;cursor:pointer;" style-hover="background:#0E6CB0">Entrar</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ EMPRESA — PAINEL ============ -->
+  <sc-if value="{{ isEmpPainel }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1160px;margin:0 auto;padding:36px 32px 64px;">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px;flex-wrap:wrap;">
+        <div>
+          <h1 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;margin:0 0 4px;">Painel da empresa</h1>
+          <p style="margin:0;color:#6C7682;font-size:15px;">Acompanhe suas cargas publicadas e os motoristas interessados.</p>
+        </div>
+        <button onClick="{{ goNova }}" style="padding:13px 24px;background:#1284D7;color:#fff;border:none;border-radius:11px;font-weight:700;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">+ Publicar nova carga</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;">
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;"><div style="font-family:'Archivo';font-weight:800;font-size:32px;color:#1284D7;">{{ stats.disp }}</div><div style="font-size:13px;color:#6C7682;margin-top:2px;">Disponíveis</div></div>
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;"><div style="font-family:'Archivo';font-weight:800;font-size:32px;color:#B7791F;">{{ stats.inter }}</div><div style="font-size:13px;color:#6C7682;margin-top:2px;">Com interessados</div></div>
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;"><div style="font-family:'Archivo';font-weight:800;font-size:32px;color:#1E8E5A;">{{ stats.contr }}</div><div style="font-size:13px;color:#6C7682;margin-top:2px;">Contratadas</div></div>
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;"><div style="font-family:'Archivo';font-weight:800;font-size:32px;color:#5A6573;">{{ stats.concl }}</div><div style="font-size:13px;color:#6C7682;margin-top:2px;">Concluídas</div></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+        <sc-for list="{{ empresaTabs }}" as="tab" hint-placeholder-count="5">
+          <button onClick="{{ tab.onClick }}" style="{{ tab.style }}">{{ tab.label }}</button>
+        </sc-for>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <sc-for list="{{ empresaList }}" as="item" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px 22px;display:flex;align-items:center;gap:24px;">
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                <span style="{{ item.badgeStyle }}">{{ item.statusLabel }}</span>
+                <span style="font-size:12px;color:#9AA3AF;">Coleta {{ item.dataColeta }}</span>
+              </div>
+              <div style="font-family:'Archivo';font-weight:700;font-size:17px;color:#15191F;margin-bottom:8px;">{{ item.titulo }}</div>
+              <div style="font-size:14px;color:#4A5462;">
+                <span style="font-weight:700;color:#0B3A66;">{{ item.origem }}</span> → <span style="font-weight:700;color:#0B3A66;">{{ item.destino }}</span>
+                <span style="color:#C2C9D2;">  ·  </span>{{ item.carroceria }}<span style="color:#C2C9D2;">  ·  </span>{{ item.peso }}
+              </div>
+            </div>
+            <div style="text-align:right;flex:none;">
+              <div style="font-family:'Archivo';font-weight:800;font-size:21px;color:#0B3A66;">{{ item.valorFmt }}</div>
+              <div style="font-size:12px;color:#6C7682;margin:4px 0 12px;">{{ item.interessadosLabel }}</div>
+              <button onClick="{{ item.onVerEmp }}" style="padding:9px 18px;background:#fff;color:#15191F;border:1px solid #D9DEE6;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;" style-hover="border-color:#1284D7;color:#1284D7">Ver detalhes</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ empresaEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #D9DEE6;border-radius:14px;padding:48px;text-align:center;color:#9AA3AF;">Nenhuma carga neste status.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ EMPRESA — NOVA CARGA ============ -->
+  <sc-if value="{{ isEmpNova }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:760px;margin:0 auto;padding:36px 32px 64px;">
+      <button onClick="{{ nc.onCancelar }}" style="background:none;border:none;color:#6C7682;font-weight:600;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Voltar ao painel</button>
+      <h1 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;margin:0 0 4px;">Publicar nova carga</h1>
+      <p style="margin:0 0 28px;color:#6C7682;font-size:15px;">Preencha os dados do frete. Ele ficará disponível para os motoristas imediatamente.</p>
+      <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+        <div style="margin-bottom:18px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Título da carga</label><input value="{{ nc.titulo }}" onChange="{{ nc.setTitulo }}" placeholder="Ex.: Eletrodomésticos — linha branca" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Origem</label><input value="{{ nc.origem }}" onChange="{{ nc.setOrigem }}" placeholder="Cidade/UF" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Destino</label><input value="{{ nc.destino }}" onChange="{{ nc.setDestino }}" placeholder="Cidade/UF" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Tipo de veículo</label>
+            <select value="{{ nc.tipoVeiculo }}" onChange="{{ nc.setTipoVeiculo }}" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;">
+              <sc-for list="{{ tiposVeiculo }}" as="opt" hint-placeholder-count="5"><option value="{{ opt.nome }}">{{ opt.nome }}</option></sc-for>
+            </select>
+          </div>
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Tipo de carroceria</label>
+            <select value="{{ nc.carroceria }}" onChange="{{ nc.setCarroceria }}" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;">
+              <sc-for list="{{ carrocerias }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.nome }}">{{ opt.nome }}</option></sc-for>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;">
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Peso</label><input value="{{ nc.peso }}" onChange="{{ nc.setPeso }}" placeholder="Ex.: 8.500 kg" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Valor do frete (R$)</label><input value="{{ nc.valor }}" onChange="{{ nc.setValor }}" placeholder="Ex.: 4200" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Data de coleta</label><input value="{{ nc.dataColeta }}" onChange="{{ nc.setDataColeta }}" placeholder="dd/mm/aaaa" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+        </div>
+        <div style="margin-bottom:26px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Descrição</label><textarea value="{{ nc.descricao }}" onChange="{{ nc.setDescricao }}" rows="4" placeholder="Detalhes da carga, exigências de manuseio, agendamento de descarga..." style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;resize:vertical;font-family:inherit;"></textarea></div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <button onClick="{{ nc.onCancelar }}" style="padding:13px 24px;background:#fff;color:#15191F;border:1px solid #D9DEE6;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;">Cancelar</button>
+          <button onClick="{{ nc.onPublicar }}" style="padding:13px 28px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">Publicar carga</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ EMPRESA — DETALHES ============ -->
+  <sc-if value="{{ isEmpDet }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1000px;margin:0 auto;padding:36px 32px 64px;">
+      <button onClick="{{ sc.onVoltarEmp }}" style="background:none;border:none;color:#6C7682;font-weight:600;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Voltar ao painel</button>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;">
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="{{ sc.badgeStyle }}">{{ sc.statusLabel }}</span><span style="font-size:12px;color:#9AA3AF;">Coleta {{ sc.dataColeta }}</span></div>
+          <h1 style="font-family:'Archivo';font-weight:800;font-size:26px;color:#0B1B2B;margin:0 0 22px;">{{ sc.titulo }}</h1>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;">
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Origem</div><div style="font-size:16px;font-weight:700;color:#0B3A66;">{{ sc.origem }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Destino</div><div style="font-size:16px;font-weight:700;color:#0B3A66;">{{ sc.destino }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Veículo / Carroceria</div><div style="font-size:15px;color:#15191F;">{{ sc.tipoVeiculo }} · {{ sc.carroceria }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Peso / Volume</div><div style="font-size:15px;color:#15191F;">{{ sc.peso }} · {{ sc.volume }}</div></div>
+          </div>
+          <div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Descrição</div>
+          <p style="font-size:15px;color:#4A5462;line-height:1.6;margin:0;">{{ sc.descricao }}</p>
+        </div>
+        <div>
+          <div style="background:#0B3A66;border-radius:16px;padding:26px;color:#fff;margin-bottom:18px;">
+            <div style="font-size:13px;color:#9FC2E0;margin-bottom:4px;">Valor do frete</div>
+            <div style="font-family:'Archivo';font-weight:900;font-size:36px;line-height:1;">{{ sc.valorFmt }}</div>
+          </div>
+          <sc-if value="{{ sc.isContratada }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;">
+              <div style="font-size:13px;font-weight:700;color:#1E8E5A;margin-bottom:12px;">✓ Carga contratada</div>
+              <button onClick="{{ sc.onConcluir }}" style="width:100%;padding:13px;background:#1E8E5A;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:10px;">Marcar como concluída</button>
+              <button onClick="{{ sc.onCancelar }}" style="width:100%;padding:13px;background:#fff;color:#C0392B;border:1px solid #F0D2CE;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;">Cancelar carga</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ sc.isDisponivel }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;">
+              <button onClick="{{ sc.onCancelar }}" style="width:100%;padding:13px;background:#fff;color:#C0392B;border:1px solid #F0D2CE;border-radius:10px;font-weight:600;font-size:14px;cursor:pointer;">Cancelar carga</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="margin-top:32px;">
+        <h2 style="font-family:'Archivo';font-weight:800;font-size:20px;color:#0B1B2B;margin:0 0 16px;">Motoristas interessados</h2>
+        <sc-if value="{{ sc.semInteressados }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#fff;border:1px dashed #D9DEE6;border-radius:14px;padding:40px;text-align:center;color:#9AA3AF;">Ainda não há motoristas interessados nesta carga.</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ sc.interessadosVM }}" as="m" hint-placeholder-count="3">
+            <div style="background:#fff;border:1px solid {{ m.borderColor }};border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:18px;">
+              <div style="width:48px;height:48px;border-radius:50%;background:#E7F2FB;color:#0B3A66;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;font-family:'Archivo';flex:none;">{{ m.inicial }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:16px;color:#15191F;margin-bottom:3px;">{{ m.nome }}</div>
+                <div style="font-size:13px;color:#6C7682;">{{ m.veiculo }} · {{ m.carroceria }} · até {{ m.cap }}</div>
+                <div style="font-size:13px;color:#6C7682;margin-top:2px;">{{ m.cidade }} · ⭐ {{ m.nota }} · {{ m.viagens }} viagens</div>
+              </div>
+              <sc-if value="{{ m.isEscolhido }}" hint-placeholder-val="{{ false }}">
+                <span style="background:#E3F4EC;color:#1E8E5A;font-weight:700;font-size:13px;padding:9px 16px;border-radius:9px;flex:none;">✓ Contratado</span>
+              </sc-if>
+              <sc-if value="{{ m.podeEscolher }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ m.onEscolher }}" style="padding:11px 22px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;flex:none;" style-hover="background:#0E6CB0">Escolher</button>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MOTORISTA — CARGAS DISPONÍVEIS ============ -->
+  <sc-if value="{{ isMotPainel }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1160px;margin:0 auto;padding:36px 32px 64px;">
+      <h1 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;margin:0 0 4px;">Cargas disponíveis</h1>
+      <p style="margin:0 0 24px;color:#6C7682;font-size:15px;">Encontre fretes compatíveis e demonstre seu interesse.</p>
+
+      <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:18px 20px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-bottom:24px;">
+        <div style="flex:1;min-width:160px;"><label style="display:block;font-size:12px;font-weight:600;color:#6C7682;margin-bottom:6px;">Origem</label><input value="{{ filt.origem }}" onChange="{{ filt.setOrigem }}" placeholder="Cidade ou UF" style="width:100%;padding:10px 13px;border:1px solid #D9DEE6;border-radius:9px;font-size:14px;background:#fff;"/></div>
+        <div style="flex:1;min-width:160px;"><label style="display:block;font-size:12px;font-weight:600;color:#6C7682;margin-bottom:6px;">Destino</label><input value="{{ filt.destino }}" onChange="{{ filt.setDestino }}" placeholder="Cidade ou UF" style="width:100%;padding:10px 13px;border:1px solid #D9DEE6;border-radius:9px;font-size:14px;background:#fff;"/></div>
+        <div style="flex:1;min-width:180px;"><label style="display:block;font-size:12px;font-weight:600;color:#6C7682;margin-bottom:6px;">Carroceria</label>
+          <select value="{{ filt.carroceria }}" onChange="{{ filt.setCarroceria }}" style="width:100%;padding:10px 13px;border:1px solid #D9DEE6;border-radius:9px;font-size:14px;background:#fff;">
+            <sc-for list="{{ carroceriasFilter }}" as="opt" hint-placeholder-count="7"><option value="{{ opt.val }}">{{ opt.nome }}</option></sc-for>
+          </select>
+        </div>
+        <button onClick="{{ filt.limpar }}" style="padding:10px 18px;background:#F1F4F8;color:#6C7682;border:none;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;height:40px;">Limpar</button>
+      </div>
+
+      <div style="font-size:14px;color:#6C7682;margin-bottom:14px;">{{ marketCount }} carga(s) encontrada(s)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <sc-for list="{{ marketVM }}" as="item" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:14px;padding:20px;display:flex;flex-direction:column;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="{{ item.badgeStyle }}">{{ item.statusLabel }}</span><span style="font-size:12px;color:#9AA3AF;">Coleta {{ item.dataColeta }}</span></div>
+            <div style="font-family:'Archivo';font-weight:700;font-size:17px;color:#15191F;margin-bottom:6px;">{{ item.titulo }}</div>
+            <div style="font-size:13px;color:#6C7682;margin-bottom:12px;">{{ item.empresa }}</div>
+            <div style="font-size:15px;color:#4A5462;margin-bottom:6px;"><span style="font-weight:700;color:#0B3A66;">{{ item.origem }}</span> → <span style="font-weight:700;color:#0B3A66;">{{ item.destino }}</span></div>
+            <div style="font-size:13px;color:#6C7682;margin-bottom:16px;">{{ item.carroceria }} · {{ item.peso }}</div>
+            <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid #F0F2F5;">
+              <div style="font-family:'Archivo';font-weight:800;font-size:20px;color:#0B3A66;">{{ item.valorFmt }}</div>
+              <button onClick="{{ item.onVerMot }}" style="padding:10px 20px;background:#1284D7;color:#fff;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;" style-hover="background:#0E6CB0">Ver carga</button>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ marketEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px dashed #D9DEE6;border-radius:14px;padding:48px;text-align:center;color:#9AA3AF;">Nenhuma carga corresponde aos filtros.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <!-- ============ MOTORISTA — DETALHES ============ -->
+  <sc-if value="{{ isMotDet }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1000px;margin:0 auto;padding:36px 32px 64px;">
+      <button onClick="{{ sc.onVoltarMot }}" style="background:none;border:none;color:#6C7682;font-weight:600;font-size:14px;cursor:pointer;padding:0;margin-bottom:16px;">← Voltar às cargas</button>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start;">
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;"><span style="{{ sc.badgeStyle }}">{{ sc.statusLabel }}</span><span style="font-size:12px;color:#9AA3AF;">Coleta {{ sc.dataColeta }}</span></div>
+          <h1 style="font-family:'Archivo';font-weight:800;font-size:26px;color:#0B1B2B;margin:0 0 4px;">{{ sc.titulo }}</h1>
+          <div style="font-size:14px;color:#6C7682;margin-bottom:24px;">Publicada por {{ sc.empresa }}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;">
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Origem</div><div style="font-size:16px;font-weight:700;color:#0B3A66;">{{ sc.origem }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Destino</div><div style="font-size:16px;font-weight:700;color:#0B3A66;">{{ sc.destino }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Veículo / Carroceria</div><div style="font-size:15px;color:#15191F;">{{ sc.tipoVeiculo }} · {{ sc.carroceria }}</div></div>
+            <div><div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Peso / Volume</div><div style="font-size:15px;color:#15191F;">{{ sc.peso }} · {{ sc.volume }}</div></div>
+          </div>
+          <div style="font-size:12px;color:#9AA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Descrição</div>
+          <p style="font-size:15px;color:#4A5462;line-height:1.6;margin:0;">{{ sc.descricao }}</p>
+        </div>
+        <div>
+          <div style="background:#0B3A66;border-radius:16px;padding:26px;color:#fff;margin-bottom:18px;">
+            <div style="font-size:13px;color:#9FC2E0;margin-bottom:4px;">Valor do frete</div>
+            <div style="font-family:'Archivo';font-weight:900;font-size:36px;line-height:1;">{{ sc.valorFmt }}</div>
+          </div>
+          <sc-if value="{{ sc.podeInteresse }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ sc.onInteresse }}" style="width:100%;padding:16px;background:#1284D7;color:#fff;border:none;border-radius:12px;font-weight:700;font-size:16px;cursor:pointer;" style-hover="background:#0E6CB0">Tenho interesse</button>
+          </sc-if>
+          <sc-if value="{{ sc.contatoLiberado }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#fff;border:1px solid #CDE8D9;border-radius:14px;padding:20px;">
+              <div style="font-size:13px;font-weight:700;color:#1E8E5A;margin-bottom:12px;">✓ Interesse enviado — contato liberado</div>
+              <div style="font-size:12px;color:#9AA3AF;margin-bottom:2px;">Telefone</div>
+              <div style="font-size:16px;font-weight:700;color:#15191F;margin-bottom:10px;">{{ sc.empresaTel }}</div>
+              <div style="font-size:12px;color:#9AA3AF;margin-bottom:2px;">WhatsApp</div>
+              <div style="font-size:16px;font-weight:700;color:#15191F;margin-bottom:16px;">{{ sc.empresaWhats }}</div>
+              <button onClick="{{ sc.onVerMinhas }}" style="width:100%;padding:12px;background:#fff;color:#1284D7;border:1px solid #BBD9F1;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;">Ver em Minhas cargas</button>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MOTORISTA — MINHAS CARGAS ============ -->
+  <sc-if value="{{ isMotMinhas }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1000px;margin:0 auto;padding:36px 32px 64px;">
+      <h1 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;margin:0 0 4px;">Minhas cargas</h1>
+      <p style="margin:0 0 28px;color:#6C7682;font-size:15px;">Acompanhe seus interesses, fretes contratados e o histórico.</p>
+
+      <div style="font-family:'Archivo';font-weight:700;font-size:15px;color:#B7791F;margin-bottom:12px;">Interesse enviado</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:32px;">
+        <sc-if value="{{ enviadosEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D9DEE6;border-radius:12px;padding:24px;text-align:center;color:#9AA3AF;font-size:14px;">Você ainda não demonstrou interesse em nenhuma carga.</div></sc-if>
+        <sc-for list="{{ enviados }}" as="item" hint-placeholder-count="2">
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:13px;padding:18px 20px;display:flex;align-items:center;gap:20px;">
+            <div style="flex:1;"><div style="font-weight:700;font-size:16px;color:#15191F;margin-bottom:4px;">{{ item.titulo }}</div><div style="font-size:14px;color:#4A5462;"><span style="font-weight:700;color:#0B3A66;">{{ item.origem }}</span> → <span style="font-weight:700;color:#0B3A66;">{{ item.destino }}</span> · {{ item.empresa }}</div></div>
+            <div style="font-family:'Archivo';font-weight:800;font-size:18px;color:#0B3A66;">{{ item.valorFmt }}</div>
+            <span style="background:#FBF1E0;color:#B7791F;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;">Aguardando empresa</span>
+            <button onClick="{{ item.onVerMot }}" style="padding:9px 16px;background:#fff;color:#15191F;border:1px solid #D9DEE6;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer;">Ver</button>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-family:'Archivo';font-weight:700;font-size:15px;color:#1E8E5A;margin-bottom:12px;">Contratadas</div>
+      <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:32px;">
+        <sc-if value="{{ contratadasEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D9DEE6;border-radius:12px;padding:24px;text-align:center;color:#9AA3AF;font-size:14px;">Nenhum frete contratado no momento.</div></sc-if>
+        <sc-for list="{{ contratadasM }}" as="item" hint-placeholder-count="1">
+          <div style="background:#fff;border:1px solid #CDE8D9;border-radius:13px;padding:18px 20px;display:flex;align-items:center;gap:20px;">
+            <div style="flex:1;"><div style="font-weight:700;font-size:16px;color:#15191F;margin-bottom:4px;">{{ item.titulo }}</div><div style="font-size:14px;color:#4A5462;"><span style="font-weight:700;color:#0B3A66;">{{ item.origem }}</span> → <span style="font-weight:700;color:#0B3A66;">{{ item.destino }}</span> · {{ item.empresa }}</div></div>
+            <div style="font-family:'Archivo';font-weight:800;font-size:18px;color:#0B3A66;">{{ item.valorFmt }}</div>
+            <span style="background:#E3F4EC;color:#1E8E5A;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;">Contratada</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-family:'Archivo';font-weight:700;font-size:15px;color:#5A6573;margin-bottom:12px;">Concluídas</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <sc-if value="{{ concluidasEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:#fff;border:1px dashed #D9DEE6;border-radius:12px;padding:24px;text-align:center;color:#9AA3AF;font-size:14px;">Nenhum frete concluído ainda.</div></sc-if>
+        <sc-for list="{{ concluidasM }}" as="item" hint-placeholder-count="1">
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:13px;padding:18px 20px;display:flex;align-items:center;gap:20px;opacity:.86;">
+            <div style="flex:1;"><div style="font-weight:700;font-size:16px;color:#15191F;margin-bottom:4px;">{{ item.titulo }}</div><div style="font-size:14px;color:#4A5462;"><span style="font-weight:700;color:#0B3A66;">{{ item.origem }}</span> → <span style="font-weight:700;color:#0B3A66;">{{ item.destino }}</span> · {{ item.empresa }}</div></div>
+            <div style="font-family:'Archivo';font-weight:800;font-size:18px;color:#0B3A66;">{{ item.valorFmt }}</div>
+            <span style="background:#EDF0F4;color:#5A6573;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px;">Concluída</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MEU PERFIL ============ -->
+  <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:720px;margin:0 auto;padding:36px 32px 64px;">
+      <h1 style="font-family:'Archivo';font-weight:800;font-size:30px;color:#0B1B2B;margin:0 0 4px;">Meu perfil</h1>
+      <p style="margin:0 0 28px;color:#6C7682;font-size:15px;">Edite seus dados cadastrais.</p>
+
+      <sc-if value="{{ perfilEmpresa }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+          <div style="font-family:'Archivo';font-weight:700;font-size:18px;color:#0B1B2B;margin-bottom:20px;">Dados da empresa</div>
+          <div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Razão social</label><input defaultValue="Transportes Andrade Ltda" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+            <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Nome fantasia</label><input defaultValue="Andrade Logística" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">CNPJ</label><input defaultValue="18.402.551/0001-04" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+            <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Telefone</label><input defaultValue="(11) 3322-7788" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">E-mail</label><input defaultValue="contato@andradelog.com.br" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;"><button onClick="{{ onSalvarPerfil }}" style="padding:13px 28px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">Salvar alterações</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ perfilMotorista }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+            <div style="font-family:'Archivo';font-weight:700;font-size:18px;color:#0B1B2B;margin-bottom:20px;">Dados pessoais</div>
+            <div style="margin-bottom:16px;"><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Nome completo</label><input defaultValue="Carlos Henrique Souza" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Telefone</label><input defaultValue="(11) 99812-4477" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">E-mail</label><input defaultValue="carlos.souza@email.com.br" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E9EF;border-radius:16px;padding:30px;">
+            <div style="font-family:'Archivo';font-weight:700;font-size:18px;color:#0B1B2B;margin-bottom:20px;">Meu veículo</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Tipo de veículo</label><input defaultValue="Caminhão (Scania R 450)" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Carroceria</label><input defaultValue="Baú" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Capacidade</label><input defaultValue="9.000 kg" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+              <div><label style="display:block;font-size:13px;font-weight:600;color:#39414E;margin-bottom:6px;">Placa</label><input defaultValue="FQT-2D18" style="width:100%;padding:11px 14px;border:1px solid #D9DEE6;border-radius:10px;font-size:14px;background:#fff;"/></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;"><button onClick="{{ onSalvarPerfil }}" style="padding:13px 28px;background:#1284D7;color:#fff;border:none;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;" style-hover="background:#0E6CB0">Salvar alterações</button></div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#0B1B2B;color:#fff;padding:14px 24px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(11,27,43,.32);z-index:100;animation:gc_toast .25s ease;max-width:90vw;">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860},&quot;telaInicial&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Página inicial&quot;,&quot;Cadastro/Login&quot;,&quot;Painel da empresa&quot;,&quot;Nova carga&quot;,&quot;Detalhes (empresa)&quot;,&quot;Cargas disponíveis&quot;,&quot;Detalhes (motorista)&quot;,&quot;Minhas cargas&quot;,&quot;Meu perfil&quot;],&quot;default&quot;:&quot;Página inicial&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;papelAtivo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Empresa&quot;,&quot;Motorista&quot;],&quot;default&quot;:&quot;Empresa&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'landing', role: null,
+    authMode: 'cadastro', authRole: 'motorista',
+    selectedCargaId: 'c1', empresaTab: 'todas',
+    fOrigem: '', fDestino: '', fCarroceria: '',
+    toast: null,
+    novaCarga: { titulo:'', origem:'', destino:'', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'', valor:'', dataColeta:'', descricao:'' },
+    cargas: [
+      { id:'c1', titulo:'Linha branca — geladeiras e fogões', empresa:'Transportes Andrade', mine:true, origem:'São Paulo/SP', destino:'Curitiba/PR', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'8.500 kg', volume:'24 m³', valor:4200, dataColeta:'22/06/2026', descricao:'Carga paletizada de eletrodomésticos da linha branca. Necessário uso de cintas e mantas para proteção. Descarga no centro de distribuição em Curitiba com agendamento prévio.', status:'Disponível', interessados:['m1','m2','m3'], escolhido:null },
+      { id:'c2', titulo:'Bebidas paletizadas', empresa:'Transportes Andrade', mine:true, origem:'Jundiaí/SP', destino:'Belo Horizonte/MG', tipoVeiculo:'Carreta', carroceria:'Sider', peso:'18.000 kg', volume:'32 m³', valor:5100, dataColeta:'24/06/2026', descricao:'Bebidas em paletes padrão PBR. Carregamento lateral. Entrega em rede de supermercados na região metropolitana de BH.', status:'Disponível', interessados:['m2'], escolhido:null },
+      { id:'c3', titulo:'Autopeças e componentes', empresa:'Transportes Andrade', mine:true, origem:'Joinville/SC', destino:'São Paulo/SP', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'6.000 kg', volume:'18 m³', valor:3900, dataColeta:'18/06/2026', descricao:'Autopeças embaladas em caixas. Carga de valor agregado, exige veículo fechado e pontualidade na entrega.', status:'Contratada', interessados:['m1'], escolhido:'m1' },
+      { id:'c4', titulo:'Material de construção — cimento e blocos', empresa:'Transportes Andrade', mine:true, origem:'Campinas/SP', destino:'Ribeirão Preto/SP', tipoVeiculo:'Caminhão', carroceria:'Aberto/Prancha', peso:'15.000 kg', volume:'—', valor:2400, dataColeta:'10/06/2026', descricao:'Material de construção em sacaria e paletes. Descarga com Munck por conta do destinatário.', status:'Concluída', interessados:['m1'], escolhido:'m1' },
+      { id:'c5', titulo:'Produtos de limpeza', empresa:'Transportes Andrade', mine:true, origem:'Sorocaba/SP', destino:'Londrina/PR', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'7.200 kg', volume:'20 m³', valor:3300, dataColeta:'26/06/2026', descricao:'Produtos de limpeza em caixas. Carga seca, sem exigências especiais de manuseio.', status:'Disponível', interessados:[], escolhido:null },
+      { id:'c6', titulo:'Grãos de soja a granel', empresa:'Agro Cerrado S/A', mine:false, origem:'Rondonópolis/MT', destino:'Santos/SP', tipoVeiculo:'Bitrem', carroceria:'Graneleiro', peso:'32.000 kg', volume:'—', valor:9800, dataColeta:'25/06/2026', descricao:'Soja em grão para exportação. Descarga no porto de Santos. Necessária lona e documentação fiscal completa.', status:'Disponível', interessados:['m1'], escolhido:null },
+      { id:'c7', titulo:'Laticínios refrigerados', empresa:'Laticínios Bela Vista', mine:false, origem:'Uberlândia/MG', destino:'Goiânia/GO', tipoVeiculo:'Caminhão', carroceria:'Refrigerado', peso:'12.000 kg', volume:'28 m³', valor:3600, dataColeta:'23/06/2026', descricao:'Queijos e iogurtes. Temperatura controlada entre 2°C e 6°C durante todo o transporte.', status:'Disponível', interessados:[], escolhido:null },
+      { id:'c8', titulo:'Móveis planejados — desmontados', empresa:'MóveisExpress', mine:false, origem:'Bento Gonçalves/RS', destino:'Porto Alegre/RS', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'5.400 kg', volume:'22 m³', valor:1900, dataColeta:'21/06/2026', descricao:'Móveis planejados desmontados e embalados. Manuseio cuidadoso, carga frágil.', status:'Disponível', interessados:[], escolhido:null },
+      { id:'c9', titulo:'Diesel S10 a granel', empresa:'Distribuidora Vale', mine:false, origem:'Paulínia/SP', destino:'Bauru/SP', tipoVeiculo:'Carreta', carroceria:'Tanque', peso:'20.000 L', volume:'—', valor:4500, dataColeta:'27/06/2026', descricao:'Transporte de diesel S10. Exige MOPP, veículo tanque e documentação para produtos perigosos.', status:'Disponível', interessados:[], escolhido:null }
+    ]
+  };
+
+  motoristas = {
+    m1: { id:'m1', nome:'Carlos Henrique Souza', veiculo:'Scania R 450', carroceria:'Baú', cap:'9.000 kg', cidade:'São Paulo/SP', nota:4.9, viagens:128, inicial:'CH' },
+    m2: { id:'m2', nome:'Marcos Vinícius Lima', veiculo:'Volvo FH 460', carroceria:'Sider', cap:'27.000 kg', cidade:'Curitiba/PR', nota:4.7, viagens:86, inicial:'MV' },
+    m3: { id:'m3', nome:'Rafael Oliveira Dias', veiculo:'Mercedes-Benz Actros', carroceria:'Graneleiro', cap:'30.000 kg', cidade:'Goiânia/GO', nota:4.8, viagens:154, inicial:'RO' }
+  };
+
+  carrocerias = ['Baú','Sider','Graneleiro','Refrigerado','Aberto/Prancha','Tanque'];
+  tiposVeiculo = ['Caminhão','Carreta','Bitrem','VUC','Van'];
+
+  constructor(props) {
+    super(props);
+    const map = {
+      'Página inicial': ['landing', null],
+      'Cadastro/Login': ['auth', null],
+      'Painel da empresa': ['emp-painel', 'empresa'],
+      'Nova carga': ['emp-nova', 'empresa'],
+      'Detalhes (empresa)': ['emp-detalhes', 'empresa'],
+      'Cargas disponíveis': ['mot-painel', 'motorista'],
+      'Detalhes (motorista)': ['mot-detalhes', 'motorista'],
+      'Minhas cargas': ['mot-minhas', 'motorista'],
+      'Meu perfil': ['perfil', props.papelAtivo === 'Motorista' ? 'motorista' : 'empresa']
+    };
+    const sel = map[props.telaInicial] || ['landing', null];
+    this.state = { ...this.state, screen: sel[0], role: sel[1] };
+  }
+
+  fmt(n) { return 'R$ ' + Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  disp(c) { return (c.status === 'Disponível' && c.interessados.length > 0) ? 'Com interessados' : c.status; }
+  statusStyle(label) {
+    const m = {
+      'Disponível': ['#0E6CB0', '#E7F2FB'],
+      'Com interessados': ['#B7791F', '#FBF1E0'],
+      'Contratada': ['#1E8E5A', '#E3F4EC'],
+      'Concluída': ['#5A6573', '#EDF0F4'],
+      'Cancelada': ['#C0392B', '#FBEAE8']
+    };
+    const c = m[label] || ['#5A6573', '#EDF0F4'];
+    return { color: c[0], background: c[1], borderRadius: '999px', padding: '4px 12px', fontSize: '12px', fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' };
+  }
+
+  go(screen) { this.setState({ screen }); if (window.scrollTo) window.scrollTo(0, 0); }
+  loginAs(role) { this.setState({ role, screen: role === 'empresa' ? 'emp-painel' : 'mot-painel' }); if (window.scrollTo) window.scrollTo(0, 0); }
+  logout() { this.setState({ role: null, screen: 'landing' }); if (window.scrollTo) window.scrollTo(0, 0); }
+  openEmpresa(id) { this.setState({ selectedCargaId: id, screen: 'emp-detalhes' }); if (window.scrollTo) window.scrollTo(0, 0); }
+  openMotorista(id) { this.setState({ selectedCargaId: id, screen: 'mot-detalhes' }); if (window.scrollTo) window.scrollTo(0, 0); }
+  toast(msg) { if (this._t) clearTimeout(this._t); this.setState({ toast: msg }); this._t = setTimeout(() => this.setState({ toast: null }), 3400); }
+  interesse(id) {
+    this.setState(s => ({ cargas: s.cargas.map(c => c.id === id && !c.interessados.includes('m1') ? { ...c, interessados: [...c.interessados, 'm1'] } : c) }));
+    this.toast('Interesse enviado! O contato da empresa foi liberado.');
+  }
+  escolher(id, mid) {
+    this.setState(s => ({ cargas: s.cargas.map(c => c.id === id ? { ...c, escolhido: mid, status: 'Contratada' } : c) }));
+    const nome = this.motoristas[mid] ? this.motoristas[mid].nome : '';
+    this.toast(nome + ' foi contratado para o frete.');
+  }
+  concluir(id) { this.setState(s => ({ cargas: s.cargas.map(c => c.id === id ? { ...c, status: 'Concluída' } : c) })); this.toast('Frete marcado como concluído.'); }
+  cancelar(id) { this.setState(s => ({ cargas: s.cargas.map(c => c.id === id ? { ...c, status: 'Cancelada' } : c) })); this.toast('Carga cancelada.'); }
+  publicar() {
+    const nc = this.state.novaCarga;
+    if (!nc.titulo || !nc.origem || !nc.destino) { this.toast('Preencha ao menos título, origem e destino.'); return; }
+    const carga = { id: 'n' + Date.now(), titulo: nc.titulo, empresa: 'Transportes Andrade', mine: true, origem: nc.origem, destino: nc.destino, tipoVeiculo: nc.tipoVeiculo, carroceria: nc.carroceria, peso: nc.peso || '—', volume: '—', valor: Number(String(nc.valor).replace(/[^0-9]/g, '')) || 0, dataColeta: nc.dataColeta || 'A definir', descricao: nc.descricao || '—', status: 'Disponível', interessados: [], escolhido: null };
+    this.setState(s => ({ cargas: [carga, ...s.cargas], novaCarga: { titulo:'', origem:'', destino:'', tipoVeiculo:'Caminhão', carroceria:'Baú', peso:'', valor:'', dataColeta:'', descricao:'' }, screen: 'emp-painel', empresaTab: 'todas' }));
+    this.toast('Carga publicada com sucesso.');
+    if (window.scrollTo) window.scrollTo(0, 0);
+  }
+
+  renderVals() {
+    const S = this.state;
+    const role = S.role;
+    const isEmpresa = role === 'empresa';
+    const showChrome = !!role && S.screen !== 'landing' && S.screen !== 'auth';
+
+    const baseNav = { padding:'8px 14px', borderRadius:'8px', border:'none', background:'transparent', color:'#5A6573', fontWeight:600, fontSize:'14px', cursor:'pointer' };
+    const actNav = { ...baseNav, background:'#E7F2FB', color:'#0E6CB0' };
+    const parent = { 'emp-detalhes':'emp-painel', 'mot-detalhes':'mot-painel' };
+    const cur = parent[S.screen] || S.screen;
+    const navDefs = isEmpresa
+      ? [['Painel','emp-painel'], ['Nova carga','emp-nova'], ['Meu perfil','perfil']]
+      : [['Cargas disponíveis','mot-painel'], ['Minhas cargas','mot-minhas'], ['Meu perfil','perfil']];
+    const navItems = navDefs.map(d => ({ label: d[0], style: cur === d[1] ? actNav : baseNav, onClick: () => this.go(d[1]) }));
+
+    const vm = (c) => {
+      const label = this.disp(c);
+      const n = c.interessados.length;
+      let interessadosLabel;
+      if (c.escolhido && this.motoristas[c.escolhido]) interessadosLabel = 'Motorista: ' + this.motoristas[c.escolhido].nome;
+      else if (n === 0) interessadosLabel = 'Sem interessados ainda';
+      else interessadosLabel = n + (n > 1 ? ' motoristas interessados' : ' motorista interessado');
+      return { ...c, statusLabel: label, badgeStyle: this.statusStyle(label), valorFmt: this.fmt(c.valor), interessadosLabel, onVerEmp: () => this.openEmpresa(c.id), onVerMot: () => this.openMotorista(c.id) };
+    };
+
+    const mine = S.cargas.filter(c => c.mine);
+    const stats = {
+      disp: mine.filter(c => c.status === 'Disponível' && c.interessados.length === 0).length,
+      inter: mine.filter(c => c.status === 'Disponível' && c.interessados.length > 0).length,
+      contr: mine.filter(c => c.status === 'Contratada').length,
+      concl: mine.filter(c => c.status === 'Concluída').length
+    };
+    const tabDefs = [['todas','Todas'], ['Disponível','Disponíveis'], ['Com interessados','Com interessados'], ['Contratada','Contratadas'], ['Concluída','Concluídas']];
+    const empresaTabs = tabDefs.map(d => ({ key: d[0], label: d[1], onClick: () => this.setState({ empresaTab: d[0] }), style: { padding:'8px 16px', borderRadius:'999px', border:'1px solid ' + (S.empresaTab === d[0] ? '#1284D7' : '#E5E9EF'), background: S.empresaTab === d[0] ? '#1284D7' : '#fff', color: S.empresaTab === d[0] ? '#fff' : '#5A6573', fontWeight:600, fontSize:'13px', cursor:'pointer' } }));
+    let empresaList = mine;
+    if (S.empresaTab !== 'todas') empresaList = mine.filter(c => this.disp(c) === S.empresaTab);
+    empresaList = empresaList.map(vm);
+
+    let market = S.cargas.filter(c => c.status === 'Disponível');
+    if (S.fOrigem.trim()) market = market.filter(c => c.origem.toLowerCase().includes(S.fOrigem.toLowerCase().trim()));
+    if (S.fDestino.trim()) market = market.filter(c => c.destino.toLowerCase().includes(S.fDestino.toLowerCase().trim()));
+    if (S.fCarroceria) market = market.filter(c => c.carroceria === S.fCarroceria);
+    const marketVM = market.map(vm);
+
+    const enviados = S.cargas.filter(c => c.interessados.includes('m1') && c.escolhido !== 'm1' && c.status === 'Disponível').map(vm);
+    const contratadasM = S.cargas.filter(c => c.escolhido === 'm1' && c.status === 'Contratada').map(vm);
+    const concluidasM = S.cargas.filter(c => c.escolhido === 'm1' && c.status === 'Concluída').map(vm);
+
+    const raw = S.cargas.find(c => c.id === S.selectedCargaId) || S.cargas[0];
+    const sc = vm(raw);
+    sc.interessadosVM = raw.interessados.map(mid => {
+      const m = this.motoristas[mid];
+      if (!m) return null;
+      return { ...m, onEscolher: () => this.escolher(raw.id, mid), isEscolhido: raw.escolhido === mid, podeEscolher: !raw.escolhido, borderColor: raw.escolhido === mid ? '#CDE8D9' : '#E5E9EF' };
+    }).filter(Boolean);
+    sc.isDisponivel = raw.status === 'Disponível';
+    sc.isContratada = raw.status === 'Contratada';
+    sc.semInteressados = raw.interessados.length === 0;
+    sc.jaInteresse = raw.interessados.includes('m1');
+    sc.contatoLiberado = raw.interessados.includes('m1') || raw.escolhido === 'm1';
+    sc.podeInteresse = raw.status === 'Disponível' && !raw.interessados.includes('m1');
+    sc.empresaTel = '(11) 3322-7788';
+    sc.empresaWhats = '(11) 99745-2210';
+    sc.onInteresse = () => this.interesse(raw.id);
+    sc.onConcluir = () => this.concluir(raw.id);
+    sc.onCancelar = () => this.cancelar(raw.id);
+    sc.onVoltarEmp = () => this.go('emp-painel');
+    sc.onVoltarMot = () => this.go('mot-painel');
+    sc.onVerMinhas = () => this.go('mot-minhas');
+
+    const setNC = (k) => (e) => { const v = (e && e.target) ? e.target.value : e; this.setState(s => ({ novaCarga: { ...s.novaCarga, [k]: v } })); };
+    const nc = {};
+    ['titulo','origem','destino','tipoVeiculo','carroceria','peso','valor','dataColeta','descricao'].forEach(k => { nc[k] = S.novaCarga[k]; nc['set' + this.cap(k)] = setNC(k); });
+    nc.onPublicar = () => this.publicar();
+    nc.onCancelar = () => this.go('emp-painel');
+
+    const filt = {
+      origem: S.fOrigem, destino: S.fDestino, carroceria: S.fCarroceria,
+      setOrigem: (e) => this.setState({ fOrigem: e.target.value }),
+      setDestino: (e) => this.setState({ fDestino: e.target.value }),
+      setCarroceria: (e) => this.setState({ fCarroceria: e.target.value }),
+      limpar: () => this.setState({ fOrigem:'', fDestino:'', fCarroceria:'' })
+    };
+
+    const authIsCadastro = S.authMode === 'cadastro';
+    const segStyle = (on) => ({ flex:1, padding:'12px', borderRadius:'10px', border:'1px solid ' + (on ? '#1284D7' : '#D9DEE6'), background: on ? '#E7F2FB' : '#fff', color: on ? '#0E6CB0' : '#5A6573', fontWeight:700, fontSize:'14px', cursor:'pointer', textAlign:'center' });
+    const tabSty = (on) => ({ flex:1, padding:'10px', borderRadius:'8px', border:'none', background: on ? '#fff' : 'transparent', color: on ? '#15191F' : '#6C7682', fontWeight:700, fontSize:'14px', cursor:'pointer', boxShadow: on ? '0 1px 2px rgba(16,24,40,.12)' : 'none' });
+    const auth = {
+      isCadastro: authIsCadastro, isLogin: !authIsCadastro,
+      roleMot: S.authRole === 'motorista', roleEmp: S.authRole === 'empresa',
+      setCadastro: () => this.setState({ authMode:'cadastro' }), setLogin: () => this.setState({ authMode:'login' }),
+      pickMot: () => this.setState({ authRole:'motorista' }), pickEmp: () => this.setState({ authRole:'empresa' }),
+      submit: () => this.loginAs(S.authRole),
+      titulo: authIsCadastro ? 'Criar sua conta' : 'Entrar na sua conta',
+      docLabel: S.authRole === 'empresa' ? 'CNPJ' : 'CPF',
+      docPh: S.authRole === 'empresa' ? '00.000.000/0000-00' : '000.000.000-00',
+      nomeLabel: S.authRole === 'empresa' ? 'Razão social' : 'Nome completo',
+      nomePh: S.authRole === 'empresa' ? 'Sua empresa Ltda' : 'Seu nome completo',
+      styMot: segStyle(S.authRole === 'motorista'), styEmp: segStyle(S.authRole === 'empresa'),
+      tabCad: tabSty(authIsCadastro), tabLog: tabSty(!authIsCadastro)
+    };
+
+    return {
+      showChrome, navItems,
+      userName: isEmpresa ? 'Transportes Andrade' : 'Carlos H. Souza',
+      userInitials: isEmpresa ? 'TA' : 'CH',
+      userRoleLabel: isEmpresa ? 'Empresa · Transportadora' : 'Motorista autônomo',
+      goHome: () => this.go(isEmpresa ? 'emp-painel' : 'mot-painel'),
+      goHomePublic: () => this.go('landing'),
+      logout: () => this.logout(),
+      goNova: () => this.go('emp-nova'),
+      goLogin: () => { this.setState({ authMode:'login', screen:'auth' }); if (window.scrollTo) window.scrollTo(0,0); },
+      goCadEmpresa: () => { this.setState({ authMode:'cadastro', authRole:'empresa', screen:'auth' }); if (window.scrollTo) window.scrollTo(0,0); },
+      goCadMotorista: () => { this.setState({ authMode:'cadastro', authRole:'motorista', screen:'auth' }); if (window.scrollTo) window.scrollTo(0,0); },
+      onNewsletter: () => this.toast('Inscrição realizada! Você receberá nossas novidades.'),
+      onSalvarPerfil: () => this.toast('Alterações salvas com sucesso.'),
+      isLanding: S.screen === 'landing', isAuth: S.screen === 'auth',
+      isEmpPainel: S.screen === 'emp-painel', isEmpNova: S.screen === 'emp-nova', isEmpDet: S.screen === 'emp-detalhes',
+      isMotPainel: S.screen === 'mot-painel', isMotDet: S.screen === 'mot-detalhes', isMotMinhas: S.screen === 'mot-minhas',
+      isPerfil: S.screen === 'perfil',
+      perfilEmpresa: isEmpresa, perfilMotorista: !isEmpresa,
+      stats, empresaTabs, empresaList, empresaEmpty: empresaList.length === 0,
+      marketVM, marketCount: marketVM.length, marketEmpty: marketVM.length === 0,
+      enviados, contratadasM, concluidasM,
+      enviadosEmpty: enviados.length === 0, contratadasEmpty: contratadasM.length === 0, concluidasEmpty: concluidasM.length === 0,
+      sc, nc, filt, auth,
+      carrocerias: this.carrocerias.map(x => ({ nome: x })),
+      tiposVeiculo: this.tiposVeiculo.map(x => ({ nome: x })),
+      carroceriasFilter: [{ nome:'Todas as carrocerias', val:'' }].concat(this.carrocerias.map(x => ({ nome: x, val: x }))),
+      steps: [
+        { n:'1', t:'Empresa publica a carga', d:'Origem, destino, valor e tipo de carroceria em poucos minutos.' },
+        { n:'2', t:'Motoristas têm interesse', d:'Quem está na rota demonstra interesse com um clique.' },
+        { n:'3', t:'Empresa escolhe', d:'Avalia os interessados e contrata o motorista ideal.' },
+        { n:'4', t:'Frete realizado', d:'Contato liberado, carga transportada e marcada como concluída.' }
+      ],
+      benefEmpresa: [
+        { t:'Publique cargas em minutos, sem burocracia.' },
+        { t:'Receba motoristas interessados e compatíveis.' },
+        { t:'Escolha pelo veículo, carroceria e avaliação.' },
+        { t:'Acompanhe o status de cada carga em um só lugar.' }
+      ],
+      benefMotorista: [
+        { t:'Encontre fretes disponíveis na sua rota.' },
+        { t:'Filtre por origem, destino e tipo de carroceria.' },
+        { t:'Demonstre interesse com um único clique.' },
+        { t:'Fale direto com a empresa após o interesse.' }
+      ],
+      toast: S.toast,
+      year: 2026
+    };
+  }
+}
+</script>
+</body>
+</html>
