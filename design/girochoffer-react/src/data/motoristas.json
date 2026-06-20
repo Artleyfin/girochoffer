@@ -1,0 +1,35 @@
+{
+  "m1": {
+    "id": "m1",
+    "nome": "Carlos Henrique Souza",
+    "veiculo": "Scania R 450",
+    "carroceria": "Baú",
+    "cap": "9.000 kg",
+    "cidade": "São Paulo/SP",
+    "nota": 4.9,
+    "viagens": 128,
+    "inicial": "CH"
+  },
+  "m2": {
+    "id": "m2",
+    "nome": "Marcos Vinícius Lima",
+    "veiculo": "Volvo FH 460",
+    "carroceria": "Sider",
+    "cap": "27.000 kg",
+    "cidade": "Curitiba/PR",
+    "nota": 4.7,
+    "viagens": 86,
+    "inicial": "MV"
+  },
+  "m3": {
+    "id": "m3",
+    "nome": "Rafael Oliveira Dias",
+    "veiculo": "Mercedes-Benz Actros",
+    "carroceria": "Graneleiro",
+    "cap": "30.000 kg",
+    "cidade": "Goiânia/GO",
+    "nota": 4.8,
+    "viagens": 154,
+    "inicial": "RO"
+  }
+}

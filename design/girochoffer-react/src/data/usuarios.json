@@ -1,0 +1,25 @@
+{
+  "empresa": {
+    "id": "e1",
+    "nome": "Transportes Andrade",
+    "iniciais": "TA",
+    "razaoSocial": "Transportes Andrade Ltda",
+    "nomeFantasia": "Andrade Logística",
+    "cnpj": "18.402.551/0001-04",
+    "telefone": "(11) 3322-7788",
+    "whatsapp": "(11) 99745-2210",
+    "email": "contato@andradelog.com.br"
+  },
+  "motorista": {
+    "id": "m1",
+    "nome": "Carlos Henrique Souza",
+    "nomeCurto": "Carlos H. Souza",
+    "iniciais": "CH",
+    "telefone": "(11) 99812-4477",
+    "email": "carlos.souza@email.com.br",
+    "tipoVeiculo": "Caminhão (Scania R 450)",
+    "carroceria": "Baú",
+    "capacidade": "9.000 kg",
+    "placa": "FQT-2D18"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "carrocerias": ["Baú", "Sider", "Graneleiro", "Refrigerado", "Aberto/Prancha", "Tanque"],
+  "tiposVeiculo": ["Caminhão", "Carreta", "Bitrem", "VUC", "Van"]
+}

@@ -1,0 +1,2222 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GiroChoffer · Preview React</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>/* Reset e estilos globais mínimos. Todo o resto é estilizado inline,
+   espelhando o protótipo original do GiroChoffer. */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  color: #39414e;
+  -webkit-font-smoothing: antialiased;
+  background: #f4f6f9;
+}
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #1284d7 !important;
+  box-shadow: 0 0 0 3px rgba(18, 132, 215, 0.14);
+}
+a {
+  color: inherit;
+}
+@keyframes gc_toast {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+</style>
+<!-- React 19 + React Router 8, carregados como ESM via import map.
+     (RR8 removeu o pacote react-router-dom; tudo vem de 'react-router'.) -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.1.0",
+    "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@19.1.0?deps=react@19.1.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.1.0/client?deps=react@19.1.0",
+    "react-router": "https://esm.sh/react-router@8.0.0?deps=react@19.1.0,react-dom@19.1.0"
+  }
+}
+</script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/plain" id="app-src">
+
+import React, { useState, useContext, useCallback, useRef, createContext } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation, useParams, useSearchParams, Outlet } from 'react-router';
+const cargasSeed = [
+  {
+    "id": "c1",
+    "titulo": "Linha branca — geladeiras e fogões",
+    "empresa": "Transportes Andrade",
+    "empresaId": "e1",
+    "mine": true,
+    "origem": "São Paulo/SP",
+    "destino": "Curitiba/PR",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Baú",
+    "peso": "8.500 kg",
+    "volume": "24 m³",
+    "valor": 4200,
+    "dataColeta": "22/06/2026",
+    "descricao": "Carga paletizada de eletrodomésticos da linha branca. Necessário uso de cintas e mantas para proteção. Descarga no centro de distribuição em Curitiba com agendamento prévio.",
+    "status": "Disponível",
+    "interessados": ["m1", "m2", "m3"],
+    "escolhido": null
+  },
+  {
+    "id": "c2",
+    "titulo": "Bebidas paletizadas",
+    "empresa": "Transportes Andrade",
+    "empresaId": "e1",
+    "mine": true,
+    "origem": "Jundiaí/SP",
+    "destino": "Belo Horizonte/MG",
+    "tipoVeiculo": "Carreta",
+    "carroceria": "Sider",
+    "peso": "18.000 kg",
+    "volume": "32 m³",
+    "valor": 5100,
+    "dataColeta": "24/06/2026",
+    "descricao": "Bebidas em paletes padrão PBR. Carregamento lateral. Entrega em rede de supermercados na região metropolitana de BH.",
+    "status": "Disponível",
+    "interessados": ["m2"],
+    "escolhido": null
+  },
+  {
+    "id": "c3",
+    "titulo": "Autopeças e componentes",
+    "empresa": "Transportes Andrade",
+    "empresaId": "e1",
+    "mine": true,
+    "origem": "Joinville/SC",
+    "destino": "São Paulo/SP",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Baú",
+    "peso": "6.000 kg",
+    "volume": "18 m³",
+    "valor": 3900,
+    "dataColeta": "18/06/2026",
+    "descricao": "Autopeças embaladas em caixas. Carga de valor agregado, exige veículo fechado e pontualidade na entrega.",
+    "status": "Contratada",
+    "interessados": ["m1"],
+    "escolhido": "m1"
+  },
+  {
+    "id": "c4",
+    "titulo": "Material de construção — cimento e blocos",
+    "empresa": "Transportes Andrade",
+    "empresaId": "e1",
+    "mine": true,
+    "origem": "Campinas/SP",
+    "destino": "Ribeirão Preto/SP",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Aberto/Prancha",
+    "peso": "15.000 kg",
+    "volume": "—",
+    "valor": 2400,
+    "dataColeta": "10/06/2026",
+    "descricao": "Material de construção em sacaria e paletes. Descarga com Munck por conta do destinatário.",
+    "status": "Concluída",
+    "interessados": ["m1"],
+    "escolhido": "m1"
+  },
+  {
+    "id": "c5",
+    "titulo": "Produtos de limpeza",
+    "empresa": "Transportes Andrade",
+    "empresaId": "e1",
+    "mine": true,
+    "origem": "Sorocaba/SP",
+    "destino": "Londrina/PR",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Baú",
+    "peso": "7.200 kg",
+    "volume": "20 m³",
+    "valor": 3300,
+    "dataColeta": "26/06/2026",
+    "descricao": "Produtos de limpeza em caixas. Carga seca, sem exigências especiais de manuseio.",
+    "status": "Disponível",
+    "interessados": [],
+    "escolhido": null
+  },
+  {
+    "id": "c6",
+    "titulo": "Grãos de soja a granel",
+    "empresa": "Agro Cerrado S/A",
+    "empresaId": "e2",
+    "mine": false,
+    "origem": "Rondonópolis/MT",
+    "destino": "Santos/SP",
+    "tipoVeiculo": "Bitrem",
+    "carroceria": "Graneleiro",
+    "peso": "32.000 kg",
+    "volume": "—",
+    "valor": 9800,
+    "dataColeta": "25/06/2026",
+    "descricao": "Soja em grão para exportação. Descarga no porto de Santos. Necessária lona e documentação fiscal completa.",
+    "status": "Disponível",
+    "interessados": ["m1"],
+    "escolhido": null
+  },
+  {
+    "id": "c7",
+    "titulo": "Laticínios refrigerados",
+    "empresa": "Laticínios Bela Vista",
+    "empresaId": "e3",
+    "mine": false,
+    "origem": "Uberlândia/MG",
+    "destino": "Goiânia/GO",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Refrigerado",
+    "peso": "12.000 kg",
+    "volume": "28 m³",
+    "valor": 3600,
+    "dataColeta": "23/06/2026",
+    "descricao": "Queijos e iogurtes. Temperatura controlada entre 2°C e 6°C durante todo o transporte.",
+    "status": "Disponível",
+    "interessados": [],
+    "escolhido": null
+  },
+  {
+    "id": "c8",
+    "titulo": "Móveis planejados — desmontados",
+    "empresa": "MóveisExpress",
+    "empresaId": "e4",
+    "mine": false,
+    "origem": "Bento Gonçalves/RS",
+    "destino": "Porto Alegre/RS",
+    "tipoVeiculo": "Caminhão",
+    "carroceria": "Baú",
+    "peso": "5.400 kg",
+    "volume": "22 m³",
+    "valor": 1900,
+    "dataColeta": "21/06/2026",
+    "descricao": "Móveis planejados desmontados e embalados. Manuseio cuidadoso, carga frágil.",
+    "status": "Disponível",
+    "interessados": [],
+    "escolhido": null
+  },
+  {
+    "id": "c9",
+    "titulo": "Diesel S10 a granel",
+    "empresa": "Distribuidora Vale",
+    "empresaId": "e5",
+    "mine": false,
+    "origem": "Paulínia/SP",
+    "destino": "Bauru/SP",
+    "tipoVeiculo": "Carreta",
+    "carroceria": "Tanque",
+    "peso": "20.000 L",
+    "volume": "—",
+    "valor": 4500,
+    "dataColeta": "27/06/2026",
+    "descricao": "Transporte de diesel S10. Exige MOPP, veículo tanque e documentação para produtos perigosos.",
+    "status": "Disponível",
+    "interessados": [],
+    "escolhido": null
+  }
+]
+;
+const motoristasData = {
+  "m1": {
+    "id": "m1",
+    "nome": "Carlos Henrique Souza",
+    "veiculo": "Scania R 450",
+    "carroceria": "Baú",
+    "cap": "9.000 kg",
+    "cidade": "São Paulo/SP",
+    "nota": 4.9,
+    "viagens": 128,
+    "inicial": "CH"
+  },
+  "m2": {
+    "id": "m2",
+    "nome": "Marcos Vinícius Lima",
+    "veiculo": "Volvo FH 460",
+    "carroceria": "Sider",
+    "cap": "27.000 kg",
+    "cidade": "Curitiba/PR",
+    "nota": 4.7,
+    "viagens": 86,
+    "inicial": "MV"
+  },
+  "m3": {
+    "id": "m3",
+    "nome": "Rafael Oliveira Dias",
+    "veiculo": "Mercedes-Benz Actros",
+    "carroceria": "Graneleiro",
+    "cap": "30.000 kg",
+    "cidade": "Goiânia/GO",
+    "nota": 4.8,
+    "viagens": 154,
+    "inicial": "RO"
+  }
+}
+;
+const opcoesData = {
+  "carrocerias": ["Baú", "Sider", "Graneleiro", "Refrigerado", "Aberto/Prancha", "Tanque"],
+  "tiposVeiculo": ["Caminhão", "Carreta", "Bitrem", "VUC", "Van"]
+}
+;
+const usuarios = {
+  "empresa": {
+    "id": "e1",
+    "nome": "Transportes Andrade",
+    "iniciais": "TA",
+    "razaoSocial": "Transportes Andrade Ltda",
+    "nomeFantasia": "Andrade Logística",
+    "cnpj": "18.402.551/0001-04",
+    "telefone": "(11) 3322-7788",
+    "whatsapp": "(11) 99745-2210",
+    "email": "contato@andradelog.com.br"
+  },
+  "motorista": {
+    "id": "m1",
+    "nome": "Carlos Henrique Souza",
+    "nomeCurto": "Carlos H. Souza",
+    "iniciais": "CH",
+    "telefone": "(11) 99812-4477",
+    "email": "carlos.souza@email.com.br",
+    "tipoVeiculo": "Caminhão (Scania R 450)",
+    "carroceria": "Baú",
+    "capacidade": "9.000 kg",
+    "placa": "FQT-2D18"
+  }
+}
+;
+
+
+// ===== src/utils/theme.js =====
+/* Paleta e tokens visuais do GiroChoffer, extraídos do protótipo original. */
+const colors = {
+  bg: '#F4F6F9',
+  surface: '#fff',
+  text: '#39414E',
+  ink: '#15191F',
+  inkStrong: '#0B1B2B',
+  primary: '#1284D7',
+  primaryHover: '#0E6CB0',
+  navy: '#0B3A66',
+  navyHover: '#0a3158',
+  navyDeep: '#0B1B2B',
+  muted: '#6C7682',
+  muted2: '#9AA3AF',
+  muted3: '#5A6573',
+  border: '#E5E9EF',
+  borderInput: '#D9DEE6',
+  borderSoft: '#E0E6ED',
+  tintBlue: '#E7F2FB',
+  tintBlueText: '#0E6CB0',
+};
+
+const fonts = {
+  heading: "'Archivo', system-ui, sans-serif",
+  body: "'Public Sans', system-ui, sans-serif",
+};
+
+/* Mapa de cores por status, usado nos badges. [texto, fundo] */
+const statusColors = {
+  Disponível: ['#0E6CB0', '#E7F2FB'],
+  'Com interessados': ['#B7791F', '#FBF1E0'],
+  Contratada: ['#1E8E5A', '#E3F4EC'],
+  Concluída: ['#5A6573', '#EDF0F4'],
+  Cancelada: ['#C0392B', '#FBEAE8'],
+};
+
+/* Estilo de seta customizada para <select>: remove a seta nativa (que fica
+   colada na borda) e desenha um chevron com espaçamento confortável. */
+const selectArrow = {
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  MozAppearance: 'none',
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236C7682' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")",
+  backgroundRepeat: 'no-repeat',
+  backgroundPosition: 'right 14px center',
+  paddingRight: '40px',
+};
+
+
+// ===== src/utils/format.js =====
+
+/* Formata um número em moeda brasileira. */
+const fmt = (n) =>
+  'R$ ' +
+  Number(n).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/* Status "efetivo" de exibição: uma carga disponível com interessados
+   aparece como "Com interessados". */
+const dispStatus = (c) =>
+  c.status === 'Disponível' && c.interessados.length > 0
+    ? 'Com interessados'
+    : c.status;
+
+/* Estilo inline para o badge de status. */
+const statusStyle = (label) => {
+  const c = statusColors[label] || ['#5A6573', '#EDF0F4'];
+  return {
+    color: c[0],
+    background: c[1],
+    borderRadius: '999px',
+    padding: '4px 12px',
+    fontSize: '12px',
+    fontWeight: 700,
+    display: 'inline-block',
+    whiteSpace: 'nowrap',
+  };
+};
+
+
+// ===== src/utils/cargaVm.js =====
+
+/* Monta os campos derivados de uma carga para exibição. */
+function cargaVM(c, motoristas) {
+  const statusLabel = dispStatus(c);
+  const n = c.interessados.length;
+  let interessadosLabel;
+  if (c.escolhido && motoristas[c.escolhido]) {
+    interessadosLabel = 'Motorista: ' + motoristas[c.escolhido].nome;
+  } else if (n === 0) {
+    interessadosLabel = 'Sem interessados ainda';
+  } else {
+    interessadosLabel = n + (n > 1 ? ' motoristas interessados' : ' motorista interessado');
+  }
+  return {
+    ...c,
+    statusLabel,
+    valorFmt: fmt(c.valor),
+    interessadosLabel,
+  };
+}
+
+
+// ===== src/context/AppContext.jsx =====
+
+const AppContext = createContext(null);
+
+/* Usuário "logado" para fins do MVP. O motorista atual é sempre m1. */
+const CURRENT_MOTORISTA = 'm1';
+
+function AppProvider({ children }) {
+  const [role, setRole] = useState(null); // 'empresa' | 'motorista' | null
+  const [cargas, setCargas] = useState(cargasSeed);
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  const showToast = useCallback((msg) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast(msg);
+    toastTimer.current = setTimeout(() => setToast(null), 3400);
+  }, []);
+
+  /* ----- Ações sobre cargas ----- */
+  const interesse = useCallback(
+    (id) => {
+      setCargas((cs) =>
+        cs.map((c) =>
+          c.id === id && !c.interessados.includes(CURRENT_MOTORISTA)
+            ? { ...c, interessados: [...c.interessados, CURRENT_MOTORISTA] }
+            : c
+        )
+      );
+      showToast('Interesse enviado! O contato da empresa foi liberado.');
+    },
+    [showToast]
+  );
+
+  const escolher = useCallback(
+    (id, mid) => {
+      setCargas((cs) =>
+        cs.map((c) =>
+          c.id === id ? { ...c, escolhido: mid, status: 'Contratada' } : c
+        )
+      );
+      const nome = motoristasData[mid] ? motoristasData[mid].nome : '';
+      showToast(`${nome} foi contratado para o frete.`);
+    },
+    [showToast]
+  );
+
+  const concluir = useCallback(
+    (id) => {
+      setCargas((cs) =>
+        cs.map((c) => (c.id === id ? { ...c, status: 'Concluída' } : c))
+      );
+      showToast('Frete marcado como concluído.');
+    },
+    [showToast]
+  );
+
+  const cancelarCarga = useCallback(
+    (id) => {
+      setCargas((cs) =>
+        cs.map((c) => (c.id === id ? { ...c, status: 'Cancelada' } : c))
+      );
+      showToast('Carga cancelada.');
+    },
+    [showToast]
+  );
+
+  const publicar = useCallback(
+    (nc) => {
+      if (!nc.titulo || !nc.origem || !nc.destino) {
+        showToast('Preencha ao menos título, origem e destino.');
+        return false;
+      }
+      const carga = {
+        id: 'n' + Date.now(),
+        titulo: nc.titulo,
+        empresa: usuarios.empresa.nome,
+        empresaId: usuarios.empresa.id,
+        mine: true,
+        origem: nc.origem,
+        destino: nc.destino,
+        tipoVeiculo: nc.tipoVeiculo,
+        carroceria: nc.carroceria,
+        peso: nc.peso || '—',
+        volume: '—',
+        valor: Number(String(nc.valor).replace(/[^0-9]/g, '')) || 0,
+        dataColeta: nc.dataColeta || 'A definir',
+        descricao: nc.descricao || '—',
+        status: 'Disponível',
+        interessados: [],
+        escolhido: null,
+      };
+      setCargas((cs) => [carga, ...cs]);
+      showToast('Carga publicada com sucesso.');
+      return true;
+    },
+    [showToast]
+  );
+
+  const value = {
+    role,
+    setRole,
+    cargas,
+    motoristas: motoristasData,
+    opcoes: opcoesData,
+    usuarios,
+    currentMotorista: CURRENT_MOTORISTA,
+    toast,
+    showToast,
+    interesse,
+    escolher,
+    concluir,
+    cancelarCarga,
+    publicar,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+function useApp() {
+  const ctx = useContext(AppContext);
+  if (!ctx) throw new Error('useApp deve ser usado dentro de <AppProvider>');
+  return ctx;
+}
+
+
+// ===== src/components/Button.jsx =====
+
+/* Botão com suporte a estilo de hover (já que usamos estilos inline).
+   Passe `style` para o estado normal e `hoverStyle` para o hover. */
+function Button({ style, hoverStyle, children, ...props }) {
+  const [hover, setHover] = useState(false);
+  return (
+    <button
+      {...props}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{ ...style, ...(hover ? hoverStyle : null) }}
+    >
+      {children}
+    </button>
+  );
+}
+
+
+// ===== src/components/FormControls.jsx =====
+
+const labelStyle = {
+  display: 'block',
+  fontSize: '13px',
+  fontWeight: 600,
+  color: colors.text,
+  marginBottom: '6px',
+};
+
+const controlStyle = {
+  width: '100%',
+  padding: '11px 14px',
+  border: `1px solid ${colors.borderInput}`,
+  borderRadius: '10px',
+  fontSize: '14px',
+  background: '#fff',
+};
+
+/* Campo de texto rotulado. */
+function Field({ label, children }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function TextInput({ label, style, ...props }) {
+  return (
+    <Field label={label}>
+      <input style={{ ...controlStyle, ...style }} {...props} />
+    </Field>
+  );
+}
+
+function SelectInput({ label, children, style, ...props }) {
+  return (
+    <Field label={label}>
+      <select style={{ ...controlStyle, ...selectArrow, ...style }} {...props}>
+        {children}
+      </select>
+    </Field>
+  );
+}
+
+function TextArea({ label, style, ...props }) {
+  return (
+    <Field label={label}>
+      <textarea
+        style={{ ...controlStyle, resize: 'vertical', fontFamily: 'inherit', ...style }}
+        {...props}
+      />
+    </Field>
+  );
+}
+
+
+
+// ===== src/components/StatusBadge.jsx =====
+
+/* Pílula de status reutilizável. */
+function StatusBadge({ label }) {
+  return <span style={statusStyle(label)}>{label}</span>;
+}
+
+
+// ===== src/components/EmptyState.jsx =====
+
+/* Estado vazio padrão (caixa tracejada com mensagem). */
+function EmptyState({ children, padding = '48px', radius = '14px' }) {
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: `1px dashed ${colors.borderInput}`,
+        borderRadius: radius,
+        padding,
+        textAlign: 'center',
+        color: colors.muted2,
+        fontSize: '14px',
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+
+// ===== src/components/Toast.jsx =====
+
+/* Notificação flutuante (toast) global. */
+function Toast() {
+  const { toast } = useApp();
+  if (!toast) return null;
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: '28px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: '#0B1B2B',
+        color: '#fff',
+        padding: '14px 24px',
+        borderRadius: '12px',
+        fontSize: '14px',
+        fontWeight: 600,
+        boxShadow: '0 8px 30px rgba(11,27,43,.32)',
+        zIndex: 100,
+        animation: 'gc_toast .25s ease',
+        maxWidth: '90vw',
+      }}
+    >
+      {toast}
+    </div>
+  );
+}
+
+
+// ===== src/components/Header.jsx =====
+
+/* Cabeçalho da área autenticada, com navegação dependente do papel. */
+function Header() {
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const { role, setRole, usuarios } = useApp();
+  const isEmpresa = role === 'empresa';
+
+  const navDefs = isEmpresa
+    ? [
+        ['Painel', '/empresa'],
+        ['Nova carga', '/empresa/nova'],
+        ['Meu perfil', '/perfil'],
+      ]
+    : [
+        ['Cargas disponíveis', '/motorista'],
+        ['Minhas cargas', '/motorista/minhas'],
+        ['Meu perfil', '/perfil'],
+      ];
+
+  /* Marca o item ativo levando em conta as telas de detalhe. */
+  const isActive = (path) => {
+    if (path === '/empresa') return pathname === '/empresa' || pathname.startsWith('/empresa/carga');
+    if (path === '/motorista') return pathname === '/motorista' || pathname.startsWith('/motorista/carga');
+    return pathname === path;
+  };
+
+  const baseNav = {
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: 'none',
+    background: 'transparent',
+    color: colors.muted3,
+    fontWeight: 600,
+    fontSize: '14px',
+    cursor: 'pointer',
+  };
+  const actNav = { ...baseNav, background: colors.tintBlue, color: colors.tintBlueText };
+
+  const logout = () => {
+    setRole(null);
+    navigate('/');
+  };
+
+  const u = isEmpresa ? usuarios.empresa : usuarios.motorista;
+  const userName = isEmpresa ? u.nome : u.nomeCurto;
+  const userInitials = u.iniciais;
+  const userRoleLabel = isEmpresa ? 'Empresa · Transportadora' : 'Motorista autônomo';
+
+  return (
+    <header
+      style={{
+        height: '64px',
+        background: '#fff',
+        borderBottom: `1px solid ${colors.border}`,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '28px',
+        padding: '0 32px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 30,
+      }}
+    >
+      <div
+        style={{ display: 'flex', alignItems: 'center', gap: '11px', cursor: 'pointer' }}
+        onClick={() => navigate(isEmpresa ? '/empresa' : '/motorista')}
+      >
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI2IiBoZWlnaHQ9IjExNyIgdmlld0JveD0iMCAwIDEyNiAxMTciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQuMDcyNyAwLjI4OTcwOUM1Ni4yNjM3IDEuNzEwNzEgNDcuMDM0NyA1LjQ4MzcxIDQwLjc2ODcgOS44MTU3QzM2LjI5MjcgMTIuOTA4NyAyOC44MDE3IDIwLjYwMDcgMjUuOTExNyAyNS4wNjc3QzIzLjU4OTcgMjguNjU3NyAyMC4yODc3IDM1LjM0MjcgMTkuNzI5NyAzNy41ODM3TDE5LjQwMzcgMzguODk0N0gzMS4zNDA3TDMzLjAyODcgMzUuOTE1N0MzMy45NTY3IDM0LjI3NzcgMzUuMjQxNyAzMi4yOTM3IDM1Ljg4MjcgMzEuNTA4N0MzNy4wMzA3IDMwLjEwMjcgMzcuMDYyNyAzMC4wOTQ3IDM4LjAzNjcgMzAuOTc2N0wzOS4wMjU3IDMxLjg3MTdMMzcuMzY4NyAzNC44MzI3QzM2LjQ1NzcgMzYuNDYxNyAzNS43MTI3IDM4LjA0MTcgMzUuNzEyNyAzOC4zNDQ3QzM1LjcxMjcgMzguNzMyNyAzNy41ODk3IDM4Ljg5NDcgNDIuMDg5NyAzOC44OTQ3SDQ4LjQ2NjdMNTIuMjE3NyAzNS4xNjE3QzYwLjMwOTcgMjcuMTExNyA3MC44ODk3IDI0LjU1ODcgODEuMDE2NyAyOC4yMTE3Qzg1LjE1NTcgMjkuNzAzNyA4NS44ODM3IDMwLjEyNjcgOTAuMTgzNyAzMy41MzY3TDkzLjQxNjcgMzYuMTAwN0w5OC40MTA3IDMzLjQ1NzdDMTA1Ljg5MSAyOS40OTg3IDExNC40NzcgMjQuNzM2NyAxMTUuNTEgMjMuOTc0N0MxMTYuMzg3IDIzLjMyNzcgMTE2LjMzNSAyMy4xODM3IDExNC4yMjIgMjAuNDM4N0MxMDkuMiAxMy45MTI3IDk5LjkwMjcgNi44Mjg3IDkyLjcxNDcgNC4wNTA3Qzg1LjUzOTcgMS4yNzg3IDgwLjQ0NjcgMC4yMzQ3MDQgNzMuMTI4NyAwLjAzNTcwMzVDNjkuNDU4NyAtMC4wNjMyOTY1IDY1LjM4MzcgMC4wNTA3MDg5IDY0LjA3MjcgMC4yODk3MDlaTTczLjg0MjcgMTIuODY4N0M3My44Mzk3IDEzLjI3MTcgNzMuODM2NyAxMy41NTc3IDczLjk1MzcgMTMuNzgyN0M3NC4yNjE3IDE0LjM3NzcgNzUuNDAzNyAxNC41NDA3IDc5LjU2MzcgMTUuMjczN0M4Mi4wNTM3IDE1LjcxMjcgODQuMjg3NyAxNi4xMTI3IDg0LjUyODcgMTYuMTYyN0M4NC43Njg3IDE2LjIxMzcgODUuMTY5NyAxNS42Mzk3IDg1LjQyMDcgMTQuODg3N0M4NS43NTg3IDEzLjg3NDcgODUuNzEzNyAxMy40MjE3IDg1LjI0NTcgMTMuMTMzN0M4NC42MTE3IDEyLjc0MTcgODAuOTY1NyAxMi4wNjI3IDc2LjM0NTcgMTEuNDc3N0w3My44NDM3IDExLjE1OTdWMTIuNjQ5N0M3My44NDM3IDEyLjcyNjcgNzMuODQyNyAxMi43OTk3IDczLjg0MjcgMTIuODY4N1pNNjUuMDI1NyAxMS43NjY3QzYwLjU5NjcgMTIuNzQ2NyA1NS43MzE3IDE0LjI3MzcgNTUuNzMxNyAxNC42ODM3QzU1LjczMTcgMTUuMDU5NyA1Ni41NjE3IDE2LjkwMTcgNTYuOTMyNyAxNy4zNTA3QzU2Ljk5NzcgMTcuNDI5NyA1OC45NTI3IDE2Ljk2NTcgNjEuMjc2NyAxNi4zMTk3QzYzLjYwMDcgMTUuNjczNyA2Ni4wOTI3IDE1LjAxNTcgNjYuODEyNyAxNC44NTY3QzY3LjkzNjcgMTQuNjA4NyA2OC4xMjM3IDE0LjMzMDcgNjguMTIzNyAxMi45MDg3QzY4LjEyMzcgMTEuMTE3NyA2OC4wNjM3IDExLjA5NDcgNjUuMDI1NyAxMS43NjY3Wk05MC45MTQ3IDE3LjIwOTdDOTAuNjE1NyAxNy44NjY3IDkwLjQ1OTcgMTguNDYyNyA5MC41Njc3IDE4LjUzNTdDOTAuNjc1NyAxOC42MDk3IDkyLjMzMDcgMTkuNjkwNyA5NC4yNDU3IDIwLjkzNzdMOTcuNzI2NyAyMy4yMDc3TDk4LjYxMDcgMjIuMTE2N0M5OS4wOTY3IDIxLjUxNjcgOTkuMzgwNyAyMC44NDI3IDk5LjI0MjcgMjAuNjE5N0M5OC44NTk3IDE5Ljk5ODcgOTIuNTc1NyAxNi4wMTU3IDkxLjk4MDcgMTYuMDE1N0M5MS42OTM3IDE2LjAxNTcgOTEuMjE0NyAxNi41NTI3IDkwLjkxNDcgMTcuMjA5N1pNNDcuNDIxNyAxOS4xMjQ3QzQ2LjEyODcgMjAuMDE4NyA0My45MTY3IDIxLjc0NzcgNDIuNTA1NyAyMi45NjY3TDM5LjkzODcgMjUuMTgxN0w0MS4wMDY3IDI2LjMxODdDNDIuMjIzNyAyNy42MTM3IDQyLjc3MTcgMjcuNzIyNyA0My41MjQ3IDI2LjgyMTdDNDQuNDI5NyAyNS43Mzg3IDQ5LjcxNzcgMjEuNDA3NyA1MC44NDg3IDIwLjgyNDdDNTEuODcxNyAyMC4yOTU3IDUxLjg4ODcgMjAuMjAwNyA1MS4xOTM3IDE4Ljg1NzdDNTAuNzkyNyAxOC4wODA3IDUwLjMwODcgMTcuNDU3NyA1MC4xMTg3IDE3LjQ3MTdDNDkuOTI4NyAxNy40ODY3IDQ4LjcxNTcgMTguMjMwNyA0Ny40MjE3IDE5LjEyNDdaTTUyLjYzMzcgNDEuMzk3N0M1MC4wMTE3IDQxLjYzMjcgMzkuMDg0NyA0MS45MTk3IDI4LjM1MDcgNDIuMDM3N0MxMS4xNjA3IDQyLjIyNjcgOC43MzE3MiA0Mi4zNDQ3IDcuOTc0NzIgNDMuMDMwN0M2Ljg0MTcyIDQ0LjA1NTcgNi44ODI3MiA0NS44MTE3IDguMDY3NzIgNDYuOTk3N0M4Ljk4NDcyIDQ3LjkxNDcgOS42NTY3MiA0Ny45NTA3IDI2LjA2ODcgNDcuOTUwN0M0NS4xMzU3IDQ3Ljk1MDcgNDUuNDU2NyA0OC4wMDE3IDQ3LjIzNDcgNTEuMzE2N0M0OC4yNzk3IDUzLjI2NDcgNDguMzIyNyA1NC4yNTA3IDQ3LjQzODcgNTUuOTU4N0M0NS45MjQ3IDU4Ljg4NjcgNDUuMjQ3NyA1OS4xMzA3IDM3LjkyNzcgNTkuMzg5N0wzMS4xODQ3IDU5LjYyODdWNjMuOTE3N0g4NS4wNDQ3TDg1LjE3MjcgNTMuMDE0N0M4NS4yNjI3IDQ1LjM3MzcgODUuMTM4NyA0MS45MTY3IDg0Ljc1NzcgNDEuNDU2N0M4NC4zMTU3IDQwLjkyNDcgODEuNjgwNyA0MC44MTc3IDcwLjgwNjcgNDAuODg1N0M2My40MzI3IDQwLjkzMjcgNTUuMjU0NyA0MS4xNjI3IDUyLjYzMzcgNDEuMzk3N1pNODguNDYwNyA0My4wMjU3Qzg4LjA2MzcgNDMuNDIyNyA4OC4wMzY3IDYzLjMyNTcgODguNDMxNyA2NC4zNTU3Qzg4LjY3NDcgNjQuOTg3NyA4OS42ODU3IDY1LjEwOTcgOTQuNjc5NyA2NS4xMDk3Qzk5LjkxNjcgNjUuMTA5NyAxMDAuNjAzIDY1LjIwMDcgMTAwLjM0OCA2NS44NjM3QzEwMC4xODkgNjYuMjc4NyAxMDAuMDU5IDY2LjcwNzcgMTAwLjA1OSA2Ni44MTY3QzEwMC4wNTkgNjYuOTI2NyA5Mi4xMTY3IDY3LjAxNTcgODIuNDA4NyA2Ny4wMTU3SDY0Ljc1ODdMNjUuNzc5NyA2OC4zOTY3QzY2LjM0MDcgNjkuMTU1NyA2Ni45MTE3IDcwLjc2NjcgNjcuMDQ4NyA3MS45NzY3TDY3LjI5NTcgNzQuMTc3N0w4NC4yNjc3IDc0LjA1MjdMMTAxLjIzOSA3My45Mjc3TDEwMS41NjggNzEuNjIyN0MxMDIuNTk3IDY0LjQzMjcgMTExLjAwMSA2MS42MjI3IDExNS44NzcgNjYuODM4N0MxMTcuMzc1IDY4LjQ0MDcgMTE4LjE3MSA3MC4zMzE3IDExOC4xNzEgNzIuMjg5N0MxMTguMTcxIDczLjY2MTcgMTE4LjIyMSA3My42ODg3IDEyMC42OTcgNzMuNjg4N0MxMjIuMDg3IDczLjY4ODcgMTIzLjQ4MSA3My40MzE3IDEyMy43OTYgNzMuMTE2N0MxMjQuNjI3IDcyLjI4NTcgMTI0LjUyMyA2OC4yMTU3IDEyMy42NTMgNjcuNDkyN0MxMjMuMjM5IDY3LjE0OTcgMTIyLjkyNiA2Ni4wNjg3IDEyMi45MDkgNjQuOTMyN0MxMjIuODYgNjEuNTEwNyAxMjIuMTQzIDU4LjMwMTcgMTIxLjI4OCA1Ny42NzY3QzEyMC44MzYgNTcuMzQ1NyAxMTcuNzUxIDU2LjQxOTcgMTE0LjQzMyA1NS42MTg3QzEwOS43MDcgNTQuNDc3NyAxMDguMjQ1IDUzLjkzMjcgMTA3LjY4NSA1My4xMDI3QzEwMi44OTMgNDUuOTk3NyAxMDEuMTIgNDMuODYyNyA5OS41Njk3IDQzLjMyOTdDOTcuODE2NyA0Mi43Mjg3IDg4Ljk5OTcgNDIuNDg1NyA4OC40NjA3IDQzLjAyNTdaTTEwMS44NTYgNDkuNzM3N0w5OS4zNjE3IDQ2LjA0MzdIOTIuOTA5N1Y1NC4xNDY3SDk4LjYyODdDMTAxLjc3NSA1NC4xNDY3IDEwNC4zNDkgNTMuOTg1NyAxMDQuMzQ5IDUzLjc4OTdDMTA0LjM0OSA1My41OTI3IDEwMy4yMjcgNTEuNzY5NyAxMDEuODU2IDQ5LjczNzdaTTAuNzUzNzI3IDUyLjE1ODdDLTAuMjgxMjczIDUzLjMwMjcgLTAuMjQ3MjY1IDU0Ljc2MDcgMC44MzY3MzUgNTUuNzQwN0MxLjYxOTczIDU2LjQ0OTcgMy44MjE3MyA1Ni41Mjk3IDIyLjQ4OTcgNTYuNTI5N0gyMy4zNzk3QzQwLjYyNzcgNTYuNTMwNyA0My45Njk3IDU2LjUzMDcgNDQuNjE1NyA1NS4yMTA3QzQ0Ljc2OTcgNTQuODk0NyA0NC43Njk3IDU0LjUwMDcgNDQuNzY4NyA1NC4wMTM3QzQ0Ljc2ODcgNTMuOTc4NyA0NC43Njg3IDUzLjk0MzcgNDQuNzY4NyA1My45MDg3QzQ0Ljc2ODcgNTMuODcxNyA0NC43Njg3IDUzLjgzNTcgNDQuNzY4NyA1My44MDA3QzQ0Ljc2OTcgNTMuMzE0NyA0NC43Njk3IDUyLjkyMjcgNDQuNjE1NyA1Mi42MDY3QzQzLjk3MDcgNTEuMjg2NyA0MC42MjM3IDUxLjI4NjcgMjMuMzE3NyA1MS4yODY3SDIyLjQwNjdDMi43OTg3MiA1MS4yODY3IDEuNDk0NzMgNTEuMzM5NyAwLjc1MzcyNyA1Mi4xNTg3Wk0xNi4zODE3IDYyLjM2ODdDMTYuNTQ5NyA2NC4wMDc3IDE2LjgwMzcgNjYuMTUyNyAxNi45NDY3IDY3LjEzNTdMMTcuMjA3NyA2OC45MjI3SDIzLjE3NDdDMjguNjYxNyA2OC45MjI3IDI5LjExNTcgNjguODU1NyAyOC44MjA3IDY4LjA4ODdDMjguNjQzNyA2Ny42Mjk3IDI4LjI3MDcgNjUuNDg0NyAyNy45OTE3IDYzLjMyMTdMMjcuNDgyNyA1OS4zODk3SDE2LjA3NjdMMTYuMzgxNyA2Mi4zNjg3Wk0xMTUuMTEzIDYyLjA3OTdDMTE0Ljk0OCA2Mi41MTA3IDExNC44NzEgNjIuOTAxNyAxMTQuOTQzIDYyLjk0ODdDMTE1LjAxNSA2Mi45OTU3IDExNS43NSA2My41MDE3IDExNi41NzYgNjQuMDcyN0MxMTcuNDAzIDY0LjY0MjcgMTE4Ljc0NCA2NS4xMDk3IDExOS41NTYgNjUuMTA5N0MxMjAuODU0IDY1LjEwOTcgMTIxLjAzMSA2NC45NDk3IDEyMS4wMzEgNjMuNzc0N0MxMjEuMDMxIDYxLjg5MDcgMTIwLjIyIDYxLjI5NjcgMTE3LjY1IDYxLjI5NjdDMTE2LjAxNSA2MS4yOTY3IDExNS4zMzIgNjEuNTA2NyAxMTUuMTEzIDYyLjA3OTdaTTMxLjg5OTcgNjcuNjc5N0MzMS44OTk3IDY5LjIxMDcgMzYuMzQ2NyA2OS40NTU3IDM3LjE0MjcgNjcuOTY5N0MzNy42MjY3IDY3LjA2NTcgMzcuNTA0NyA2Ny4wMTU3IDM0Ljc3NTcgNjcuMDE1N0MzMi42MzQ3IDY3LjAxNTcgMzEuODk5NyA2Ny4xODU3IDMxLjg5OTcgNjcuNjc5N1pNNTAuMjkzNyA2OC4yMDc3QzUxLjI1NDcgNjkuNjczNyA1MS40NTk3IDY5LjY3MjcgNTIuNTM2NyA2OC4xOTI3TDUzLjM5MjcgNjcuMDE1N0g0OS41MTM3TDUwLjI5MzcgNjguMjA3N1pNMTA2LjYxOSA2Ny43NjE3QzEwMy44ODYgNjkuMjQ0NyAxMDMuMTE1IDcyLjkwMTcgMTA0Ljk1OSA3NS42Mzc3QzEwOC40MjQgODAuNzc4NyAxMTUuMzExIDc4LjUxNDcgMTE1LjMxMSA3Mi4yMzU3QzExNS4zMTEgNzAuNjIxNyAxMTUuMDEzIDY5Ljk1ODcgMTEzLjY5MSA2OC42MzY3QzExMi4zMzQgNjcuMjgwNyAxMTEuNzMyIDY3LjAxOTcgMTA5Ljk5NyA2Ny4wMzQ3QzEwOC44NTYgNjcuMDQ1NyAxMDcuMzM2IDY3LjM3MjcgMTA2LjYxOSA2Ny43NjE3Wk01NS45MzE3IDY4LjM5MTdDNTQuMDU3NyA2OS41MzQ3IDUyLjcwMTcgNzIuMzA4NyA1My4xMDk3IDc0LjE2NTdDNTQuMTcyNyA3OS4wMDI3IDU5Ljg5OTcgODAuMjg4NyA2My4xNTQ3IDc2LjQxOTdDNjQuMjQ0NyA3NS4xMjQ3IDY0LjM4MjcgNzQuNjA0NyA2NC4xODQ3IDcyLjU0NzdDNjMuNzY2NyA2OC4xOTU3IDU5LjY1MDcgNjYuMTIzNyA1NS45MzE3IDY4LjM5MTdaTTQwLjgzOTcgNjguMzI5N0MzOS40NTI3IDY5LjE4ODcgMzguMDk1NyA3MS41NDU3IDM4LjA5NTcgNzMuMDk0N0MzOC4wOTU3IDc0LjM4NjcgNDAuMDMwNyA3Ny4xMjg3IDQxLjQ0NjcgNzcuODQ1N0M0NC43OTE3IDc5LjUzODcgNDguODY2NyA3Ny4yMjU3IDQ5LjM4ODcgNzMuMzM3N0M0OS42Mzk3IDcxLjQ2MTcgNDkuNTIyNyA3MS4xODE3IDQ3Ljc0NjcgNjkuNDA0N0M0Ni4xNjQ3IDY3LjgyMzcgNDUuNTE0NyA2Ny40OTQ3IDQzLjk5MDcgNjcuNTA1N0M0Mi45NzY3IDY3LjUxMjcgNDEuNTU4NyA2Ny44ODI3IDQwLjgzOTcgNjguMzI5N1pNNS40Nzk3MiA3Mi41MzE3QzQuNTM3NzIgNzMuNDczNyA0LjUzNjczIDc0LjE1MTcgNS40NzM3MyA3NS40ODk3QzYuMjEyNzMgNzYuNTQ1NyA2LjI1MzcyIDc2LjU0ODcgMjEuMjM0NyA3Ni41NDg3QzM1LjMwOTcgNzYuNTQ4NyAzNi4yMzg3IDc2LjQ5NjcgMzYuMDE4NyA3NS43MTQ3QzM1Ljg4OTcgNzUuMjU2NyAzNS42NDM3IDc0LjE4MzcgMzUuNDcxNyA3My4zMzE3TDM1LjE1OTcgNzEuNzgyN0gyMC42OTQ3QzguMTc5NzMgNzEuNzgyNyA2LjEyNzcyIDcxLjg4MzcgNS40Nzk3MiA3Mi41MzE3WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMTIuMTc5IDgzLjE0ODdDMTE0LjkwMiA4Mi43NzU3IDExNy44ODkgODEuMjU0NyAxMTguODg1IDc5LjczMzdDMTE5LjU2NyA3OC42OTQ3IDEyMC4wMDUgNzguNTQ4NyAxMjIuNDYgNzguNTQ4N0gxMjUuMjU4TDEyNC4yNzMgODEuMDUxN0MxMTYuMjYzIDEwMS4zOTMgOTcuNTkwNSAxMTUuMTE5IDc2LjA3MTUgMTE2LjQ4M0M1NC40NTE1IDExNy44NTIgMzMuMDY1NSAxMDUuMDg1IDIzLjQ3NDUgODUuMDgxN0wyMS44Mjg2IDgxLjY0NjdMMjcuODg3NSA4MS41MTM3QzMxLjIxOTUgODEuNDM5NyAzNC4xODg1IDgxLjQ3MTcgMzQuNDg1NSA4MS41ODU3QzM0Ljc4MTUgODEuNjk5NyAzNS45Mjg1IDgzLjMxNDcgMzcuMDM0NSA4NS4xNzU3QzM4LjEzOTUgODcuMDM1NyAzOS4yMjQ1IDg4LjU1ODcgMzkuNDQ2NSA4OC41NTg3QzM5LjY2NzUgODguNTU4NyA0MC4zNDc2IDg4LjE1NDcgNDAuOTU1NiA4Ny42NjE3TDQyLjA2MzYgODYuNzY1N0w0MC44NTY2IDg0LjkyMDdDMzkuNjc4NiA4My4xMjA3IDM4Ljg2NzUgODEuNDA4NyAzOS4xOTM1IDgxLjQwODdDMzkuMjgzNSA4MS40MDg3IDQwLjM4NDUgODEuODYzNyA0MS42NDA1IDgyLjQxOTdDNDQuNTk1NSA4My43MjY3IDQ3Ljg1MzUgODMuNDA0NyA1MC45MTA1IDgxLjUwMzdMNTMuMDkyNSA4MC4xNDc3TDU1LjAwNjUgODIuMTMxN0M1OC42NzQ1IDg1LjkzMjcgNjUuMjEwNSA4OC44NTQ3IDcxLjEwNTUgODkuMzI5N0M3Ny44MDU1IDg5Ljg2NzcgODUuMjM0NSA4Ny4zMzA3IDkwLjE3MzUgODIuODE2N0w5Mi43NTI1IDgwLjQ1OTdMOTQuNzczNSA4MS4xNzI3Qzk1Ljg4NDUgODEuNTY0NyA5Ny40NTA1IDgxLjg4NTcgOTguMjUyNSA4MS44ODU3Qzk5Ljk1MzUgODEuODg1NyAxMDMuODI1IDgwLjEzNTcgMTAzLjgyNSA3OS4zNjY3QzEwMy44MjUgNzkuMDc1NyAxMDQuNTUgNzkuNTQxNyAxMDUuNDM3IDgwLjQwMTdMMTA3LjA1IDgxLjk2NDdMMTA1LjkwNyA4NC4wMTA3TDEwNC43NjMgODYuMDU1N0wxMDYuMDIzIDg2Ljg4MDdDMTA3LjI2IDg3LjY5MjcgMTA3LjMwMiA4Ny42ODI3IDEwOC4zOTggODYuMzQ1N0MxMDkuMDEyIDg1LjU5NTcgMTA5LjYzNCA4NC42MzY3IDEwOS43OCA4NC4yMTI3QzEwOS45NDcgODMuNzI1NyAxMTAuODMxIDgzLjMzMzcgMTEyLjE3OSA4My4xNDg3Wk05My42MzQ1IDk3LjcyNTdDOTIuOTUyNSA5Ni40MDc3IDkyLjk1NDUgOTYuNDA1NyA5Ny4wNzc1IDkzLjAzNjdMMTAxLjIwMiA4OS42Njc3TDEwMi41MTQgOTAuNTc0N0MxMDMuMjM1IDkxLjA3NDcgMTAzLjgyNSA5MS42NDI3IDEwMy44MjUgOTEuODM3N0MxMDMuODI1IDkyLjYyNTcgOTUuNzIyNSA5OS4wNDQ3IDk0LjcyNzUgOTkuMDQ0N0M5NC41MDE1IDk5LjA0NDcgOTQuMDA5NSA5OC40NTA3IDkzLjYzNDUgOTcuNzI1N1pNNDQuMDU4NSA5My44NTg3QzQzLjE3NjUgOTIuODg0NyA0My4xODA1IDkyLjg1MTcgNDQuMjk4NSA5MS45MjA3QzQ0LjkyMzUgOTEuMzk5NyA0NS41NDM1IDkwLjk2NzcgNDUuNjc0NSA5MC45NjE3QzQ1LjgwNTUgOTAuOTU1NyA0Ni44Nzc1IDkxLjcyMjcgNDguMDU3NSA5Mi42NjY3QzQ5LjIzNzUgOTMuNjA5NyA1MS4zMzU1IDk1LjExMDcgNTIuNzE5NSA5Ni4wMDE3QzU0Ljk2NTUgOTcuNDQ2NyA1NS4xODA1IDk3LjcyNjcgNTQuNzE0NSA5OC41OTc3QzU0LjQyNjUgOTkuMTM1NyA1My44ODY1IDk5LjY5MTcgNTMuNTE0NSA5OS44MzQ3QzUyLjgwMTUgMTAwLjEwOSA0NS41OTA1IDk1LjU1MTcgNDQuMDU4NSA5My44NTg3Wk03OS4zOTY1IDEwMC45OTZDODAuMzc5NSAxMDAuNzM4IDgyLjM2MzUgMTAwLjIxMyA4My44MDU1IDk5LjgyODdDODcuNzQ3NSA5OC43Nzk3IDg4LjI4ODUgOTguODQ1NyA4OC44OTQ1IDEwMC40NTVDODkuNDI3NSAxMDEuODY1IDg5LjQyNTUgMTAxLjg2NSA4Ni45NzQ1IDEwMi41NTZDODMuNzk4NSAxMDMuNDUxIDc5LjcyMDUgMTA0LjI4OCA3OC41Mzg1IDEwNC4yODhDNzcuODI2NSAxMDQuMjg4IDc3LjYwOTUgMTAzLjk1OCA3Ny42MDk1IDEwMi44NzZDNzcuNjA5NSAxMDEuNjQ2IDc3LjgzODUgMTAxLjQwNCA3OS4zOTY1IDEwMC45OTZaTTU5LjgyODUgMTAyLjQyQzU5LjYxNjUgMTAyLjIxMiA1OS41ODY1IDEwMS40NzUgNTkuNzYwNSAxMDAuNzgyQzU5LjkzNDUgMTAwLjA4OCA2MC4xMjg1IDk5LjUyMDcgNjAuMTkxNSA5OS41MjA3QzYwLjI1NDUgOTkuNTIwNyA2Mi4zMjE1IDk5Ljk0NjcgNjQuNzg2NSAxMDAuNDY3QzY3LjI1MTUgMTAwLjk4NyA2OS43NTA1IDEwMS40MTYgNzAuMzQwNSAxMDEuNDJDNzEuMjQ2NSAxMDEuNDI3IDcxLjQxMjUgMTAxLjY4NiA3MS40MTI1IDEwMy4wOTZDNzEuNDEyNSAxMDQuMzA0IDcxLjIwMzUgMTA0Ljc2NCA3MC42NTM1IDEwNC43NjRDNjkuMjY5NSAxMDQuNzY0IDYwLjIxODUgMTAyLjgwNCA1OS44Mjg1IDEwMi40MloiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPC9zdmc+" alt="" style={{ height: '42px', width: 'auto', display: 'block' }} />
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgzIiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTgzIDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjMuMDE1NiAyNC42NDlINDQuNTQ2M1Y1Mi43ODc0QzQxLjA1NjkgNTMuOTI1OCAzNy43NzE2IDU0LjcyMzkgMzQuNjkwNCA1NS4xODE3QzMxLjYwOTMgNTUuNjM5NiAyOC40NjAyIDU1Ljg2ODUgMjUuMjQyOSA1NS44Njg1QzE3LjA1MTMgNTUuODY4NSAxMC43OTYzIDUzLjQ2MTggNi40Nzc3NyA0OC42NDgzQzIuMTU5MjUgNDMuODM0OCAwIDM2LjkyMzkgMCAyNy45MTU3QzAgMTkuMTU0OSAyLjUwNTcyIDEyLjMyNDUgNy41MTcxOCA3LjQyNDM4QzEyLjUyODYgMi41MjQyOCAxOS40NzY2IDAuMDc0MjE4OCAyOC4zNjEyIDAuMDc0MjE4OEMzMy45Mjk1IDAuMDc0MjE4OCAzOS4yOTk4IDEuMTg3ODggNDQuNDcyMSAzLjQxNTE5TDQwLjY0ODUgMTIuNjIxNEMzNi42ODg4IDEwLjY0MTYgMzIuNTY4MyA5LjY1MTY3IDI4LjI4NjkgOS42NTE2N0MyMy4zMTI2IDkuNjUxNjcgMTkuMzI4MSAxMS4zMjIyIDE2LjMzMzYgMTQuNjYzMUMxMy4zMzkxIDE4LjAwNDEgMTEuODQxOSAyMi40OTU5IDExLjg0MTkgMjguMTM4NEMxMS44NDE5IDM0LjAyODQgMTMuMDQ4NCAzOC41MjY0IDE1LjQ2MTMgNDEuNjMyMkMxNy44NzQyIDQ0LjczODEgMjEuMzgyMiA0Ni4yOTEgMjUuOTg1NCA0Ni4yOTFDMjguMzg1OSA0Ni4yOTEgMzAuODIzNiA0Ni4wNDM1IDMzLjI5ODQgNDUuNTQ4NlYzNC4yMjY0SDIzLjAxNTZMMjMuMDE1NiAyNC42NDlaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik0xMy42ODEyIDcwLjQxNTRDMTEuMzU0NCA3MC40MTU0IDkuNTUyODcgNzEuMjg5NiA4LjI3NjQ5IDczLjAzOEM3LjAwMDExIDc0Ljc4NjMgNi4zNjE5NCA3Ny4yMjI4IDYuMzYxOTQgODAuMzQ3MkM2LjM2MTk0IDg2Ljg0ODggOC44MDE2NyA5MC4wOTk1IDEzLjY4MTIgOTAuMDk5NUMxNS43Mjg3IDkwLjA5OTUgMTguMjA4MyA4OS41ODc2IDIxLjEyIDg4LjU2MzlWOTMuNzQ5MkMxOC43MjY4IDk0Ljc0NjMgMTYuMDU0NCA5NS4yNDQ5IDEzLjEwMjggOTUuMjQ0OUM4Ljg2MTUxIDk1LjI0NDkgNS42MTczNyA5My45NTg2IDMuMzcwNDIgOTEuMzg1OUMxLjEyMzQ3IDg4LjgxMzIgMCA4NS4xMjAzIDAgODAuMzA3M0MwIDc3LjI3NTkgMC41NTE3NTkgNzQuNjIwMSAxLjY1NTI5IDcyLjMzOTlDMi43NTg4MiA3MC4wNTk3IDQuMzQ0MzIgNjguMzExNCA2LjQxMTc5IDY3LjA5NDhDOC40NzkyNSA2NS44NzgzIDEwLjkwMjQgNjUuMjcgMTMuNjgxMiA2NS4yN0MxNi41MTMxIDY1LjI3IDE5LjM1ODQgNjUuOTU0NyAyMi4yMTY5IDY3LjMyNDJMMjAuMjIyNiA3Mi4zNDk5QzE5LjEzMjMgNzEuODMxNCAxOC4wMzU1IDcxLjM3OTMgMTYuOTMxOSA3MC45OTM4QzE1LjgyODQgNzAuNjA4MiAxNC43NDQ4IDcwLjQxNTQgMTMuNjgxMiA3MC40MTU0WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE4Mi4wODMgMjcuOTE1N0MxODIuMDgzIDM2Ljg5OTIgMTc5Ljg1NiA0My44MDM5IDE3NS40MDEgNDguNjI5N0MxNzAuOTQ2IDUzLjQ1NTYgMTY0LjU2MiA1NS44Njg1IDE1Ni4yNDYgNTUuODY4NUMxNDcuOTMxIDU1Ljg2ODUgMTQxLjU0NiA1My40NTU2IDEzNy4wOTEgNDguNjI5N0MxMzIuNjM3IDQzLjgwMzkgMTMwLjQwOSAzNi44NzQ0IDEzMC40MDkgMjcuODQxNEMxMzAuNDA5IDE4LjgwODQgMTMyLjY0MyAxMS45MDk5IDEzNy4xMSA3LjE0NTk3QzE0MS41NzcgMi4zODE5OSAxNDcuOTggMCAxNTYuMzIgMEMxNjQuNjYgMCAxNzEuMDM5IDIuNDAwNTUgMTc1LjQ1NyA3LjIwMTY2QzE3OS44NzQgMTIuMDAyOCAxODIuMDgzIDE4LjkwNzQgMTgyLjA4MyAyNy45MTU3Wk0xNDIuNDc0IDI3LjkxNTdDMTQyLjQ3NCAzMy45Nzg5IDE0My42MjUgMzguNTQ0OSAxNDUuOTI2IDQxLjYxMzdDMTQ4LjIyOCA0NC42ODI0IDE1MS42NjggNDYuMjE2OCAxNTYuMjQ2IDQ2LjIxNjhDMTY1LjQyOCA0Ni4yMTY4IDE3MC4wMTggNDAuMTE2NCAxNzAuMDE4IDI3LjkxNTdDMTcwLjAxOCAxNS42OTAyIDE2NS40NTIgOS41Nzc0MiAxNTYuMzIgOS41Nzc0MkMxNTEuNzQyIDkuNTc3NDIgMTQ4LjI5IDExLjExOCAxNDUuOTYzIDE0LjE5OTFDMTQzLjYzNyAxNy4yODAyIDE0Mi40NzQgMjEuODUyNCAxNDIuNDc0IDI3LjkxNTdaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik05Ny4xNjQyIDk0Ljg0NjFIOTEuMDgxNFY2NS42ODg4SDEwNy43OTRWNzAuNzU0NUg5Ny4xNjQyVjc4LjI3MzFIMTA3LjA1NlY4My4zMTg4SDk3LjE2NDJWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xMTkuNTgxIDk0Ljg0NjFIMTEzLjQ5OFY2NS42ODg4SDEzMC4yMVY3MC43NTQ1SDExOS41ODFWNzguMjczMUgxMjkuNDcyVjgzLjMxODhIMTE5LjU4MVY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE1Mi43MDYgOTQuODQ2MUgxMzUuOTE0VjY1LjY4ODhIMTUyLjcwNlY3MC43NTQ1SDE0Mi4wOTdWNzcuMTU2M0gxNTEuOTY5VjgyLjIyMTlIMTQyLjA5N1Y4OS43NDA2SDE1Mi43MDZWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xNjQuOTcyIDc4LjYzMjFIMTY2Ljk2NkMxNjguOTIgNzguNjMyMSAxNzAuMzYzIDc4LjMwNjQgMTcxLjI5NCA3Ny42NTQ5QzE3Mi4yMjQgNzcuMDAzNCAxNzIuNjkgNzUuOTc5NiAxNzIuNjkgNzQuNTgzNkMxNzIuNjkgNzMuMjAwOCAxNzIuMjE0IDcyLjIxNyAxNzEuMjY0IDcxLjYzMkMxNzAuMzEzIDcxLjA0NjkgMTY4Ljg0MSA3MC43NTQ1IDE2Ni44NDYgNzAuNzU0NUgxNjQuOTcyVjc4LjYzMjFaTTE2NC45NzIgODMuNjU3OFY5NC44NDYxSDE1OC43ODlWNjUuNjg4OEgxNjcuMjg1QzE3MS4yNDcgNjUuNjg4OCAxNzQuMTc5IDY2LjQxMDEgMTc2LjA4IDY3Ljg1MjdDMTc3Ljk4MSA2OS4yOTUzIDE3OC45MzIgNzEuNDg1NyAxNzguOTMyIDc0LjQyNEMxNzguOTMyIDc2LjEzOTIgMTc4LjQ2IDc3LjY2NDggMTc3LjUxNiA3OS4wMDFDMTc2LjU3MiA4MC4zMzcyIDE3NS4yMzYgODEuMzg0MyAxNzMuNTA3IDgyLjE0MjFDMTc3Ljg5NSA4OC42OTY5IDE4MC43NTQgOTIuOTMxNSAxODIuMDgzIDk0Ljg0NjFIMTc1LjIyM0wxNjguMjYyIDgzLjY1NzhMMTY0Ljk3MiA4My42NTc4WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTU3LjQ2NDcgNTUuMTI2VjAuODUzNzZINjguOTcyNVY1NS4xMjZINTcuNDY0N1oiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPHBhdGggZD0iTTk0LjE0MTIgMjQuOTQ1OUg5Ny44NTM0QzEwMS40OTEgMjQuOTQ1OSAxMDQuMTc3IDI0LjMzOTYgMTA1LjkwOSAyMy4xMjY5QzEwNy42NDEgMjEuOTE0MyAxMDguNTA3IDIwLjAwODcgMTA4LjUwNyAxNy40MTAxQzEwOC41MDcgMTQuODM2MyAxMDcuNjIzIDEzLjAwNSAxMDUuODUzIDExLjkxNjFDMTA0LjA4NCAxMC44MjcyIDEwMS4zNDMgMTAuMjgyNyA5Ny42MzA3IDEwLjI4MjdIOTQuMTQxMlYyNC45NDU5Wk05NC4xNDEyIDM0LjMwMDZWNTUuMTI2SDgyLjYzMzRWMC44NTM3Nkg5OC40NDc0QzEwNS44MjIgMC44NTM3NiAxMTEuMjc5IDIuMTk2MzIgMTE0LjgxOCA0Ljg4MTQ3QzExOC4zNTcgNy41NjY2MiAxMjAuMTI3IDExLjY0MzkgMTIwLjEyNyAxNy4xMTMyQzEyMC4xMjcgMjAuMzA1NiAxMTkuMjQ4IDIzLjE0NTUgMTE3LjQ5MSAyNS42MzI2QzExNS43MzQgMjguMTE5OCAxMTMuMjQ3IDMwLjA2ODcgMTEwLjAyOSAzMS40NzkzQzExOC4xOTYgNDMuNjgwMSAxMjMuNTE3IDUxLjU2MjMgMTI1Ljk5MiA1NS4xMjZIMTEzLjIyMkwxMDAuMjY2IDM0LjMwMDZMOTQuMTQxMiAzNC4zMDA2WiIgZmlsbD0iIzEyODRENyI+PC9wYXRoPgo8cGF0aCBkPSJNNTEuMjE0NiA5NC44NDYxSDQ1LjA1MjFWODIuMjYxOEgzMy41MDQ5Vjk0Ljg0NjFIMjcuMzIyNFY2NS42ODg4SDMzLjUwNDlWNzcuMTE2NEg0NS4wNTIxVjY1LjY4ODhINTEuMjE0NlY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTg1LjAzODYgODAuMjI3NUM4NS4wMzg2IDg1LjA1MzggODMuODQyIDg4Ljc2MzMgODEuNDQ4OCA5MS4zNTZDNzkuMDU1NiA5My45NDg2IDc1LjYyNTMgOTUuMjQ0OSA3MS4xNTggOTUuMjQ0OUM2Ni42OTA3IDk1LjI0NDkgNjMuMjYwNCA5My45NDg2IDYwLjg2NzIgOTEuMzU2QzU4LjQ3NCA4OC43NjMzIDU3LjI3NzQgODUuMDQwNSA1Ny4yNzc0IDgwLjE4NzdDNTcuMjc3NCA3NS4zMzQ4IDU4LjQ3NzMgNzEuNjI4NiA2MC44NzcyIDY5LjA2OTJDNjMuMjc3IDY2LjUwOTggNjYuNzE3MyA2NS4yMzAxIDcxLjE5NzkgNjUuMjMwMUM3NS42Nzg1IDY1LjIzMDEgNzkuMTA1NCA2Ni41MTk4IDgxLjQ3ODcgNjkuMDk5MkM4My44NTE5IDcxLjY3ODUgODUuMDM4NiA3NS4zODc5IDg1LjAzODYgODAuMjI3NVpNNjMuNzU5IDgwLjIyNzVDNjMuNzU5IDgzLjQ4NSA2NC4zNzcyIDg1LjkzOCA2NS42MTM3IDg3LjU4NjZDNjYuODUwMiA4OS4yMzUzIDY4LjY5ODMgOTAuMDU5NiA3MS4xNTggOTAuMDU5NkM3Ni4wOTA2IDkwLjA1OTYgNzguNTU3IDg2Ljc4MjMgNzguNTU3IDgwLjIyNzVDNzguNTU3IDczLjY1OTUgNzYuMTAzOSA3MC4zNzU1IDcxLjE5NzkgNzAuMzc1NUM2OC43MzgyIDcwLjM3NTUgNjYuODgzNCA3MS4yMDMyIDY1LjYzMzcgNzIuODU4NUM2NC4zODM5IDc0LjUxMzggNjMuNzU5IDc2Ljk3MDEgNjMuNzU5IDgwLjIyNzVaIiBmaWxsPSJibGFjayI+PC9wYXRoPgo8L3N2Zz4=" alt="GiroChoffer" style={{ height: '32px', width: 'auto', display: 'block' }} />
+      </div>
+      <nav style={{ display: 'flex', gap: '4px' }}>
+        {navDefs.map(([label, path]) => (
+          <button key={path} onClick={() => navigate(path)} style={isActive(path) ? actNav : baseNav}>
+            {label}
+          </button>
+        ))}
+      </nav>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ textAlign: 'right', lineHeight: 1.3 }}>
+          <div style={{ fontSize: '13px', fontWeight: 700, color: colors.ink }}>{userName}</div>
+          <div style={{ fontSize: '11px', color: colors.muted }}>{userRoleLabel}</div>
+        </div>
+        <div
+          style={{
+            width: '38px',
+            height: '38px',
+            borderRadius: '50%',
+            background: colors.navy,
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontWeight: 800,
+            fontSize: '13px',
+            fontFamily: fonts.heading,
+          }}
+        >
+          {userInitials}
+        </div>
+        <button
+          onClick={logout}
+          style={{
+            padding: '8px 14px',
+            background: 'transparent',
+            border: `1px solid ${colors.border}`,
+            borderRadius: '8px',
+            color: colors.muted,
+            fontWeight: 600,
+            fontSize: '13px',
+            cursor: 'pointer',
+          }}
+        >
+          Sair
+        </button>
+      </div>
+    </header>
+  );
+}
+
+
+// ===== src/components/AppLayout.jsx =====
+
+/* Casca da área autenticada: header fixo + conteúdo da rota. */
+function AppLayout() {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: colors.bg,
+        fontFamily: fonts.body,
+        color: colors.text,
+      }}
+    >
+      <Header />
+      <Outlet />
+    </div>
+  );
+}
+
+
+// ===== src/components/CargaDetalheCard.jsx =====
+
+function Campo({ label, children }) {
+  return (
+    <div>
+      <div style={{ fontSize: '12px', color: colors.muted2, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.4px', marginBottom: '4px' }}>
+        {label}
+      </div>
+      <div style={{ fontSize: '15px', color: colors.ink }}>{children}</div>
+    </div>
+  );
+}
+
+/* Cartão de detalhes da carga (coluna principal), compartilhado entre
+   as telas de detalhe da empresa e do motorista. */
+function CargaDetalheCard({ carga, statusLabel, subtitulo }) {
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '30px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+        <StatusBadge label={statusLabel} />
+        <span style={{ fontSize: '12px', color: colors.muted2 }}>Coleta {carga.dataColeta}</span>
+      </div>
+      <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '26px', color: colors.inkStrong, margin: subtitulo ? '0 0 4px' : '0 0 22px' }}>
+        {carga.titulo}
+      </h1>
+      {subtitulo && <div style={{ fontSize: '14px', color: colors.muted, marginBottom: '24px' }}>{subtitulo}</div>}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '18px', marginBottom: '24px' }}>
+        <Campo label="Origem">
+          <span style={{ fontSize: '16px', fontWeight: 700, color: colors.navy }}>{carga.origem}</span>
+        </Campo>
+        <Campo label="Destino">
+          <span style={{ fontSize: '16px', fontWeight: 700, color: colors.navy }}>{carga.destino}</span>
+        </Campo>
+        <Campo label="Veículo / Carroceria">
+          {carga.tipoVeiculo} · {carga.carroceria}
+        </Campo>
+        <Campo label="Peso / Volume">
+          {carga.peso} · {carga.volume}
+        </Campo>
+      </div>
+
+      <div style={{ fontSize: '12px', color: colors.muted2, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.4px', marginBottom: '6px' }}>
+        Descrição
+      </div>
+      <p style={{ fontSize: '15px', color: '#4A5462', lineHeight: 1.6, margin: 0 }}>{carga.descricao}</p>
+    </div>
+  );
+}
+
+
+// ===== src/components/MotoristaInteressadoCard.jsx =====
+
+/* Card de motorista interessado, exibido nos detalhes da carga (empresa). */
+function MotoristaInteressadoCard({ motorista, escolhido, podeEscolher, onEscolher }) {
+  const m = motorista;
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: `1px solid ${escolhido ? '#CDE8D9' : colors.border}`,
+        borderRadius: '14px',
+        padding: '18px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '18px',
+      }}
+    >
+      <div
+        style={{
+          width: '48px',
+          height: '48px',
+          borderRadius: '50%',
+          background: colors.tintBlue,
+          color: colors.navy,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontWeight: 800,
+          fontSize: '16px',
+          fontFamily: fonts.heading,
+          flex: 'none',
+        }}
+      >
+        {m.inicial}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700, fontSize: '16px', color: colors.ink, marginBottom: '3px' }}>{m.nome}</div>
+        <div style={{ fontSize: '13px', color: colors.muted }}>
+          {m.veiculo} · {m.carroceria} · até {m.cap}
+        </div>
+        <div style={{ fontSize: '13px', color: colors.muted, marginTop: '2px' }}>
+          {m.cidade} · ⭐ {m.nota} · {m.viagens} viagens
+        </div>
+      </div>
+      {escolhido && (
+        <span
+          style={{
+            background: '#E3F4EC',
+            color: '#1E8E5A',
+            fontWeight: 700,
+            fontSize: '13px',
+            padding: '9px 16px',
+            borderRadius: '9px',
+            flex: 'none',
+          }}
+        >
+          ✓ Contratado
+        </span>
+      )}
+      {podeEscolher && (
+        <Button
+          onClick={onEscolher}
+          style={{
+            padding: '11px 22px',
+            background: colors.primary,
+            color: '#fff',
+            border: 'none',
+            borderRadius: '10px',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: 'pointer',
+            flex: 'none',
+          }}
+          hoverStyle={{ background: colors.primaryHover }}
+        >
+          Escolher
+        </Button>
+      )}
+    </div>
+  );
+}
+
+
+// ===== src/components/CargaCardEmpresa.jsx =====
+
+/* Card em formato de linha usado no painel da empresa. */
+function CargaCardEmpresa({ carga }) {
+  const navigate = useNavigate();
+  const { motoristas } = useApp();
+  const item = cargaVM(carga, motoristas);
+
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: `1px solid ${colors.border}`,
+        borderRadius: '14px',
+        padding: '20px 22px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '24px',
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <StatusBadge label={item.statusLabel} />
+          <span style={{ fontSize: '12px', color: colors.muted2 }}>Coleta {item.dataColeta}</span>
+        </div>
+        <div
+          style={{
+            fontFamily: fonts.heading,
+            fontWeight: 700,
+            fontSize: '17px',
+            color: colors.ink,
+            marginBottom: '8px',
+          }}
+        >
+          {item.titulo}
+        </div>
+        <div style={{ fontSize: '14px', color: '#4A5462' }}>
+          <span style={{ fontWeight: 700, color: colors.navy }}>{item.origem}</span> →{' '}
+          <span style={{ fontWeight: 700, color: colors.navy }}>{item.destino}</span>
+          <span style={{ color: '#C2C9D2' }}>{'  ·  '}</span>
+          {item.carroceria}
+          <span style={{ color: '#C2C9D2' }}>{'  ·  '}</span>
+          {item.peso}
+        </div>
+      </div>
+      <div style={{ textAlign: 'right', flex: 'none' }}>
+        <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '21px', color: colors.navy }}>
+          {item.valorFmt}
+        </div>
+        <div style={{ fontSize: '12px', color: colors.muted, margin: '4px 0 12px' }}>
+          {item.interessadosLabel}
+        </div>
+        <Button
+          onClick={() => navigate(`/empresa/carga/${item.id}`)}
+          style={{
+            padding: '9px 18px',
+            background: '#fff',
+            color: colors.ink,
+            border: `1px solid ${colors.borderInput}`,
+            borderRadius: '9px',
+            fontWeight: 600,
+            fontSize: '14px',
+            cursor: 'pointer',
+          }}
+          hoverStyle={{ borderColor: colors.primary, color: colors.primary }}
+        >
+          Ver detalhes
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/components/CargaCardMercado.jsx =====
+
+/* Card em grade usado na vitrine de cargas do motorista. */
+function CargaCardMercado({ carga }) {
+  const navigate = useNavigate();
+  const { motoristas } = useApp();
+  const item = cargaVM(carga, motoristas);
+
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: `1px solid ${colors.border}`,
+        borderRadius: '14px',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <StatusBadge label={item.statusLabel} />
+        <span style={{ fontSize: '12px', color: colors.muted2 }}>Coleta {item.dataColeta}</span>
+      </div>
+      <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '17px', color: colors.ink, marginBottom: '6px' }}>
+        {item.titulo}
+      </div>
+      <div style={{ fontSize: '13px', color: colors.muted, marginBottom: '12px' }}>{item.empresa}</div>
+      <div style={{ fontSize: '15px', color: '#4A5462', marginBottom: '6px' }}>
+        <span style={{ fontWeight: 700, color: colors.navy }}>{item.origem}</span> →{' '}
+        <span style={{ fontWeight: 700, color: colors.navy }}>{item.destino}</span>
+      </div>
+      <div style={{ fontSize: '13px', color: colors.muted, marginBottom: '16px' }}>
+        {item.carroceria} · {item.peso}
+      </div>
+      <div
+        style={{
+          marginTop: 'auto',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingTop: '14px',
+          borderTop: '1px solid #F0F2F5',
+        }}
+      >
+        <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '20px', color: colors.navy }}>
+          {item.valorFmt}
+        </div>
+        <Button
+          onClick={() => navigate(`/motorista/carga/${item.id}`)}
+          style={{
+            padding: '10px 20px',
+            background: colors.primary,
+            color: '#fff',
+            border: 'none',
+            borderRadius: '9px',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: 'pointer',
+          }}
+          hoverStyle={{ background: colors.primaryHover }}
+        >
+          Ver carga
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/components/CargaResumoRow.jsx =====
+
+/* Linha compacta de carga usada em "Minhas cargas" (motorista).
+   `pill` define o rótulo/cores do status e `verButton` exibe o botão Ver. */
+function CargaResumoRow({ carga, pill, borderColor = colors.border, dimmed = false, verButton = false }) {
+  const navigate = useNavigate();
+  return (
+    <div
+      style={{
+        background: '#fff',
+        border: `1px solid ${borderColor}`,
+        borderRadius: '13px',
+        padding: '18px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '20px',
+        opacity: dimmed ? 0.86 : 1,
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <div style={{ fontWeight: 700, fontSize: '16px', color: colors.ink, marginBottom: '4px' }}>{carga.titulo}</div>
+        <div style={{ fontSize: '14px', color: '#4A5462' }}>
+          <span style={{ fontWeight: 700, color: colors.navy }}>{carga.origem}</span> →{' '}
+          <span style={{ fontWeight: 700, color: colors.navy }}>{carga.destino}</span> · {carga.empresa}
+        </div>
+      </div>
+      <div style={{ fontFamily: "'Archivo', sans-serif", fontWeight: 800, fontSize: '18px', color: colors.navy }}>
+        {fmt(carga.valor)}
+      </div>
+      <span
+        style={{
+          background: pill.bg,
+          color: pill.color,
+          fontWeight: 700,
+          fontSize: '12px',
+          padding: '6px 12px',
+          borderRadius: '999px',
+        }}
+      >
+        {pill.label}
+      </span>
+      {verButton && (
+        <button
+          onClick={() => navigate(`/motorista/carga/${carga.id}`)}
+          style={{
+            padding: '9px 16px',
+            background: '#fff',
+            color: colors.ink,
+            border: `1px solid ${colors.borderInput}`,
+            borderRadius: '9px',
+            fontWeight: 600,
+            fontSize: '13px',
+            cursor: 'pointer',
+          }}
+        >
+          Ver
+        </button>
+      )}
+    </div>
+  );
+}
+
+
+// ===== src/pages/Landing.jsx =====
+
+const steps = [
+  { n: '1', t: 'Empresa publica a carga', d: 'Origem, destino, valor e tipo de carroceria em poucos minutos.' },
+  { n: '2', t: 'Motoristas têm interesse', d: 'Quem está na rota demonstra interesse com um clique.' },
+  { n: '3', t: 'Empresa escolhe', d: 'Avalia os interessados e contrata o motorista ideal.' },
+  { n: '4', t: 'Frete realizado', d: 'Contato liberado, carga transportada e marcada como concluída.' },
+];
+
+const benefEmpresa = [
+  'Publique cargas em minutos, sem burocracia.',
+  'Receba motoristas interessados e compatíveis.',
+  'Escolha pelo veículo, carroceria e avaliação.',
+  'Acompanhe o status de cada carga em um só lugar.',
+];
+
+const benefMotorista = [
+  'Encontre fretes disponíveis na sua rota.',
+  'Filtre por origem, destino e tipo de carroceria.',
+  'Demonstre interesse com um único clique.',
+  'Fale direto com a empresa após o interesse.',
+];
+
+const stats = [
+  ['+2.400', 'motoristas ativos'],
+  ['+850', 'empresas cadastradas'],
+  ['27', 'estados atendidos'],
+];
+
+function Landing() {
+  const navigate = useNavigate();
+  const { showToast } = useApp();
+  const year = 2026;
+
+  const goCad = () => navigate('/entrar?modo=cadastro');
+
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg, fontFamily: fonts.body, color: colors.text }}>
+      <header style={{ height: '72px', maxWidth: '1160px', margin: '0 auto', display: 'flex', alignItems: 'center', padding: '0 32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '13px' }}>
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI2IiBoZWlnaHQ9IjExNyIgdmlld0JveD0iMCAwIDEyNiAxMTciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQuMDcyNyAwLjI4OTcwOUM1Ni4yNjM3IDEuNzEwNzEgNDcuMDM0NyA1LjQ4MzcxIDQwLjc2ODcgOS44MTU3QzM2LjI5MjcgMTIuOTA4NyAyOC44MDE3IDIwLjYwMDcgMjUuOTExNyAyNS4wNjc3QzIzLjU4OTcgMjguNjU3NyAyMC4yODc3IDM1LjM0MjcgMTkuNzI5NyAzNy41ODM3TDE5LjQwMzcgMzguODk0N0gzMS4zNDA3TDMzLjAyODcgMzUuOTE1N0MzMy45NTY3IDM0LjI3NzcgMzUuMjQxNyAzMi4yOTM3IDM1Ljg4MjcgMzEuNTA4N0MzNy4wMzA3IDMwLjEwMjcgMzcuMDYyNyAzMC4wOTQ3IDM4LjAzNjcgMzAuOTc2N0wzOS4wMjU3IDMxLjg3MTdMMzcuMzY4NyAzNC44MzI3QzM2LjQ1NzcgMzYuNDYxNyAzNS43MTI3IDM4LjA0MTcgMzUuNzEyNyAzOC4zNDQ3QzM1LjcxMjcgMzguNzMyNyAzNy41ODk3IDM4Ljg5NDcgNDIuMDg5NyAzOC44OTQ3SDQ4LjQ2NjdMNTIuMjE3NyAzNS4xNjE3QzYwLjMwOTcgMjcuMTExNyA3MC44ODk3IDI0LjU1ODcgODEuMDE2NyAyOC4yMTE3Qzg1LjE1NTcgMjkuNzAzNyA4NS44ODM3IDMwLjEyNjcgOTAuMTgzNyAzMy41MzY3TDkzLjQxNjcgMzYuMTAwN0w5OC40MTA3IDMzLjQ1NzdDMTA1Ljg5MSAyOS40OTg3IDExNC40NzcgMjQuNzM2NyAxMTUuNTEgMjMuOTc0N0MxMTYuMzg3IDIzLjMyNzcgMTE2LjMzNSAyMy4xODM3IDExNC4yMjIgMjAuNDM4N0MxMDkuMiAxMy45MTI3IDk5LjkwMjcgNi44Mjg3IDkyLjcxNDcgNC4wNTA3Qzg1LjUzOTcgMS4yNzg3IDgwLjQ0NjcgMC4yMzQ3MDQgNzMuMTI4NyAwLjAzNTcwMzVDNjkuNDU4NyAtMC4wNjMyOTY1IDY1LjM4MzcgMC4wNTA3MDg5IDY0LjA3MjcgMC4yODk3MDlaTTczLjg0MjcgMTIuODY4N0M3My44Mzk3IDEzLjI3MTcgNzMuODM2NyAxMy41NTc3IDczLjk1MzcgMTMuNzgyN0M3NC4yNjE3IDE0LjM3NzcgNzUuNDAzNyAxNC41NDA3IDc5LjU2MzcgMTUuMjczN0M4Mi4wNTM3IDE1LjcxMjcgODQuMjg3NyAxNi4xMTI3IDg0LjUyODcgMTYuMTYyN0M4NC43Njg3IDE2LjIxMzcgODUuMTY5NyAxNS42Mzk3IDg1LjQyMDcgMTQuODg3N0M4NS43NTg3IDEzLjg3NDcgODUuNzEzNyAxMy40MjE3IDg1LjI0NTcgMTMuMTMzN0M4NC42MTE3IDEyLjc0MTcgODAuOTY1NyAxMi4wNjI3IDc2LjM0NTcgMTEuNDc3N0w3My44NDM3IDExLjE1OTdWMTIuNjQ5N0M3My44NDM3IDEyLjcyNjcgNzMuODQyNyAxMi43OTk3IDczLjg0MjcgMTIuODY4N1pNNjUuMDI1NyAxMS43NjY3QzYwLjU5NjcgMTIuNzQ2NyA1NS43MzE3IDE0LjI3MzcgNTUuNzMxNyAxNC42ODM3QzU1LjczMTcgMTUuMDU5NyA1Ni41NjE3IDE2LjkwMTcgNTYuOTMyNyAxNy4zNTA3QzU2Ljk5NzcgMTcuNDI5NyA1OC45NTI3IDE2Ljk2NTcgNjEuMjc2NyAxNi4zMTk3QzYzLjYwMDcgMTUuNjczNyA2Ni4wOTI3IDE1LjAxNTcgNjYuODEyNyAxNC44NTY3QzY3LjkzNjcgMTQuNjA4NyA2OC4xMjM3IDE0LjMzMDcgNjguMTIzNyAxMi45MDg3QzY4LjEyMzcgMTEuMTE3NyA2OC4wNjM3IDExLjA5NDcgNjUuMDI1NyAxMS43NjY3Wk05MC45MTQ3IDE3LjIwOTdDOTAuNjE1NyAxNy44NjY3IDkwLjQ1OTcgMTguNDYyNyA5MC41Njc3IDE4LjUzNTdDOTAuNjc1NyAxOC42MDk3IDkyLjMzMDcgMTkuNjkwNyA5NC4yNDU3IDIwLjkzNzdMOTcuNzI2NyAyMy4yMDc3TDk4LjYxMDcgMjIuMTE2N0M5OS4wOTY3IDIxLjUxNjcgOTkuMzgwNyAyMC44NDI3IDk5LjI0MjcgMjAuNjE5N0M5OC44NTk3IDE5Ljk5ODcgOTIuNTc1NyAxNi4wMTU3IDkxLjk4MDcgMTYuMDE1N0M5MS42OTM3IDE2LjAxNTcgOTEuMjE0NyAxNi41NTI3IDkwLjkxNDcgMTcuMjA5N1pNNDcuNDIxNyAxOS4xMjQ3QzQ2LjEyODcgMjAuMDE4NyA0My45MTY3IDIxLjc0NzcgNDIuNTA1NyAyMi45NjY3TDM5LjkzODcgMjUuMTgxN0w0MS4wMDY3IDI2LjMxODdDNDIuMjIzNyAyNy42MTM3IDQyLjc3MTcgMjcuNzIyNyA0My41MjQ3IDI2LjgyMTdDNDQuNDI5NyAyNS43Mzg3IDQ5LjcxNzcgMjEuNDA3NyA1MC44NDg3IDIwLjgyNDdDNTEuODcxNyAyMC4yOTU3IDUxLjg4ODcgMjAuMjAwNyA1MS4xOTM3IDE4Ljg1NzdDNTAuNzkyNyAxOC4wODA3IDUwLjMwODcgMTcuNDU3NyA1MC4xMTg3IDE3LjQ3MTdDNDkuOTI4NyAxNy40ODY3IDQ4LjcxNTcgMTguMjMwNyA0Ny40MjE3IDE5LjEyNDdaTTUyLjYzMzcgNDEuMzk3N0M1MC4wMTE3IDQxLjYzMjcgMzkuMDg0NyA0MS45MTk3IDI4LjM1MDcgNDIuMDM3N0MxMS4xNjA3IDQyLjIyNjcgOC43MzE3MiA0Mi4zNDQ3IDcuOTc0NzIgNDMuMDMwN0M2Ljg0MTcyIDQ0LjA1NTcgNi44ODI3MiA0NS44MTE3IDguMDY3NzIgNDYuOTk3N0M4Ljk4NDcyIDQ3LjkxNDcgOS42NTY3MiA0Ny45NTA3IDI2LjA2ODcgNDcuOTUwN0M0NS4xMzU3IDQ3Ljk1MDcgNDUuNDU2NyA0OC4wMDE3IDQ3LjIzNDcgNTEuMzE2N0M0OC4yNzk3IDUzLjI2NDcgNDguMzIyNyA1NC4yNTA3IDQ3LjQzODcgNTUuOTU4N0M0NS45MjQ3IDU4Ljg4NjcgNDUuMjQ3NyA1OS4xMzA3IDM3LjkyNzcgNTkuMzg5N0wzMS4xODQ3IDU5LjYyODdWNjMuOTE3N0g4NS4wNDQ3TDg1LjE3MjcgNTMuMDE0N0M4NS4yNjI3IDQ1LjM3MzcgODUuMTM4NyA0MS45MTY3IDg0Ljc1NzcgNDEuNDU2N0M4NC4zMTU3IDQwLjkyNDcgODEuNjgwNyA0MC44MTc3IDcwLjgwNjcgNDAuODg1N0M2My40MzI3IDQwLjkzMjcgNTUuMjU0NyA0MS4xNjI3IDUyLjYzMzcgNDEuMzk3N1pNODguNDYwNyA0My4wMjU3Qzg4LjA2MzcgNDMuNDIyNyA4OC4wMzY3IDYzLjMyNTcgODguNDMxNyA2NC4zNTU3Qzg4LjY3NDcgNjQuOTg3NyA4OS42ODU3IDY1LjEwOTcgOTQuNjc5NyA2NS4xMDk3Qzk5LjkxNjcgNjUuMTA5NyAxMDAuNjAzIDY1LjIwMDcgMTAwLjM0OCA2NS44NjM3QzEwMC4xODkgNjYuMjc4NyAxMDAuMDU5IDY2LjcwNzcgMTAwLjA1OSA2Ni44MTY3QzEwMC4wNTkgNjYuOTI2NyA5Mi4xMTY3IDY3LjAxNTcgODIuNDA4NyA2Ny4wMTU3SDY0Ljc1ODdMNjUuNzc5NyA2OC4zOTY3QzY2LjM0MDcgNjkuMTU1NyA2Ni45MTE3IDcwLjc2NjcgNjcuMDQ4NyA3MS45NzY3TDY3LjI5NTcgNzQuMTc3N0w4NC4yNjc3IDc0LjA1MjdMMTAxLjIzOSA3My45Mjc3TDEwMS41NjggNzEuNjIyN0MxMDIuNTk3IDY0LjQzMjcgMTExLjAwMSA2MS42MjI3IDExNS44NzcgNjYuODM4N0MxMTcuMzc1IDY4LjQ0MDcgMTE4LjE3MSA3MC4zMzE3IDExOC4xNzEgNzIuMjg5N0MxMTguMTcxIDczLjY2MTcgMTE4LjIyMSA3My42ODg3IDEyMC42OTcgNzMuNjg4N0MxMjIuMDg3IDczLjY4ODcgMTIzLjQ4MSA3My40MzE3IDEyMy43OTYgNzMuMTE2N0MxMjQuNjI3IDcyLjI4NTcgMTI0LjUyMyA2OC4yMTU3IDEyMy42NTMgNjcuNDkyN0MxMjMuMjM5IDY3LjE0OTcgMTIyLjkyNiA2Ni4wNjg3IDEyMi45MDkgNjQuOTMyN0MxMjIuODYgNjEuNTEwNyAxMjIuMTQzIDU4LjMwMTcgMTIxLjI4OCA1Ny42NzY3QzEyMC44MzYgNTcuMzQ1NyAxMTcuNzUxIDU2LjQxOTcgMTE0LjQzMyA1NS42MTg3QzEwOS43MDcgNTQuNDc3NyAxMDguMjQ1IDUzLjkzMjcgMTA3LjY4NSA1My4xMDI3QzEwMi44OTMgNDUuOTk3NyAxMDEuMTIgNDMuODYyNyA5OS41Njk3IDQzLjMyOTdDOTcuODE2NyA0Mi43Mjg3IDg4Ljk5OTcgNDIuNDg1NyA4OC40NjA3IDQzLjAyNTdaTTEwMS44NTYgNDkuNzM3N0w5OS4zNjE3IDQ2LjA0MzdIOTIuOTA5N1Y1NC4xNDY3SDk4LjYyODdDMTAxLjc3NSA1NC4xNDY3IDEwNC4zNDkgNTMuOTg1NyAxMDQuMzQ5IDUzLjc4OTdDMTA0LjM0OSA1My41OTI3IDEwMy4yMjcgNTEuNzY5NyAxMDEuODU2IDQ5LjczNzdaTTAuNzUzNzI3IDUyLjE1ODdDLTAuMjgxMjczIDUzLjMwMjcgLTAuMjQ3MjY1IDU0Ljc2MDcgMC44MzY3MzUgNTUuNzQwN0MxLjYxOTczIDU2LjQ0OTcgMy44MjE3MyA1Ni41Mjk3IDIyLjQ4OTcgNTYuNTI5N0gyMy4zNzk3QzQwLjYyNzcgNTYuNTMwNyA0My45Njk3IDU2LjUzMDcgNDQuNjE1NyA1NS4yMTA3QzQ0Ljc2OTcgNTQuODk0NyA0NC43Njk3IDU0LjUwMDcgNDQuNzY4NyA1NC4wMTM3QzQ0Ljc2ODcgNTMuOTc4NyA0NC43Njg3IDUzLjk0MzcgNDQuNzY4NyA1My45MDg3QzQ0Ljc2ODcgNTMuODcxNyA0NC43Njg3IDUzLjgzNTcgNDQuNzY4NyA1My44MDA3QzQ0Ljc2OTcgNTMuMzE0NyA0NC43Njk3IDUyLjkyMjcgNDQuNjE1NyA1Mi42MDY3QzQzLjk3MDcgNTEuMjg2NyA0MC42MjM3IDUxLjI4NjcgMjMuMzE3NyA1MS4yODY3SDIyLjQwNjdDMi43OTg3MiA1MS4yODY3IDEuNDk0NzMgNTEuMzM5NyAwLjc1MzcyNyA1Mi4xNTg3Wk0xNi4zODE3IDYyLjM2ODdDMTYuNTQ5NyA2NC4wMDc3IDE2LjgwMzcgNjYuMTUyNyAxNi45NDY3IDY3LjEzNTdMMTcuMjA3NyA2OC45MjI3SDIzLjE3NDdDMjguNjYxNyA2OC45MjI3IDI5LjExNTcgNjguODU1NyAyOC44MjA3IDY4LjA4ODdDMjguNjQzNyA2Ny42Mjk3IDI4LjI3MDcgNjUuNDg0NyAyNy45OTE3IDYzLjMyMTdMMjcuNDgyNyA1OS4zODk3SDE2LjA3NjdMMTYuMzgxNyA2Mi4zNjg3Wk0xMTUuMTEzIDYyLjA3OTdDMTE0Ljk0OCA2Mi41MTA3IDExNC44NzEgNjIuOTAxNyAxMTQuOTQzIDYyLjk0ODdDMTE1LjAxNSA2Mi45OTU3IDExNS43NSA2My41MDE3IDExNi41NzYgNjQuMDcyN0MxMTcuNDAzIDY0LjY0MjcgMTE4Ljc0NCA2NS4xMDk3IDExOS41NTYgNjUuMTA5N0MxMjAuODU0IDY1LjEwOTcgMTIxLjAzMSA2NC45NDk3IDEyMS4wMzEgNjMuNzc0N0MxMjEuMDMxIDYxLjg5MDcgMTIwLjIyIDYxLjI5NjcgMTE3LjY1IDYxLjI5NjdDMTE2LjAxNSA2MS4yOTY3IDExNS4zMzIgNjEuNTA2NyAxMTUuMTEzIDYyLjA3OTdaTTMxLjg5OTcgNjcuNjc5N0MzMS44OTk3IDY5LjIxMDcgMzYuMzQ2NyA2OS40NTU3IDM3LjE0MjcgNjcuOTY5N0MzNy42MjY3IDY3LjA2NTcgMzcuNTA0NyA2Ny4wMTU3IDM0Ljc3NTcgNjcuMDE1N0MzMi42MzQ3IDY3LjAxNTcgMzEuODk5NyA2Ny4xODU3IDMxLjg5OTcgNjcuNjc5N1pNNTAuMjkzNyA2OC4yMDc3QzUxLjI1NDcgNjkuNjczNyA1MS40NTk3IDY5LjY3MjcgNTIuNTM2NyA2OC4xOTI3TDUzLjM5MjcgNjcuMDE1N0g0OS41MTM3TDUwLjI5MzcgNjguMjA3N1pNMTA2LjYxOSA2Ny43NjE3QzEwMy44ODYgNjkuMjQ0NyAxMDMuMTE1IDcyLjkwMTcgMTA0Ljk1OSA3NS42Mzc3QzEwOC40MjQgODAuNzc4NyAxMTUuMzExIDc4LjUxNDcgMTE1LjMxMSA3Mi4yMzU3QzExNS4zMTEgNzAuNjIxNyAxMTUuMDEzIDY5Ljk1ODcgMTEzLjY5MSA2OC42MzY3QzExMi4zMzQgNjcuMjgwNyAxMTEuNzMyIDY3LjAxOTcgMTA5Ljk5NyA2Ny4wMzQ3QzEwOC44NTYgNjcuMDQ1NyAxMDcuMzM2IDY3LjM3MjcgMTA2LjYxOSA2Ny43NjE3Wk01NS45MzE3IDY4LjM5MTdDNTQuMDU3NyA2OS41MzQ3IDUyLjcwMTcgNzIuMzA4NyA1My4xMDk3IDc0LjE2NTdDNTQuMTcyNyA3OS4wMDI3IDU5Ljg5OTcgODAuMjg4NyA2My4xNTQ3IDc2LjQxOTdDNjQuMjQ0NyA3NS4xMjQ3IDY0LjM4MjcgNzQuNjA0NyA2NC4xODQ3IDcyLjU0NzdDNjMuNzY2NyA2OC4xOTU3IDU5LjY1MDcgNjYuMTIzNyA1NS45MzE3IDY4LjM5MTdaTTQwLjgzOTcgNjguMzI5N0MzOS40NTI3IDY5LjE4ODcgMzguMDk1NyA3MS41NDU3IDM4LjA5NTcgNzMuMDk0N0MzOC4wOTU3IDc0LjM4NjcgNDAuMDMwNyA3Ny4xMjg3IDQxLjQ0NjcgNzcuODQ1N0M0NC43OTE3IDc5LjUzODcgNDguODY2NyA3Ny4yMjU3IDQ5LjM4ODcgNzMuMzM3N0M0OS42Mzk3IDcxLjQ2MTcgNDkuNTIyNyA3MS4xODE3IDQ3Ljc0NjcgNjkuNDA0N0M0Ni4xNjQ3IDY3LjgyMzcgNDUuNTE0NyA2Ny40OTQ3IDQzLjk5MDcgNjcuNTA1N0M0Mi45NzY3IDY3LjUxMjcgNDEuNTU4NyA2Ny44ODI3IDQwLjgzOTcgNjguMzI5N1pNNS40Nzk3MiA3Mi41MzE3QzQuNTM3NzIgNzMuNDczNyA0LjUzNjczIDc0LjE1MTcgNS40NzM3MyA3NS40ODk3QzYuMjEyNzMgNzYuNTQ1NyA2LjI1MzcyIDc2LjU0ODcgMjEuMjM0NyA3Ni41NDg3QzM1LjMwOTcgNzYuNTQ4NyAzNi4yMzg3IDc2LjQ5NjcgMzYuMDE4NyA3NS43MTQ3QzM1Ljg4OTcgNzUuMjU2NyAzNS42NDM3IDc0LjE4MzcgMzUuNDcxNyA3My4zMzE3TDM1LjE1OTcgNzEuNzgyN0gyMC42OTQ3QzguMTc5NzMgNzEuNzgyNyA2LjEyNzcyIDcxLjg4MzcgNS40Nzk3MiA3Mi41MzE3WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMTIuMTc5IDgzLjE0ODdDMTE0LjkwMiA4Mi43NzU3IDExNy44ODkgODEuMjU0NyAxMTguODg1IDc5LjczMzdDMTE5LjU2NyA3OC42OTQ3IDEyMC4wMDUgNzguNTQ4NyAxMjIuNDYgNzguNTQ4N0gxMjUuMjU4TDEyNC4yNzMgODEuMDUxN0MxMTYuMjYzIDEwMS4zOTMgOTcuNTkwNSAxMTUuMTE5IDc2LjA3MTUgMTE2LjQ4M0M1NC40NTE1IDExNy44NTIgMzMuMDY1NSAxMDUuMDg1IDIzLjQ3NDUgODUuMDgxN0wyMS44Mjg2IDgxLjY0NjdMMjcuODg3NSA4MS41MTM3QzMxLjIxOTUgODEuNDM5NyAzNC4xODg1IDgxLjQ3MTcgMzQuNDg1NSA4MS41ODU3QzM0Ljc4MTUgODEuNjk5NyAzNS45Mjg1IDgzLjMxNDcgMzcuMDM0NSA4NS4xNzU3QzM4LjEzOTUgODcuMDM1NyAzOS4yMjQ1IDg4LjU1ODcgMzkuNDQ2NSA4OC41NTg3QzM5LjY2NzUgODguNTU4NyA0MC4zNDc2IDg4LjE1NDcgNDAuOTU1NiA4Ny42NjE3TDQyLjA2MzYgODYuNzY1N0w0MC44NTY2IDg0LjkyMDdDMzkuNjc4NiA4My4xMjA3IDM4Ljg2NzUgODEuNDA4NyAzOS4xOTM1IDgxLjQwODdDMzkuMjgzNSA4MS40MDg3IDQwLjM4NDUgODEuODYzNyA0MS42NDA1IDgyLjQxOTdDNDQuNTk1NSA4My43MjY3IDQ3Ljg1MzUgODMuNDA0NyA1MC45MTA1IDgxLjUwMzdMNTMuMDkyNSA4MC4xNDc3TDU1LjAwNjUgODIuMTMxN0M1OC42NzQ1IDg1LjkzMjcgNjUuMjEwNSA4OC44NTQ3IDcxLjEwNTUgODkuMzI5N0M3Ny44MDU1IDg5Ljg2NzcgODUuMjM0NSA4Ny4zMzA3IDkwLjE3MzUgODIuODE2N0w5Mi43NTI1IDgwLjQ1OTdMOTQuNzczNSA4MS4xNzI3Qzk1Ljg4NDUgODEuNTY0NyA5Ny40NTA1IDgxLjg4NTcgOTguMjUyNSA4MS44ODU3Qzk5Ljk1MzUgODEuODg1NyAxMDMuODI1IDgwLjEzNTcgMTAzLjgyNSA3OS4zNjY3QzEwMy44MjUgNzkuMDc1NyAxMDQuNTUgNzkuNTQxNyAxMDUuNDM3IDgwLjQwMTdMMTA3LjA1IDgxLjk2NDdMMTA1LjkwNyA4NC4wMTA3TDEwNC43NjMgODYuMDU1N0wxMDYuMDIzIDg2Ljg4MDdDMTA3LjI2IDg3LjY5MjcgMTA3LjMwMiA4Ny42ODI3IDEwOC4zOTggODYuMzQ1N0MxMDkuMDEyIDg1LjU5NTcgMTA5LjYzNCA4NC42MzY3IDEwOS43OCA4NC4yMTI3QzEwOS45NDcgODMuNzI1NyAxMTAuODMxIDgzLjMzMzcgMTEyLjE3OSA4My4xNDg3Wk05My42MzQ1IDk3LjcyNTdDOTIuOTUyNSA5Ni40MDc3IDkyLjk1NDUgOTYuNDA1NyA5Ny4wNzc1IDkzLjAzNjdMMTAxLjIwMiA4OS42Njc3TDEwMi41MTQgOTAuNTc0N0MxMDMuMjM1IDkxLjA3NDcgMTAzLjgyNSA5MS42NDI3IDEwMy44MjUgOTEuODM3N0MxMDMuODI1IDkyLjYyNTcgOTUuNzIyNSA5OS4wNDQ3IDk0LjcyNzUgOTkuMDQ0N0M5NC41MDE1IDk5LjA0NDcgOTQuMDA5NSA5OC40NTA3IDkzLjYzNDUgOTcuNzI1N1pNNDQuMDU4NSA5My44NTg3QzQzLjE3NjUgOTIuODg0NyA0My4xODA1IDkyLjg1MTcgNDQuMjk4NSA5MS45MjA3QzQ0LjkyMzUgOTEuMzk5NyA0NS41NDM1IDkwLjk2NzcgNDUuNjc0NSA5MC45NjE3QzQ1LjgwNTUgOTAuOTU1NyA0Ni44Nzc1IDkxLjcyMjcgNDguMDU3NSA5Mi42NjY3QzQ5LjIzNzUgOTMuNjA5NyA1MS4zMzU1IDk1LjExMDcgNTIuNzE5NSA5Ni4wMDE3QzU0Ljk2NTUgOTcuNDQ2NyA1NS4xODA1IDk3LjcyNjcgNTQuNzE0NSA5OC41OTc3QzU0LjQyNjUgOTkuMTM1NyA1My44ODY1IDk5LjY5MTcgNTMuNTE0NSA5OS44MzQ3QzUyLjgwMTUgMTAwLjEwOSA0NS41OTA1IDk1LjU1MTcgNDQuMDU4NSA5My44NTg3Wk03OS4zOTY1IDEwMC45OTZDODAuMzc5NSAxMDAuNzM4IDgyLjM2MzUgMTAwLjIxMyA4My44MDU1IDk5LjgyODdDODcuNzQ3NSA5OC43Nzk3IDg4LjI4ODUgOTguODQ1NyA4OC44OTQ1IDEwMC40NTVDODkuNDI3NSAxMDEuODY1IDg5LjQyNTUgMTAxLjg2NSA4Ni45NzQ1IDEwMi41NTZDODMuNzk4NSAxMDMuNDUxIDc5LjcyMDUgMTA0LjI4OCA3OC41Mzg1IDEwNC4yODhDNzcuODI2NSAxMDQuMjg4IDc3LjYwOTUgMTAzLjk1OCA3Ny42MDk1IDEwMi44NzZDNzcuNjA5NSAxMDEuNjQ2IDc3LjgzODUgMTAxLjQwNCA3OS4zOTY1IDEwMC45OTZaTTU5LjgyODUgMTAyLjQyQzU5LjYxNjUgMTAyLjIxMiA1OS41ODY1IDEwMS40NzUgNTkuNzYwNSAxMDAuNzgyQzU5LjkzNDUgMTAwLjA4OCA2MC4xMjg1IDk5LjUyMDcgNjAuMTkxNSA5OS41MjA3QzYwLjI1NDUgOTkuNTIwNyA2Mi4zMjE1IDk5Ljk0NjcgNjQuNzg2NSAxMDAuNDY3QzY3LjI1MTUgMTAwLjk4NyA2OS43NTA1IDEwMS40MTYgNzAuMzQwNSAxMDEuNDJDNzEuMjQ2NSAxMDEuNDI3IDcxLjQxMjUgMTAxLjY4NiA3MS40MTI1IDEwMy4wOTZDNzEuNDEyNSAxMDQuMzA0IDcxLjIwMzUgMTA0Ljc2NCA3MC42NTM1IDEwNC43NjRDNjkuMjY5NSAxMDQuNzY0IDYwLjIxODUgMTAyLjgwNCA1OS44Mjg1IDEwMi40MloiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPC9zdmc+" alt="" style={{ height: '50px', width: 'auto', display: 'block' }} />
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgzIiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTgzIDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjMuMDE1NiAyNC42NDlINDQuNTQ2M1Y1Mi43ODc0QzQxLjA1NjkgNTMuOTI1OCAzNy43NzE2IDU0LjcyMzkgMzQuNjkwNCA1NS4xODE3QzMxLjYwOTMgNTUuNjM5NiAyOC40NjAyIDU1Ljg2ODUgMjUuMjQyOSA1NS44Njg1QzE3LjA1MTMgNTUuODY4NSAxMC43OTYzIDUzLjQ2MTggNi40Nzc3NyA0OC42NDgzQzIuMTU5MjUgNDMuODM0OCAwIDM2LjkyMzkgMCAyNy45MTU3QzAgMTkuMTU0OSAyLjUwNTcyIDEyLjMyNDUgNy41MTcxOCA3LjQyNDM4QzEyLjUyODYgMi41MjQyOCAxOS40NzY2IDAuMDc0MjE4OCAyOC4zNjEyIDAuMDc0MjE4OEMzMy45Mjk1IDAuMDc0MjE4OCAzOS4yOTk4IDEuMTg3ODggNDQuNDcyMSAzLjQxNTE5TDQwLjY0ODUgMTIuNjIxNEMzNi42ODg4IDEwLjY0MTYgMzIuNTY4MyA5LjY1MTY3IDI4LjI4NjkgOS42NTE2N0MyMy4zMTI2IDkuNjUxNjcgMTkuMzI4MSAxMS4zMjIyIDE2LjMzMzYgMTQuNjYzMUMxMy4zMzkxIDE4LjAwNDEgMTEuODQxOSAyMi40OTU5IDExLjg0MTkgMjguMTM4NEMxMS44NDE5IDM0LjAyODQgMTMuMDQ4NCAzOC41MjY0IDE1LjQ2MTMgNDEuNjMyMkMxNy44NzQyIDQ0LjczODEgMjEuMzgyMiA0Ni4yOTEgMjUuOTg1NCA0Ni4yOTFDMjguMzg1OSA0Ni4yOTEgMzAuODIzNiA0Ni4wNDM1IDMzLjI5ODQgNDUuNTQ4NlYzNC4yMjY0SDIzLjAxNTZMMjMuMDE1NiAyNC42NDlaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik0xMy42ODEyIDcwLjQxNTRDMTEuMzU0NCA3MC40MTU0IDkuNTUyODcgNzEuMjg5NiA4LjI3NjQ5IDczLjAzOEM3LjAwMDExIDc0Ljc4NjMgNi4zNjE5NCA3Ny4yMjI4IDYuMzYxOTQgODAuMzQ3MkM2LjM2MTk0IDg2Ljg0ODggOC44MDE2NyA5MC4wOTk1IDEzLjY4MTIgOTAuMDk5NUMxNS43Mjg3IDkwLjA5OTUgMTguMjA4MyA4OS41ODc2IDIxLjEyIDg4LjU2MzlWOTMuNzQ5MkMxOC43MjY4IDk0Ljc0NjMgMTYuMDU0NCA5NS4yNDQ5IDEzLjEwMjggOTUuMjQ0OUM4Ljg2MTUxIDk1LjI0NDkgNS42MTczNyA5My45NTg2IDMuMzcwNDIgOTEuMzg1OUMxLjEyMzQ3IDg4LjgxMzIgMCA4NS4xMjAzIDAgODAuMzA3M0MwIDc3LjI3NTkgMC41NTE3NTkgNzQuNjIwMSAxLjY1NTI5IDcyLjMzOTlDMi43NTg4MiA3MC4wNTk3IDQuMzQ0MzIgNjguMzExNCA2LjQxMTc5IDY3LjA5NDhDOC40NzkyNSA2NS44NzgzIDEwLjkwMjQgNjUuMjcgMTMuNjgxMiA2NS4yN0MxNi41MTMxIDY1LjI3IDE5LjM1ODQgNjUuOTU0NyAyMi4yMTY5IDY3LjMyNDJMMjAuMjIyNiA3Mi4zNDk5QzE5LjEzMjMgNzEuODMxNCAxOC4wMzU1IDcxLjM3OTMgMTYuOTMxOSA3MC45OTM4QzE1LjgyODQgNzAuNjA4MiAxNC43NDQ4IDcwLjQxNTQgMTMuNjgxMiA3MC40MTU0WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE4Mi4wODMgMjcuOTE1N0MxODIuMDgzIDM2Ljg5OTIgMTc5Ljg1NiA0My44MDM5IDE3NS40MDEgNDguNjI5N0MxNzAuOTQ2IDUzLjQ1NTYgMTY0LjU2MiA1NS44Njg1IDE1Ni4yNDYgNTUuODY4NUMxNDcuOTMxIDU1Ljg2ODUgMTQxLjU0NiA1My40NTU2IDEzNy4wOTEgNDguNjI5N0MxMzIuNjM3IDQzLjgwMzkgMTMwLjQwOSAzNi44NzQ0IDEzMC40MDkgMjcuODQxNEMxMzAuNDA5IDE4LjgwODQgMTMyLjY0MyAxMS45MDk5IDEzNy4xMSA3LjE0NTk3QzE0MS41NzcgMi4zODE5OSAxNDcuOTggMCAxNTYuMzIgMEMxNjQuNjYgMCAxNzEuMDM5IDIuNDAwNTUgMTc1LjQ1NyA3LjIwMTY2QzE3OS44NzQgMTIuMDAyOCAxODIuMDgzIDE4LjkwNzQgMTgyLjA4MyAyNy45MTU3Wk0xNDIuNDc0IDI3LjkxNTdDMTQyLjQ3NCAzMy45Nzg5IDE0My42MjUgMzguNTQ0OSAxNDUuOTI2IDQxLjYxMzdDMTQ4LjIyOCA0NC42ODI0IDE1MS42NjggNDYuMjE2OCAxNTYuMjQ2IDQ2LjIxNjhDMTY1LjQyOCA0Ni4yMTY4IDE3MC4wMTggNDAuMTE2NCAxNzAuMDE4IDI3LjkxNTdDMTcwLjAxOCAxNS42OTAyIDE2NS40NTIgOS41Nzc0MiAxNTYuMzIgOS41Nzc0MkMxNTEuNzQyIDkuNTc3NDIgMTQ4LjI5IDExLjExOCAxNDUuOTYzIDE0LjE5OTFDMTQzLjYzNyAxNy4yODAyIDE0Mi40NzQgMjEuODUyNCAxNDIuNDc0IDI3LjkxNTdaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik05Ny4xNjQyIDk0Ljg0NjFIOTEuMDgxNFY2NS42ODg4SDEwNy43OTRWNzAuNzU0NUg5Ny4xNjQyVjc4LjI3MzFIMTA3LjA1NlY4My4zMTg4SDk3LjE2NDJWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xMTkuNTgxIDk0Ljg0NjFIMTEzLjQ5OFY2NS42ODg4SDEzMC4yMVY3MC43NTQ1SDExOS41ODFWNzguMjczMUgxMjkuNDcyVjgzLjMxODhIMTE5LjU4MVY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE1Mi43MDYgOTQuODQ2MUgxMzUuOTE0VjY1LjY4ODhIMTUyLjcwNlY3MC43NTQ1SDE0Mi4wOTdWNzcuMTU2M0gxNTEuOTY5VjgyLjIyMTlIMTQyLjA5N1Y4OS43NDA2SDE1Mi43MDZWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xNjQuOTcyIDc4LjYzMjFIMTY2Ljk2NkMxNjguOTIgNzguNjMyMSAxNzAuMzYzIDc4LjMwNjQgMTcxLjI5NCA3Ny42NTQ5QzE3Mi4yMjQgNzcuMDAzNCAxNzIuNjkgNzUuOTc5NiAxNzIuNjkgNzQuNTgzNkMxNzIuNjkgNzMuMjAwOCAxNzIuMjE0IDcyLjIxNyAxNzEuMjY0IDcxLjYzMkMxNzAuMzEzIDcxLjA0NjkgMTY4Ljg0MSA3MC43NTQ1IDE2Ni44NDYgNzAuNzU0NUgxNjQuOTcyVjc4LjYzMjFaTTE2NC45NzIgODMuNjU3OFY5NC44NDYxSDE1OC43ODlWNjUuNjg4OEgxNjcuMjg1QzE3MS4yNDcgNjUuNjg4OCAxNzQuMTc5IDY2LjQxMDEgMTc2LjA4IDY3Ljg1MjdDMTc3Ljk4MSA2OS4yOTUzIDE3OC45MzIgNzEuNDg1NyAxNzguOTMyIDc0LjQyNEMxNzguOTMyIDc2LjEzOTIgMTc4LjQ2IDc3LjY2NDggMTc3LjUxNiA3OS4wMDFDMTc2LjU3MiA4MC4zMzcyIDE3NS4yMzYgODEuMzg0MyAxNzMuNTA3IDgyLjE0MjFDMTc3Ljg5NSA4OC42OTY5IDE4MC43NTQgOTIuOTMxNSAxODIuMDgzIDk0Ljg0NjFIMTc1LjIyM0wxNjguMjYyIDgzLjY1NzhMMTY0Ljk3MiA4My42NTc4WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTU3LjQ2NDcgNTUuMTI2VjAuODUzNzZINjguOTcyNVY1NS4xMjZINTcuNDY0N1oiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPHBhdGggZD0iTTk0LjE0MTIgMjQuOTQ1OUg5Ny44NTM0QzEwMS40OTEgMjQuOTQ1OSAxMDQuMTc3IDI0LjMzOTYgMTA1LjkwOSAyMy4xMjY5QzEwNy42NDEgMjEuOTE0MyAxMDguNTA3IDIwLjAwODcgMTA4LjUwNyAxNy40MTAxQzEwOC41MDcgMTQuODM2MyAxMDcuNjIzIDEzLjAwNSAxMDUuODUzIDExLjkxNjFDMTA0LjA4NCAxMC44MjcyIDEwMS4zNDMgMTAuMjgyNyA5Ny42MzA3IDEwLjI4MjdIOTQuMTQxMlYyNC45NDU5Wk05NC4xNDEyIDM0LjMwMDZWNTUuMTI2SDgyLjYzMzRWMC44NTM3Nkg5OC40NDc0QzEwNS44MjIgMC44NTM3NiAxMTEuMjc5IDIuMTk2MzIgMTE0LjgxOCA0Ljg4MTQ3QzExOC4zNTcgNy41NjY2MiAxMjAuMTI3IDExLjY0MzkgMTIwLjEyNyAxNy4xMTMyQzEyMC4xMjcgMjAuMzA1NiAxMTkuMjQ4IDIzLjE0NTUgMTE3LjQ5MSAyNS42MzI2QzExNS43MzQgMjguMTE5OCAxMTMuMjQ3IDMwLjA2ODcgMTEwLjAyOSAzMS40NzkzQzExOC4xOTYgNDMuNjgwMSAxMjMuNTE3IDUxLjU2MjMgMTI1Ljk5MiA1NS4xMjZIMTEzLjIyMkwxMDAuMjY2IDM0LjMwMDZMOTQuMTQxMiAzNC4zMDA2WiIgZmlsbD0iIzEyODRENyI+PC9wYXRoPgo8cGF0aCBkPSJNNTEuMjE0NiA5NC44NDYxSDQ1LjA1MjFWODIuMjYxOEgzMy41MDQ5Vjk0Ljg0NjFIMjcuMzIyNFY2NS42ODg4SDMzLjUwNDlWNzcuMTE2NEg0NS4wNTIxVjY1LjY4ODhINTEuMjE0NlY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTg1LjAzODYgODAuMjI3NUM4NS4wMzg2IDg1LjA1MzggODMuODQyIDg4Ljc2MzMgODEuNDQ4OCA5MS4zNTZDNzkuMDU1NiA5My45NDg2IDc1LjYyNTMgOTUuMjQ0OSA3MS4xNTggOTUuMjQ0OUM2Ni42OTA3IDk1LjI0NDkgNjMuMjYwNCA5My45NDg2IDYwLjg2NzIgOTEuMzU2QzU4LjQ3NCA4OC43NjMzIDU3LjI3NzQgODUuMDQwNSA1Ny4yNzc0IDgwLjE4NzdDNTcuMjc3NCA3NS4zMzQ4IDU4LjQ3NzMgNzEuNjI4NiA2MC44NzcyIDY5LjA2OTJDNjMuMjc3IDY2LjUwOTggNjYuNzE3MyA2NS4yMzAxIDcxLjE5NzkgNjUuMjMwMUM3NS42Nzg1IDY1LjIzMDEgNzkuMTA1NCA2Ni41MTk4IDgxLjQ3ODcgNjkuMDk5MkM4My44NTE5IDcxLjY3ODUgODUuMDM4NiA3NS4zODc5IDg1LjAzODYgODAuMjI3NVpNNjMuNzU5IDgwLjIyNzVDNjMuNzU5IDgzLjQ4NSA2NC4zNzcyIDg1LjkzOCA2NS42MTM3IDg3LjU4NjZDNjYuODUwMiA4OS4yMzUzIDY4LjY5ODMgOTAuMDU5NiA3MS4xNTggOTAuMDU5NkM3Ni4wOTA2IDkwLjA1OTYgNzguNTU3IDg2Ljc4MjMgNzguNTU3IDgwLjIyNzVDNzguNTU3IDczLjY1OTUgNzYuMTAzOSA3MC4zNzU1IDcxLjE5NzkgNzAuMzc1NUM2OC43MzgyIDcwLjM3NTUgNjYuODgzNCA3MS4yMDMyIDY1LjYzMzcgNzIuODU4NUM2NC4zODM5IDc0LjUxMzggNjMuNzU5IDc2Ljk3MDEgNjMuNzU5IDgwLjIyNzVaIiBmaWxsPSJibGFjayI+PC9wYXRoPgo8L3N2Zz4=" alt="GiroChoffer" style={{ height: '38px', width: 'auto', display: 'block' }} />
+        </div>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button onClick={() => navigate('/entrar?modo=login')} style={{ padding: '11px 20px', background: 'transparent', border: 'none', color: colors.ink, fontWeight: 600, fontSize: '15px', cursor: 'pointer' }}>
+            Entrar
+          </button>
+          <Button onClick={goCad} style={{ padding: '11px 22px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 600, fontSize: '15px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+            Criar conta
+          </Button>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section style={{ maxWidth: '1160px', margin: '0 auto', padding: '56px 32px 64px', display: 'grid', gridTemplateColumns: '1.05fr .95fr', gap: '56px', alignItems: 'center' }}>
+        <div>
+          <div style={{ display: 'inline-block', background: colors.tintBlue, color: colors.tintBlueText, fontWeight: 700, fontSize: '13px', padding: '6px 14px', borderRadius: '999px', marginBottom: '22px' }}>
+            Marketplace de fretes
+          </div>
+          <h1 style={{ fontFamily: fonts.heading, fontWeight: 900, fontSize: '52px', lineHeight: 1.06, color: colors.inkStrong, margin: '0 0 20px', letterSpacing: '-1px' }}>
+            Sua carga conectada ao motorista certo.
+          </h1>
+          <p style={{ fontSize: '18px', lineHeight: 1.6, color: '#4A5462', margin: '0 0 32px', maxWidth: '520px' }}>
+            O GiroChoffer aproxima empresas que precisam transportar cargas e motoristas que buscam fretes — de forma simples, direta e sem intermediários.
+          </p>
+          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+            <Button onClick={() => navigate('/entrar?modo=cadastro&papel=empresa')} style={{ padding: '15px 30px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '16px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+              Sou empresa
+            </Button>
+            <Button onClick={() => navigate('/entrar?modo=cadastro&papel=motorista')} style={{ padding: '15px 30px', background: colors.navy, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '16px', cursor: 'pointer' }} hoverStyle={{ background: colors.navyHover }}>
+              Sou motorista
+            </Button>
+          </div>
+          <div style={{ display: 'flex', gap: '32px', marginTop: '40px' }}>
+            {stats.map(([v, l]) => (
+              <div key={l}>
+                <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '26px', color: colors.navy }}>{v}</div>
+                <div style={{ fontSize: '13px', color: colors.muted }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ aspectRatio: '4 / 3', borderRadius: '18px', background: 'repeating-linear-gradient(135deg,#E9EEF4 0 14px,#EFF3F7 14px 28px)', border: `1px solid ${colors.borderSoft}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: '13px', color: '#8A95A3', background: '#fff', padding: '8px 16px', borderRadius: '8px', border: `1px solid ${colors.borderSoft}` }}>
+            [ foto: caminhão na estrada ]
+          </div>
+          <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: '11px', color: '#A7B0BC' }}>1200 × 900</div>
+        </div>
+      </section>
+
+      {/* Como funciona */}
+      <section style={{ background: '#fff', borderTop: `1px solid ${colors.border}`, borderBottom: `1px solid ${colors.border}` }}>
+        <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '60px 32px' }}>
+          <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, textAlign: 'center', margin: '0 0 8px' }}>Como funciona</h2>
+          <p style={{ textAlign: 'center', color: colors.muted, fontSize: '16px', margin: '0 0 44px' }}>Do anúncio da carga ao frete concluído em quatro passos.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '24px' }}>
+            {steps.map((step) => (
+              <div key={step.n} style={{ textAlign: 'center', padding: '0 8px' }}>
+                <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: colors.tintBlue, color: colors.primary, fontFamily: fonts.heading, fontWeight: 800, fontSize: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{step.n}</div>
+                <div style={{ fontWeight: 700, fontSize: '16px', color: colors.ink, marginBottom: '6px' }}>{step.t}</div>
+                <div style={{ fontSize: '14px', color: colors.muted, lineHeight: 1.5 }}>{step.d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Para empresas / motoristas */}
+      <section style={{ maxWidth: '1160px', margin: '0 auto', padding: '64px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
+        <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '34px' }}>
+          <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '13px', letterSpacing: '.5px', color: colors.primary, textTransform: 'uppercase', marginBottom: '14px' }}>Para empresas</div>
+          <h3 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 18px' }}>Encontre quem transporta sua carga</h3>
+          {benefEmpresa.map((b) => (
+            <div key={b} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: colors.primary, marginTop: '7px', flex: 'none' }} />
+              <div style={{ fontSize: '15px', color: colors.text }}>{b}</div>
+            </div>
+          ))}
+          <Button onClick={() => navigate('/entrar?modo=cadastro&papel=empresa')} style={{ marginTop: '14px', padding: '13px 26px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+            Publicar uma carga
+          </Button>
+        </div>
+        <div style={{ background: colors.navy, borderRadius: '16px', padding: '34px', color: '#fff' }}>
+          <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '13px', letterSpacing: '.5px', color: '#7FC0EE', textTransform: 'uppercase', marginBottom: '14px' }}>Para motoristas</div>
+          <h3 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: '#fff', margin: '0 0 18px' }}>Frete na sua rota, sem complicação</h3>
+          {benefMotorista.map((b) => (
+            <div key={b} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '12px' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#7FC0EE', marginTop: '7px', flex: 'none' }} />
+              <div style={{ fontSize: '15px', color: '#D6E4F2' }}>{b}</div>
+            </div>
+          ))}
+          <button onClick={() => navigate('/entrar?modo=cadastro&papel=motorista')} style={{ marginTop: '14px', padding: '13px 26px', background: '#fff', color: colors.navy, border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}>
+            Buscar fretes
+          </button>
+        </div>
+      </section>
+
+      {/* Newsletter */}
+      <section style={{ background: '#fff', borderTop: `1px solid ${colors.border}` }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '56px 32px', textAlign: 'center' }}>
+          <h3 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 8px' }}>Receba novidades e fretes em alta</h3>
+          <p style={{ color: colors.muted, margin: '0 0 24px' }}>Cadastre seu e-mail e fique por dentro das novidades do GiroChoffer.</p>
+          <div style={{ display: 'flex', gap: '10px', maxWidth: '460px', margin: '0 auto' }}>
+            <input type="email" placeholder="seu@email.com.br" style={{ flex: 1, padding: '13px 16px', border: `1px solid ${colors.borderInput}`, borderRadius: '10px', fontSize: '15px', background: '#fff' }} />
+            <button onClick={() => showToast('Inscrição realizada! Você receberá nossas novidades.')} style={{ padding: '13px 24px', background: colors.navy, color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              Inscrever
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer style={{ background: colors.navyDeep, color: '#9AA7B6' }}>
+        <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '36px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI2IiBoZWlnaHQ9IjExNyIgdmlld0JveD0iMCAwIDEyNiAxMTciIGZpbGw9IiNmZmZmZmYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQuMDcyNyAwLjI4OTcwOUM1Ni4yNjM3IDEuNzEwNzEgNDcuMDM0NyA1LjQ4MzcxIDQwLjc2ODcgOS44MTU3QzM2LjI5MjcgMTIuOTA4NyAyOC44MDE3IDIwLjYwMDcgMjUuOTExNyAyNS4wNjc3QzIzLjU4OTcgMjguNjU3NyAyMC4yODc3IDM1LjM0MjcgMTkuNzI5NyAzNy41ODM3TDE5LjQwMzcgMzguODk0N0gzMS4zNDA3TDMzLjAyODcgMzUuOTE1N0MzMy45NTY3IDM0LjI3NzcgMzUuMjQxNyAzMi4yOTM3IDM1Ljg4MjcgMzEuNTA4N0MzNy4wMzA3IDMwLjEwMjcgMzcuMDYyNyAzMC4wOTQ3IDM4LjAzNjcgMzAuOTc2N0wzOS4wMjU3IDMxLjg3MTdMMzcuMzY4NyAzNC44MzI3QzM2LjQ1NzcgMzYuNDYxNyAzNS43MTI3IDM4LjA0MTcgMzUuNzEyNyAzOC4zNDQ3QzM1LjcxMjcgMzguNzMyNyAzNy41ODk3IDM4Ljg5NDcgNDIuMDg5NyAzOC44OTQ3SDQ4LjQ2NjdMNTIuMjE3NyAzNS4xNjE3QzYwLjMwOTcgMjcuMTExNyA3MC44ODk3IDI0LjU1ODcgODEuMDE2NyAyOC4yMTE3Qzg1LjE1NTcgMjkuNzAzNyA4NS44ODM3IDMwLjEyNjcgOTAuMTgzNyAzMy41MzY3TDkzLjQxNjcgMzYuMTAwN0w5OC40MTA3IDMzLjQ1NzdDMTA1Ljg5MSAyOS40OTg3IDExNC40NzcgMjQuNzM2NyAxMTUuNTEgMjMuOTc0N0MxMTYuMzg3IDIzLjMyNzcgMTE2LjMzNSAyMy4xODM3IDExNC4yMjIgMjAuNDM4N0MxMDkuMiAxMy45MTI3IDk5LjkwMjcgNi44Mjg3IDkyLjcxNDcgNC4wNTA3Qzg1LjUzOTcgMS4yNzg3IDgwLjQ0NjcgMC4yMzQ3MDQgNzMuMTI4NyAwLjAzNTcwMzVDNjkuNDU4NyAtMC4wNjMyOTY1IDY1LjM4MzcgMC4wNTA3MDg5IDY0LjA3MjcgMC4yODk3MDlaTTczLjg0MjcgMTIuODY4N0M3My44Mzk3IDEzLjI3MTcgNzMuODM2NyAxMy41NTc3IDczLjk1MzcgMTMuNzgyN0M3NC4yNjE3IDE0LjM3NzcgNzUuNDAzNyAxNC41NDA3IDc5LjU2MzcgMTUuMjczN0M4Mi4wNTM3IDE1LjcxMjcgODQuMjg3NyAxNi4xMTI3IDg0LjUyODcgMTYuMTYyN0M4NC43Njg3IDE2LjIxMzcgODUuMTY5NyAxNS42Mzk3IDg1LjQyMDcgMTQuODg3N0M4NS43NTg3IDEzLjg3NDcgODUuNzEzNyAxMy40MjE3IDg1LjI0NTcgMTMuMTMzN0M4NC42MTE3IDEyLjc0MTcgODAuOTY1NyAxMi4wNjI3IDc2LjM0NTcgMTEuNDc3N0w3My44NDM3IDExLjE1OTdWMTIuNjQ5N0M3My44NDM3IDEyLjcyNjcgNzMuODQyNyAxMi43OTk3IDczLjg0MjcgMTIuODY4N1pNNjUuMDI1NyAxMS43NjY3QzYwLjU5NjcgMTIuNzQ2NyA1NS43MzE3IDE0LjI3MzcgNTUuNzMxNyAxNC42ODM3QzU1LjczMTcgMTUuMDU5NyA1Ni41NjE3IDE2LjkwMTcgNTYuOTMyNyAxNy4zNTA3QzU2Ljk5NzcgMTcuNDI5NyA1OC45NTI3IDE2Ljk2NTcgNjEuMjc2NyAxNi4zMTk3QzYzLjYwMDcgMTUuNjczNyA2Ni4wOTI3IDE1LjAxNTcgNjYuODEyNyAxNC44NTY3QzY3LjkzNjcgMTQuNjA4NyA2OC4xMjM3IDE0LjMzMDcgNjguMTIzNyAxMi45MDg3QzY4LjEyMzcgMTEuMTE3NyA2OC4wNjM3IDExLjA5NDcgNjUuMDI1NyAxMS43NjY3Wk05MC45MTQ3IDE3LjIwOTdDOTAuNjE1NyAxNy44NjY3IDkwLjQ1OTcgMTguNDYyNyA5MC41Njc3IDE4LjUzNTdDOTAuNjc1NyAxOC42MDk3IDkyLjMzMDcgMTkuNjkwNyA5NC4yNDU3IDIwLjkzNzdMOTcuNzI2NyAyMy4yMDc3TDk4LjYxMDcgMjIuMTE2N0M5OS4wOTY3IDIxLjUxNjcgOTkuMzgwNyAyMC44NDI3IDk5LjI0MjcgMjAuNjE5N0M5OC44NTk3IDE5Ljk5ODcgOTIuNTc1NyAxNi4wMTU3IDkxLjk4MDcgMTYuMDE1N0M5MS42OTM3IDE2LjAxNTcgOTEuMjE0NyAxNi41NTI3IDkwLjkxNDcgMTcuMjA5N1pNNDcuNDIxNyAxOS4xMjQ3QzQ2LjEyODcgMjAuMDE4NyA0My45MTY3IDIxLjc0NzcgNDIuNTA1NyAyMi45NjY3TDM5LjkzODcgMjUuMTgxN0w0MS4wMDY3IDI2LjMxODdDNDIuMjIzNyAyNy42MTM3IDQyLjc3MTcgMjcuNzIyNyA0My41MjQ3IDI2LjgyMTdDNDQuNDI5NyAyNS43Mzg3IDQ5LjcxNzcgMjEuNDA3NyA1MC44NDg3IDIwLjgyNDdDNTEuODcxNyAyMC4yOTU3IDUxLjg4ODcgMjAuMjAwNyA1MS4xOTM3IDE4Ljg1NzdDNTAuNzkyNyAxOC4wODA3IDUwLjMwODcgMTcuNDU3NyA1MC4xMTg3IDE3LjQ3MTdDNDkuOTI4NyAxNy40ODY3IDQ4LjcxNTcgMTguMjMwNyA0Ny40MjE3IDE5LjEyNDdaTTUyLjYzMzcgNDEuMzk3N0M1MC4wMTE3IDQxLjYzMjcgMzkuMDg0NyA0MS45MTk3IDI4LjM1MDcgNDIuMDM3N0MxMS4xNjA3IDQyLjIyNjcgOC43MzE3MiA0Mi4zNDQ3IDcuOTc0NzIgNDMuMDMwN0M2Ljg0MTcyIDQ0LjA1NTcgNi44ODI3MiA0NS44MTE3IDguMDY3NzIgNDYuOTk3N0M4Ljk4NDcyIDQ3LjkxNDcgOS42NTY3MiA0Ny45NTA3IDI2LjA2ODcgNDcuOTUwN0M0NS4xMzU3IDQ3Ljk1MDcgNDUuNDU2NyA0OC4wMDE3IDQ3LjIzNDcgNTEuMzE2N0M0OC4yNzk3IDUzLjI2NDcgNDguMzIyNyA1NC4yNTA3IDQ3LjQzODcgNTUuOTU4N0M0NS45MjQ3IDU4Ljg4NjcgNDUuMjQ3NyA1OS4xMzA3IDM3LjkyNzcgNTkuMzg5N0wzMS4xODQ3IDU5LjYyODdWNjMuOTE3N0g4NS4wNDQ3TDg1LjE3MjcgNTMuMDE0N0M4NS4yNjI3IDQ1LjM3MzcgODUuMTM4NyA0MS45MTY3IDg0Ljc1NzcgNDEuNDU2N0M4NC4zMTU3IDQwLjkyNDcgODEuNjgwNyA0MC44MTc3IDcwLjgwNjcgNDAuODg1N0M2My40MzI3IDQwLjkzMjcgNTUuMjU0NyA0MS4xNjI3IDUyLjYzMzcgNDEuMzk3N1pNODguNDYwNyA0My4wMjU3Qzg4LjA2MzcgNDMuNDIyNyA4OC4wMzY3IDYzLjMyNTcgODguNDMxNyA2NC4zNTU3Qzg4LjY3NDcgNjQuOTg3NyA4OS42ODU3IDY1LjEwOTcgOTQuNjc5NyA2NS4xMDk3Qzk5LjkxNjcgNjUuMTA5NyAxMDAuNjAzIDY1LjIwMDcgMTAwLjM0OCA2NS44NjM3QzEwMC4xODkgNjYuMjc4NyAxMDAuMDU5IDY2LjcwNzcgMTAwLjA1OSA2Ni44MTY3QzEwMC4wNTkgNjYuOTI2NyA5Mi4xMTY3IDY3LjAxNTcgODIuNDA4NyA2Ny4wMTU3SDY0Ljc1ODdMNjUuNzc5NyA2OC4zOTY3QzY2LjM0MDcgNjkuMTU1NyA2Ni45MTE3IDcwLjc2NjcgNjcuMDQ4NyA3MS45NzY3TDY3LjI5NTcgNzQuMTc3N0w4NC4yNjc3IDc0LjA1MjdMMTAxLjIzOSA3My45Mjc3TDEwMS41NjggNzEuNjIyN0MxMDIuNTk3IDY0LjQzMjcgMTExLjAwMSA2MS42MjI3IDExNS44NzcgNjYuODM4N0MxMTcuMzc1IDY4LjQ0MDcgMTE4LjE3MSA3MC4zMzE3IDExOC4xNzEgNzIuMjg5N0MxMTguMTcxIDczLjY2MTcgMTE4LjIyMSA3My42ODg3IDEyMC42OTcgNzMuNjg4N0MxMjIuMDg3IDczLjY4ODcgMTIzLjQ4MSA3My40MzE3IDEyMy43OTYgNzMuMTE2N0MxMjQuNjI3IDcyLjI4NTcgMTI0LjUyMyA2OC4yMTU3IDEyMy42NTMgNjcuNDkyN0MxMjMuMjM5IDY3LjE0OTcgMTIyLjkyNiA2Ni4wNjg3IDEyMi45MDkgNjQuOTMyN0MxMjIuODYgNjEuNTEwNyAxMjIuMTQzIDU4LjMwMTcgMTIxLjI4OCA1Ny42NzY3QzEyMC44MzYgNTcuMzQ1NyAxMTcuNzUxIDU2LjQxOTcgMTE0LjQzMyA1NS42MTg3QzEwOS43MDcgNTQuNDc3NyAxMDguMjQ1IDUzLjkzMjcgMTA3LjY4NSA1My4xMDI3QzEwMi44OTMgNDUuOTk3NyAxMDEuMTIgNDMuODYyNyA5OS41Njk3IDQzLjMyOTdDOTcuODE2NyA0Mi43Mjg3IDg4Ljk5OTcgNDIuNDg1NyA4OC40NjA3IDQzLjAyNTdaTTEwMS44NTYgNDkuNzM3N0w5OS4zNjE3IDQ2LjA0MzdIOTIuOTA5N1Y1NC4xNDY3SDk4LjYyODdDMTAxLjc3NSA1NC4xNDY3IDEwNC4zNDkgNTMuOTg1NyAxMDQuMzQ5IDUzLjc4OTdDMTA0LjM0OSA1My41OTI3IDEwMy4yMjcgNTEuNzY5NyAxMDEuODU2IDQ5LjczNzdaTTAuNzUzNzI3IDUyLjE1ODdDLTAuMjgxMjczIDUzLjMwMjcgLTAuMjQ3MjY1IDU0Ljc2MDcgMC44MzY3MzUgNTUuNzQwN0MxLjYxOTczIDU2LjQ0OTcgMy44MjE3MyA1Ni41Mjk3IDIyLjQ4OTcgNTYuNTI5N0gyMy4zNzk3QzQwLjYyNzcgNTYuNTMwNyA0My45Njk3IDU2LjUzMDcgNDQuNjE1NyA1NS4yMTA3QzQ0Ljc2OTcgNTQuODk0NyA0NC43Njk3IDU0LjUwMDcgNDQuNzY4NyA1NC4wMTM3QzQ0Ljc2ODcgNTMuOTc4NyA0NC43Njg3IDUzLjk0MzcgNDQuNzY4NyA1My45MDg3QzQ0Ljc2ODcgNTMuODcxNyA0NC43Njg3IDUzLjgzNTcgNDQuNzY4NyA1My44MDA3QzQ0Ljc2OTcgNTMuMzE0NyA0NC43Njk3IDUyLjkyMjcgNDQuNjE1NyA1Mi42MDY3QzQzLjk3MDcgNTEuMjg2NyA0MC42MjM3IDUxLjI4NjcgMjMuMzE3NyA1MS4yODY3SDIyLjQwNjdDMi43OTg3MiA1MS4yODY3IDEuNDk0NzMgNTEuMzM5NyAwLjc1MzcyNyA1Mi4xNTg3Wk0xNi4zODE3IDYyLjM2ODdDMTYuNTQ5NyA2NC4wMDc3IDE2LjgwMzcgNjYuMTUyNyAxNi45NDY3IDY3LjEzNTdMMTcuMjA3NyA2OC45MjI3SDIzLjE3NDdDMjguNjYxNyA2OC45MjI3IDI5LjExNTcgNjguODU1NyAyOC44MjA3IDY4LjA4ODdDMjguNjQzNyA2Ny42Mjk3IDI4LjI3MDcgNjUuNDg0NyAyNy45OTE3IDYzLjMyMTdMMjcuNDgyNyA1OS4zODk3SDE2LjA3NjdMMTYuMzgxNyA2Mi4zNjg3Wk0xMTUuMTEzIDYyLjA3OTdDMTE0Ljk0OCA2Mi41MTA3IDExNC44NzEgNjIuOTAxNyAxMTQuOTQzIDYyLjk0ODdDMTE1LjAxNSA2Mi45OTU3IDExNS43NSA2My41MDE3IDExNi41NzYgNjQuMDcyN0MxMTcuNDAzIDY0LjY0MjcgMTE4Ljc0NCA2NS4xMDk3IDExOS41NTYgNjUuMTA5N0MxMjAuODU0IDY1LjEwOTcgMTIxLjAzMSA2NC45NDk3IDEyMS4wMzEgNjMuNzc0N0MxMjEuMDMxIDYxLjg5MDcgMTIwLjIyIDYxLjI5NjcgMTE3LjY1IDYxLjI5NjdDMTE2LjAxNSA2MS4yOTY3IDExNS4zMzIgNjEuNTA2NyAxMTUuMTEzIDYyLjA3OTdaTTMxLjg5OTcgNjcuNjc5N0MzMS44OTk3IDY5LjIxMDcgMzYuMzQ2NyA2OS40NTU3IDM3LjE0MjcgNjcuOTY5N0MzNy42MjY3IDY3LjA2NTcgMzcuNTA0NyA2Ny4wMTU3IDM0Ljc3NTcgNjcuMDE1N0MzMi42MzQ3IDY3LjAxNTcgMzEuODk5NyA2Ny4xODU3IDMxLjg5OTcgNjcuNjc5N1pNNTAuMjkzNyA2OC4yMDc3QzUxLjI1NDcgNjkuNjczNyA1MS40NTk3IDY5LjY3MjcgNTIuNTM2NyA2OC4xOTI3TDUzLjM5MjcgNjcuMDE1N0g0OS41MTM3TDUwLjI5MzcgNjguMjA3N1pNMTA2LjYxOSA2Ny43NjE3QzEwMy44ODYgNjkuMjQ0NyAxMDMuMTE1IDcyLjkwMTcgMTA0Ljk1OSA3NS42Mzc3QzEwOC40MjQgODAuNzc4NyAxMTUuMzExIDc4LjUxNDcgMTE1LjMxMSA3Mi4yMzU3QzExNS4zMTEgNzAuNjIxNyAxMTUuMDEzIDY5Ljk1ODcgMTEzLjY5MSA2OC42MzY3QzExMi4zMzQgNjcuMjgwNyAxMTEuNzMyIDY3LjAxOTcgMTA5Ljk5NyA2Ny4wMzQ3QzEwOC44NTYgNjcuMDQ1NyAxMDcuMzM2IDY3LjM3MjcgMTA2LjYxOSA2Ny43NjE3Wk01NS45MzE3IDY4LjM5MTdDNTQuMDU3NyA2OS41MzQ3IDUyLjcwMTcgNzIuMzA4NyA1My4xMDk3IDc0LjE2NTdDNTQuMTcyNyA3OS4wMDI3IDU5Ljg5OTcgODAuMjg4NyA2My4xNTQ3IDc2LjQxOTdDNjQuMjQ0NyA3NS4xMjQ3IDY0LjM4MjcgNzQuNjA0NyA2NC4xODQ3IDcyLjU0NzdDNjMuNzY2NyA2OC4xOTU3IDU5LjY1MDcgNjYuMTIzNyA1NS45MzE3IDY4LjM5MTdaTTQwLjgzOTcgNjguMzI5N0MzOS40NTI3IDY5LjE4ODcgMzguMDk1NyA3MS41NDU3IDM4LjA5NTcgNzMuMDk0N0MzOC4wOTU3IDc0LjM4NjcgNDAuMDMwNyA3Ny4xMjg3IDQxLjQ0NjcgNzcuODQ1N0M0NC43OTE3IDc5LjUzODcgNDguODY2NyA3Ny4yMjU3IDQ5LjM4ODcgNzMuMzM3N0M0OS42Mzk3IDcxLjQ2MTcgNDkuNTIyNyA3MS4xODE3IDQ3Ljc0NjcgNjkuNDA0N0M0Ni4xNjQ3IDY3LjgyMzcgNDUuNTE0NyA2Ny40OTQ3IDQzLjk5MDcgNjcuNTA1N0M0Mi45NzY3IDY3LjUxMjcgNDEuNTU4NyA2Ny44ODI3IDQwLjgzOTcgNjguMzI5N1pNNS40Nzk3MiA3Mi41MzE3QzQuNTM3NzIgNzMuNDczNyA0LjUzNjczIDc0LjE1MTcgNS40NzM3MyA3NS40ODk3QzYuMjEyNzMgNzYuNTQ1NyA2LjI1MzcyIDc2LjU0ODcgMjEuMjM0NyA3Ni41NDg3QzM1LjMwOTcgNzYuNTQ4NyAzNi4yMzg3IDc2LjQ5NjcgMzYuMDE4NyA3NS43MTQ3QzM1Ljg4OTcgNzUuMjU2NyAzNS42NDM3IDc0LjE4MzcgMzUuNDcxNyA3My4zMzE3TDM1LjE1OTcgNzEuNzgyN0gyMC42OTQ3QzguMTc5NzMgNzEuNzgyNyA2LjEyNzcyIDcxLjg4MzcgNS40Nzk3MiA3Mi41MzE3WiIgZmlsbD0iI2ZmZmZmZiI+PC9wYXRoPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTExMi4xNzkgODMuMTQ4N0MxMTQuOTAyIDgyLjc3NTcgMTE3Ljg4OSA4MS4yNTQ3IDExOC44ODUgNzkuNzMzN0MxMTkuNTY3IDc4LjY5NDcgMTIwLjAwNSA3OC41NDg3IDEyMi40NiA3OC41NDg3SDEyNS4yNThMMTI0LjI3MyA4MS4wNTE3QzExNi4yNjMgMTAxLjM5MyA5Ny41OTA1IDExNS4xMTkgNzYuMDcxNSAxMTYuNDgzQzU0LjQ1MTUgMTE3Ljg1MiAzMy4wNjU1IDEwNS4wODUgMjMuNDc0NSA4NS4wODE3TDIxLjgyODYgODEuNjQ2N0wyNy44ODc1IDgxLjUxMzdDMzEuMjE5NSA4MS40Mzk3IDM0LjE4ODUgODEuNDcxNyAzNC40ODU1IDgxLjU4NTdDMzQuNzgxNSA4MS42OTk3IDM1LjkyODUgODMuMzE0NyAzNy4wMzQ1IDg1LjE3NTdDMzguMTM5NSA4Ny4wMzU3IDM5LjIyNDUgODguNTU4NyAzOS40NDY1IDg4LjU1ODdDMzkuNjY3NSA4OC41NTg3IDQwLjM0NzYgODguMTU0NyA0MC45NTU2IDg3LjY2MTdMNDIuMDYzNiA4Ni43NjU3TDQwLjg1NjYgODQuOTIwN0MzOS42Nzg2IDgzLjEyMDcgMzguODY3NSA4MS40MDg3IDM5LjE5MzUgODEuNDA4N0MzOS4yODM1IDgxLjQwODcgNDAuMzg0NSA4MS44NjM3IDQxLjY0MDUgODIuNDE5N0M0NC41OTU1IDgzLjcyNjcgNDcuODUzNSA4My40MDQ3IDUwLjkxMDUgODEuNTAzN0w1My4wOTI1IDgwLjE0NzdMNTUuMDA2NSA4Mi4xMzE3QzU4LjY3NDUgODUuOTMyNyA2NS4yMTA1IDg4Ljg1NDcgNzEuMTA1NSA4OS4zMjk3Qzc3LjgwNTUgODkuODY3NyA4NS4yMzQ1IDg3LjMzMDcgOTAuMTczNSA4Mi44MTY3TDkyLjc1MjUgODAuNDU5N0w5NC43NzM1IDgxLjE3MjdDOTUuODg0NSA4MS41NjQ3IDk3LjQ1MDUgODEuODg1NyA5OC4yNTI1IDgxLjg4NTdDOTkuOTUzNSA4MS44ODU3IDEwMy44MjUgODAuMTM1NyAxMDMuODI1IDc5LjM2NjdDMTAzLjgyNSA3OS4wNzU3IDEwNC41NSA3OS41NDE3IDEwNS40MzcgODAuNDAxN0wxMDcuMDUgODEuOTY0N0wxMDUuOTA3IDg0LjAxMDdMMTA0Ljc2MyA4Ni4wNTU3TDEwNi4wMjMgODYuODgwN0MxMDcuMjYgODcuNjkyNyAxMDcuMzAyIDg3LjY4MjcgMTA4LjM5OCA4Ni4zNDU3QzEwOS4wMTIgODUuNTk1NyAxMDkuNjM0IDg0LjYzNjcgMTA5Ljc4IDg0LjIxMjdDMTA5Ljk0NyA4My43MjU3IDExMC44MzEgODMuMzMzNyAxMTIuMTc5IDgzLjE0ODdaTTkzLjYzNDUgOTcuNzI1N0M5Mi45NTI1IDk2LjQwNzcgOTIuOTU0NSA5Ni40MDU3IDk3LjA3NzUgOTMuMDM2N0wxMDEuMjAyIDg5LjY2NzdMMTAyLjUxNCA5MC41NzQ3QzEwMy4yMzUgOTEuMDc0NyAxMDMuODI1IDkxLjY0MjcgMTAzLjgyNSA5MS44Mzc3QzEwMy44MjUgOTIuNjI1NyA5NS43MjI1IDk5LjA0NDcgOTQuNzI3NSA5OS4wNDQ3Qzk0LjUwMTUgOTkuMDQ0NyA5NC4wMDk1IDk4LjQ1MDcgOTMuNjM0NSA5Ny43MjU3Wk00NC4wNTg1IDkzLjg1ODdDNDMuMTc2NSA5Mi44ODQ3IDQzLjE4MDUgOTIuODUxNyA0NC4yOTg1IDkxLjkyMDdDNDQuOTIzNSA5MS4zOTk3IDQ1LjU0MzUgOTAuOTY3NyA0NS42NzQ1IDkwLjk2MTdDNDUuODA1NSA5MC45NTU3IDQ2Ljg3NzUgOTEuNzIyNyA0OC4wNTc1IDkyLjY2NjdDNDkuMjM3NSA5My42MDk3IDUxLjMzNTUgOTUuMTEwNyA1Mi43MTk1IDk2LjAwMTdDNTQuOTY1NSA5Ny40NDY3IDU1LjE4MDUgOTcuNzI2NyA1NC43MTQ1IDk4LjU5NzdDNTQuNDI2NSA5OS4xMzU3IDUzLjg4NjUgOTkuNjkxNyA1My41MTQ1IDk5LjgzNDdDNTIuODAxNSAxMDAuMTA5IDQ1LjU5MDUgOTUuNTUxNyA0NC4wNTg1IDkzLjg1ODdaTTc5LjM5NjUgMTAwLjk5NkM4MC4zNzk1IDEwMC43MzggODIuMzYzNSAxMDAuMjEzIDgzLjgwNTUgOTkuODI4N0M4Ny43NDc1IDk4Ljc3OTcgODguMjg4NSA5OC44NDU3IDg4Ljg5NDUgMTAwLjQ1NUM4OS40Mjc1IDEwMS44NjUgODkuNDI1NSAxMDEuODY1IDg2Ljk3NDUgMTAyLjU1NkM4My43OTg1IDEwMy40NTEgNzkuNzIwNSAxMDQuMjg4IDc4LjUzODUgMTA0LjI4OEM3Ny44MjY1IDEwNC4yODggNzcuNjA5NSAxMDMuOTU4IDc3LjYwOTUgMTAyLjg3NkM3Ny42MDk1IDEwMS42NDYgNzcuODM4NSAxMDEuNDA0IDc5LjM5NjUgMTAwLjk5NlpNNTkuODI4NSAxMDIuNDJDNTkuNjE2NSAxMDIuMjEyIDU5LjU4NjUgMTAxLjQ3NSA1OS43NjA1IDEwMC43ODJDNTkuOTM0NSAxMDAuMDg4IDYwLjEyODUgOTkuNTIwNyA2MC4xOTE1IDk5LjUyMDdDNjAuMjU0NSA5OS41MjA3IDYyLjMyMTUgOTkuOTQ2NyA2NC43ODY1IDEwMC40NjdDNjcuMjUxNSAxMDAuOTg3IDY5Ljc1MDUgMTAxLjQxNiA3MC4zNDA1IDEwMS40MkM3MS4yNDY1IDEwMS40MjcgNzEuNDEyNSAxMDEuNjg2IDcxLjQxMjUgMTAzLjA5NkM3MS40MTI1IDEwNC4zMDQgNzEuMjAzNSAxMDQuNzY0IDcwLjY1MzUgMTA0Ljc2NEM2OS4yNjk1IDEwNC43NjQgNjAuMjE4NSAxMDIuODA0IDU5LjgyODUgMTAyLjQyWiIgZmlsbD0iI2ZmZmZmZiI+PC9wYXRoPgo8L3N2Zz4=" alt="" style={{ height: '28px', width: 'auto', display: 'block' }} />
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgzIiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTgzIDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjMuMDE1NiAyNC42NDlINDQuNTQ2M1Y1Mi43ODc0QzQxLjA1NjkgNTMuOTI1OCAzNy43NzE2IDU0LjcyMzkgMzQuNjkwNCA1NS4xODE3QzMxLjYwOTMgNTUuNjM5NiAyOC40NjAyIDU1Ljg2ODUgMjUuMjQyOSA1NS44Njg1QzE3LjA1MTMgNTUuODY4NSAxMC43OTYzIDUzLjQ2MTggNi40Nzc3NyA0OC42NDgzQzIuMTU5MjUgNDMuODM0OCAwIDM2LjkyMzkgMCAyNy45MTU3QzAgMTkuMTU0OSAyLjUwNTcyIDEyLjMyNDUgNy41MTcxOCA3LjQyNDM4QzEyLjUyODYgMi41MjQyOCAxOS40NzY2IDAuMDc0MjE4OCAyOC4zNjEyIDAuMDc0MjE4OEMzMy45Mjk1IDAuMDc0MjE4OCAzOS4yOTk4IDEuMTg3ODggNDQuNDcyMSAzLjQxNTE5TDQwLjY0ODUgMTIuNjIxNEMzNi42ODg4IDEwLjY0MTYgMzIuNTY4MyA5LjY1MTY3IDI4LjI4NjkgOS42NTE2N0MyMy4zMTI2IDkuNjUxNjcgMTkuMzI4MSAxMS4zMjIyIDE2LjMzMzYgMTQuNjYzMUMxMy4zMzkxIDE4LjAwNDEgMTEuODQxOSAyMi40OTU5IDExLjg0MTkgMjguMTM4NEMxMS44NDE5IDM0LjAyODQgMTMuMDQ4NCAzOC41MjY0IDE1LjQ2MTMgNDEuNjMyMkMxNy44NzQyIDQ0LjczODEgMjEuMzgyMiA0Ni4yOTEgMjUuOTg1NCA0Ni4yOTFDMjguMzg1OSA0Ni4yOTEgMzAuODIzNiA0Ni4wNDM1IDMzLjI5ODQgNDUuNTQ4NlYzNC4yMjY0SDIzLjAxNTZMMjMuMDE1NiAyNC42NDlaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik0xMy42ODEyIDcwLjQxNTRDMTEuMzU0NCA3MC40MTU0IDkuNTUyODcgNzEuMjg5NiA4LjI3NjQ5IDczLjAzOEM3LjAwMDExIDc0Ljc4NjMgNi4zNjE5NCA3Ny4yMjI4IDYuMzYxOTQgODAuMzQ3MkM2LjM2MTk0IDg2Ljg0ODggOC44MDE2NyA5MC4wOTk1IDEzLjY4MTIgOTAuMDk5NUMxNS43Mjg3IDkwLjA5OTUgMTguMjA4MyA4OS41ODc2IDIxLjEyIDg4LjU2MzlWOTMuNzQ5MkMxOC43MjY4IDk0Ljc0NjMgMTYuMDU0NCA5NS4yNDQ5IDEzLjEwMjggOTUuMjQ0OUM4Ljg2MTUxIDk1LjI0NDkgNS42MTczNyA5My45NTg2IDMuMzcwNDIgOTEuMzg1OUMxLjEyMzQ3IDg4LjgxMzIgMCA4NS4xMjAzIDAgODAuMzA3M0MwIDc3LjI3NTkgMC41NTE3NTkgNzQuNjIwMSAxLjY1NTI5IDcyLjMzOTlDMi43NTg4MiA3MC4wNTk3IDQuMzQ0MzIgNjguMzExNCA2LjQxMTc5IDY3LjA5NDhDOC40NzkyNSA2NS44NzgzIDEwLjkwMjQgNjUuMjcgMTMuNjgxMiA2NS4yN0MxNi41MTMxIDY1LjI3IDE5LjM1ODQgNjUuOTU0NyAyMi4yMTY5IDY3LjMyNDJMMjAuMjIyNiA3Mi4zNDk5QzE5LjEzMjMgNzEuODMxNCAxOC4wMzU1IDcxLjM3OTMgMTYuOTMxOSA3MC45OTM4QzE1LjgyODQgNzAuNjA4MiAxNC43NDQ4IDcwLjQxNTQgMTMuNjgxMiA3MC40MTU0WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE4Mi4wODMgMjcuOTE1N0MxODIuMDgzIDM2Ljg5OTIgMTc5Ljg1NiA0My44MDM5IDE3NS40MDEgNDguNjI5N0MxNzAuOTQ2IDUzLjQ1NTYgMTY0LjU2MiA1NS44Njg1IDE1Ni4yNDYgNTUuODY4NUMxNDcuOTMxIDU1Ljg2ODUgMTQxLjU0NiA1My40NTU2IDEzNy4wOTEgNDguNjI5N0MxMzIuNjM3IDQzLjgwMzkgMTMwLjQwOSAzNi44NzQ0IDEzMC40MDkgMjcuODQxNEMxMzAuNDA5IDE4LjgwODQgMTMyLjY0MyAxMS45MDk5IDEzNy4xMSA3LjE0NTk3QzE0MS41NzcgMi4zODE5OSAxNDcuOTggMCAxNTYuMzIgMEMxNjQuNjYgMCAxNzEuMDM5IDIuNDAwNTUgMTc1LjQ1NyA3LjIwMTY2QzE3OS44NzQgMTIuMDAyOCAxODIuMDgzIDE4LjkwNzQgMTgyLjA4MyAyNy45MTU3Wk0xNDIuNDc0IDI3LjkxNTdDMTQyLjQ3NCAzMy45Nzg5IDE0My42MjUgMzguNTQ0OSAxNDUuOTI2IDQxLjYxMzdDMTQ4LjIyOCA0NC42ODI0IDE1MS42NjggNDYuMjE2OCAxNTYuMjQ2IDQ2LjIxNjhDMTY1LjQyOCA0Ni4yMTY4IDE3MC4wMTggNDAuMTE2NCAxNzAuMDE4IDI3LjkxNTdDMTcwLjAxOCAxNS42OTAyIDE2NS40NTIgOS41Nzc0MiAxNTYuMzIgOS41Nzc0MkMxNTEuNzQyIDkuNTc3NDIgMTQ4LjI5IDExLjExOCAxNDUuOTYzIDE0LjE5OTFDMTQzLjYzNyAxNy4yODAyIDE0Mi40NzQgMjEuODUyNCAxNDIuNDc0IDI3LjkxNTdaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik05Ny4xNjQyIDk0Ljg0NjFIOTEuMDgxNFY2NS42ODg4SDEwNy43OTRWNzAuNzU0NUg5Ny4xNjQyVjc4LjI3MzFIMTA3LjA1NlY4My4zMTg4SDk3LjE2NDJWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xMTkuNTgxIDk0Ljg0NjFIMTEzLjQ5OFY2NS42ODg4SDEzMC4yMVY3MC43NTQ1SDExOS41ODFWNzguMjczMUgxMjkuNDcyVjgzLjMxODhIMTE5LjU4MVY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE1Mi43MDYgOTQuODQ2MUgxMzUuOTE0VjY1LjY4ODhIMTUyLjcwNlY3MC43NTQ1SDE0Mi4wOTdWNzcuMTU2M0gxNTEuOTY5VjgyLjIyMTlIMTQyLjA5N1Y4OS43NDA2SDE1Mi43MDZWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xNjQuOTcyIDc4LjYzMjFIMTY2Ljk2NkMxNjguOTIgNzguNjMyMSAxNzAuMzYzIDc4LjMwNjQgMTcxLjI5NCA3Ny42NTQ5QzE3Mi4yMjQgNzcuMDAzNCAxNzIuNjkgNzUuOTc5NiAxNzIuNjkgNzQuNTgzNkMxNzIuNjkgNzMuMjAwOCAxNzIuMjE0IDcyLjIxNyAxNzEuMjY0IDcxLjYzMkMxNzAuMzEzIDcxLjA0NjkgMTY4Ljg0MSA3MC43NTQ1IDE2Ni44NDYgNzAuNzU0NUgxNjQuOTcyVjc4LjYzMjFaTTE2NC45NzIgODMuNjU3OFY5NC44NDYxSDE1OC43ODlWNjUuNjg4OEgxNjcuMjg1QzE3MS4yNDcgNjUuNjg4OCAxNzQuMTc5IDY2LjQxMDEgMTc2LjA4IDY3Ljg1MjdDMTc3Ljk4MSA2OS4yOTUzIDE3OC45MzIgNzEuNDg1NyAxNzguOTMyIDc0LjQyNEMxNzguOTMyIDc2LjEzOTIgMTc4LjQ2IDc3LjY2NDggMTc3LjUxNiA3OS4wMDFDMTc2LjU3MiA4MC4zMzcyIDE3NS4yMzYgODEuMzg0MyAxNzMuNTA3IDgyLjE0MjFDMTc3Ljg5NSA4OC42OTY5IDE4MC43NTQgOTIuOTMxNSAxODIuMDgzIDk0Ljg0NjFIMTc1LjIyM0wxNjguMjYyIDgzLjY1NzhMMTY0Ljk3MiA4My42NTc4WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTU3LjQ2NDcgNTUuMTI2VjAuODUzNzZINjguOTcyNVY1NS4xMjZINTcuNDY0N1oiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPHBhdGggZD0iTTk0LjE0MTIgMjQuOTQ1OUg5Ny44NTM0QzEwMS40OTEgMjQuOTQ1OSAxMDQuMTc3IDI0LjMzOTYgMTA1LjkwOSAyMy4xMjY5QzEwNy42NDEgMjEuOTE0MyAxMDguNTA3IDIwLjAwODcgMTA4LjUwNyAxNy40MTAxQzEwOC41MDcgMTQuODM2MyAxMDcuNjIzIDEzLjAwNSAxMDUuODUzIDExLjkxNjFDMTA0LjA4NCAxMC44MjcyIDEwMS4zNDMgMTAuMjgyNyA5Ny42MzA3IDEwLjI4MjdIOTQuMTQxMlYyNC45NDU5Wk05NC4xNDEyIDM0LjMwMDZWNTUuMTI2SDgyLjYzMzRWMC44NTM3Nkg5OC40NDc0QzEwNS44MjIgMC44NTM3NiAxMTEuMjc5IDIuMTk2MzIgMTE0LjgxOCA0Ljg4MTQ3QzExOC4zNTcgNy41NjY2MiAxMjAuMTI3IDExLjY0MzkgMTIwLjEyNyAxNy4xMTMyQzEyMC4xMjcgMjAuMzA1NiAxMTkuMjQ4IDIzLjE0NTUgMTE3LjQ5MSAyNS42MzI2QzExNS43MzQgMjguMTE5OCAxMTMuMjQ3IDMwLjA2ODcgMTEwLjAyOSAzMS40NzkzQzExOC4xOTYgNDMuNjgwMSAxMjMuNTE3IDUxLjU2MjMgMTI1Ljk5MiA1NS4xMjZIMTEzLjIyMkwxMDAuMjY2IDM0LjMwMDZMOTQuMTQxMiAzNC4zMDA2WiIgZmlsbD0iIzEyODRENyI+PC9wYXRoPgo8cGF0aCBkPSJNNTEuMjE0NiA5NC44NDYxSDQ1LjA1MjFWODIuMjYxOEgzMy41MDQ5Vjk0Ljg0NjFIMjcuMzIyNFY2NS42ODg4SDMzLjUwNDlWNzcuMTE2NEg0NS4wNTIxVjY1LjY4ODhINTEuMjE0NlY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTg1LjAzODYgODAuMjI3NUM4NS4wMzg2IDg1LjA1MzggODMuODQyIDg4Ljc2MzMgODEuNDQ4OCA5MS4zNTZDNzkuMDU1NiA5My45NDg2IDc1LjYyNTMgOTUuMjQ0OSA3MS4xNTggOTUuMjQ0OUM2Ni42OTA3IDk1LjI0NDkgNjMuMjYwNCA5My45NDg2IDYwLjg2NzIgOTEuMzU2QzU4LjQ3NCA4OC43NjMzIDU3LjI3NzQgODUuMDQwNSA1Ny4yNzc0IDgwLjE4NzdDNTcuMjc3NCA3NS4zMzQ4IDU4LjQ3NzMgNzEuNjI4NiA2MC44NzcyIDY5LjA2OTJDNjMuMjc3IDY2LjUwOTggNjYuNzE3MyA2NS4yMzAxIDcxLjE5NzkgNjUuMjMwMUM3NS42Nzg1IDY1LjIzMDEgNzkuMTA1NCA2Ni41MTk4IDgxLjQ3ODcgNjkuMDk5MkM4My44NTE5IDcxLjY3ODUgODUuMDM4NiA3NS4zODc5IDg1LjAzODYgODAuMjI3NVpNNjMuNzU5IDgwLjIyNzVDNjMuNzU5IDgzLjQ4NSA2NC4zNzcyIDg1LjkzOCA2NS42MTM3IDg3LjU4NjZDNjYuODUwMiA4OS4yMzUzIDY4LjY5ODMgOTAuMDU5NiA3MS4xNTggOTAuMDU5NkM3Ni4wOTA2IDkwLjA1OTYgNzguNTU3IDg2Ljc4MjMgNzguNTU3IDgwLjIyNzVDNzguNTU3IDczLjY1OTUgNzYuMTAzOSA3MC4zNzU1IDcxLjE5NzkgNzAuMzc1NUM2OC43MzgyIDcwLjM3NTUgNjYuODgzNCA3MS4yMDMyIDY1LjYzMzcgNzIuODU4NUM2NC4zODM5IDc0LjUxMzggNjMuNzU5IDc2Ljk3MDEgNjMuNzU5IDgwLjIyNzVaIiBmaWxsPSJibGFjayI+PC9wYXRoPgo8L3N2Zz4=" alt="GiroChoffer" style={{ height: '20px', width: 'auto', display: 'block', filter: 'brightness(0) invert(1)' }} />
+          </div>
+          <div style={{ fontSize: '13px' }}>© {year} GiroChoffer · Marketplace de fretes · Termos de uso · Privacidade</div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+
+// ===== src/pages/Auth.jsx =====
+
+function Auth() {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const { setRole } = useApp();
+
+  const [mode, setMode] = useState(params.get('modo') === 'login' ? 'login' : 'cadastro');
+  const [authRole, setAuthRole] = useState(params.get('papel') === 'empresa' ? 'empresa' : 'motorista');
+
+  const isCadastro = mode === 'cadastro';
+
+  const submit = () => {
+    setRole(authRole);
+    navigate(authRole === 'empresa' ? '/empresa' : '/motorista');
+  };
+
+  const segStyle = (on) => ({
+    flex: 1,
+    padding: '12px',
+    borderRadius: '10px',
+    border: `1px solid ${on ? colors.primary : colors.borderInput}`,
+    background: on ? colors.tintBlue : '#fff',
+    color: on ? colors.tintBlueText : colors.muted3,
+    fontWeight: 700,
+    fontSize: '14px',
+    cursor: 'pointer',
+    textAlign: 'center',
+  });
+  const tabSty = (on) => ({
+    flex: 1,
+    padding: '10px',
+    borderRadius: '8px',
+    border: 'none',
+    background: on ? '#fff' : 'transparent',
+    color: on ? colors.ink : colors.muted,
+    fontWeight: 700,
+    fontSize: '14px',
+    cursor: 'pointer',
+    boxShadow: on ? '0 1px 2px rgba(16,24,40,.12)' : 'none',
+  });
+  const inputStyle = {
+    width: '100%',
+    padding: '11px 14px',
+    border: `1px solid ${colors.borderInput}`,
+    borderRadius: '10px',
+    fontSize: '14px',
+    background: '#fff',
+  };
+  const lblStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: colors.text, marginBottom: '6px' };
+
+  const docLabel = authRole === 'empresa' ? 'CNPJ' : 'CPF';
+  const docPh = authRole === 'empresa' ? '00.000.000/0000-00' : '000.000.000-00';
+  const nomeLabel = authRole === 'empresa' ? 'Razão social' : 'Nome completo';
+  const nomePh = authRole === 'empresa' ? 'Sua empresa Ltda' : 'Seu nome completo';
+
+  const RolePicker = (
+    <>
+      <label style={{ ...lblStyle, marginBottom: '8px' }}>{isCadastro ? 'Quero me cadastrar como' : 'Entrar como'}</label>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <button onClick={() => setAuthRole('motorista')} style={segStyle(authRole === 'motorista')}>Motorista</button>
+        <button onClick={() => setAuthRole('empresa')} style={segStyle(authRole === 'empresa')}>Empresa</button>
+      </div>
+    </>
+  );
+
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg, fontFamily: fonts.body, color: colors.text, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI2IiBoZWlnaHQ9IjExNyIgdmlld0JveD0iMCAwIDEyNiAxMTciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQuMDcyNyAwLjI4OTcwOUM1Ni4yNjM3IDEuNzEwNzEgNDcuMDM0NyA1LjQ4MzcxIDQwLjc2ODcgOS44MTU3QzM2LjI5MjcgMTIuOTA4NyAyOC44MDE3IDIwLjYwMDcgMjUuOTExNyAyNS4wNjc3QzIzLjU4OTcgMjguNjU3NyAyMC4yODc3IDM1LjM0MjcgMTkuNzI5NyAzNy41ODM3TDE5LjQwMzcgMzguODk0N0gzMS4zNDA3TDMzLjAyODcgMzUuOTE1N0MzMy45NTY3IDM0LjI3NzcgMzUuMjQxNyAzMi4yOTM3IDM1Ljg4MjcgMzEuNTA4N0MzNy4wMzA3IDMwLjEwMjcgMzcuMDYyNyAzMC4wOTQ3IDM4LjAzNjcgMzAuOTc2N0wzOS4wMjU3IDMxLjg3MTdMMzcuMzY4NyAzNC44MzI3QzM2LjQ1NzcgMzYuNDYxNyAzNS43MTI3IDM4LjA0MTcgMzUuNzEyNyAzOC4zNDQ3QzM1LjcxMjcgMzguNzMyNyAzNy41ODk3IDM4Ljg5NDcgNDIuMDg5NyAzOC44OTQ3SDQ4LjQ2NjdMNTIuMjE3NyAzNS4xNjE3QzYwLjMwOTcgMjcuMTExNyA3MC44ODk3IDI0LjU1ODcgODEuMDE2NyAyOC4yMTE3Qzg1LjE1NTcgMjkuNzAzNyA4NS44ODM3IDMwLjEyNjcgOTAuMTgzNyAzMy41MzY3TDkzLjQxNjcgMzYuMTAwN0w5OC40MTA3IDMzLjQ1NzdDMTA1Ljg5MSAyOS40OTg3IDExNC40NzcgMjQuNzM2NyAxMTUuNTEgMjMuOTc0N0MxMTYuMzg3IDIzLjMyNzcgMTE2LjMzNSAyMy4xODM3IDExNC4yMjIgMjAuNDM4N0MxMDkuMiAxMy45MTI3IDk5LjkwMjcgNi44Mjg3IDkyLjcxNDcgNC4wNTA3Qzg1LjUzOTcgMS4yNzg3IDgwLjQ0NjcgMC4yMzQ3MDQgNzMuMTI4NyAwLjAzNTcwMzVDNjkuNDU4NyAtMC4wNjMyOTY1IDY1LjM4MzcgMC4wNTA3MDg5IDY0LjA3MjcgMC4yODk3MDlaTTczLjg0MjcgMTIuODY4N0M3My44Mzk3IDEzLjI3MTcgNzMuODM2NyAxMy41NTc3IDczLjk1MzcgMTMuNzgyN0M3NC4yNjE3IDE0LjM3NzcgNzUuNDAzNyAxNC41NDA3IDc5LjU2MzcgMTUuMjczN0M4Mi4wNTM3IDE1LjcxMjcgODQuMjg3NyAxNi4xMTI3IDg0LjUyODcgMTYuMTYyN0M4NC43Njg3IDE2LjIxMzcgODUuMTY5NyAxNS42Mzk3IDg1LjQyMDcgMTQuODg3N0M4NS43NTg3IDEzLjg3NDcgODUuNzEzNyAxMy40MjE3IDg1LjI0NTcgMTMuMTMzN0M4NC42MTE3IDEyLjc0MTcgODAuOTY1NyAxMi4wNjI3IDc2LjM0NTcgMTEuNDc3N0w3My44NDM3IDExLjE1OTdWMTIuNjQ5N0M3My44NDM3IDEyLjcyNjcgNzMuODQyNyAxMi43OTk3IDczLjg0MjcgMTIuODY4N1pNNjUuMDI1NyAxMS43NjY3QzYwLjU5NjcgMTIuNzQ2NyA1NS43MzE3IDE0LjI3MzcgNTUuNzMxNyAxNC42ODM3QzU1LjczMTcgMTUuMDU5NyA1Ni41NjE3IDE2LjkwMTcgNTYuOTMyNyAxNy4zNTA3QzU2Ljk5NzcgMTcuNDI5NyA1OC45NTI3IDE2Ljk2NTcgNjEuMjc2NyAxNi4zMTk3QzYzLjYwMDcgMTUuNjczNyA2Ni4wOTI3IDE1LjAxNTcgNjYuODEyNyAxNC44NTY3QzY3LjkzNjcgMTQuNjA4NyA2OC4xMjM3IDE0LjMzMDcgNjguMTIzNyAxMi45MDg3QzY4LjEyMzcgMTEuMTE3NyA2OC4wNjM3IDExLjA5NDcgNjUuMDI1NyAxMS43NjY3Wk05MC45MTQ3IDE3LjIwOTdDOTAuNjE1NyAxNy44NjY3IDkwLjQ1OTcgMTguNDYyNyA5MC41Njc3IDE4LjUzNTdDOTAuNjc1NyAxOC42MDk3IDkyLjMzMDcgMTkuNjkwNyA5NC4yNDU3IDIwLjkzNzdMOTcuNzI2NyAyMy4yMDc3TDk4LjYxMDcgMjIuMTE2N0M5OS4wOTY3IDIxLjUxNjcgOTkuMzgwNyAyMC44NDI3IDk5LjI0MjcgMjAuNjE5N0M5OC44NTk3IDE5Ljk5ODcgOTIuNTc1NyAxNi4wMTU3IDkxLjk4MDcgMTYuMDE1N0M5MS42OTM3IDE2LjAxNTcgOTEuMjE0NyAxNi41NTI3IDkwLjkxNDcgMTcuMjA5N1pNNDcuNDIxNyAxOS4xMjQ3QzQ2LjEyODcgMjAuMDE4NyA0My45MTY3IDIxLjc0NzcgNDIuNTA1NyAyMi45NjY3TDM5LjkzODcgMjUuMTgxN0w0MS4wMDY3IDI2LjMxODdDNDIuMjIzNyAyNy42MTM3IDQyLjc3MTcgMjcuNzIyNyA0My41MjQ3IDI2LjgyMTdDNDQuNDI5NyAyNS43Mzg3IDQ5LjcxNzcgMjEuNDA3NyA1MC44NDg3IDIwLjgyNDdDNTEuODcxNyAyMC4yOTU3IDUxLjg4ODcgMjAuMjAwNyA1MS4xOTM3IDE4Ljg1NzdDNTAuNzkyNyAxOC4wODA3IDUwLjMwODcgMTcuNDU3NyA1MC4xMTg3IDE3LjQ3MTdDNDkuOTI4NyAxNy40ODY3IDQ4LjcxNTcgMTguMjMwNyA0Ny40MjE3IDE5LjEyNDdaTTUyLjYzMzcgNDEuMzk3N0M1MC4wMTE3IDQxLjYzMjcgMzkuMDg0NyA0MS45MTk3IDI4LjM1MDcgNDIuMDM3N0MxMS4xNjA3IDQyLjIyNjcgOC43MzE3MiA0Mi4zNDQ3IDcuOTc0NzIgNDMuMDMwN0M2Ljg0MTcyIDQ0LjA1NTcgNi44ODI3MiA0NS44MTE3IDguMDY3NzIgNDYuOTk3N0M4Ljk4NDcyIDQ3LjkxNDcgOS42NTY3MiA0Ny45NTA3IDI2LjA2ODcgNDcuOTUwN0M0NS4xMzU3IDQ3Ljk1MDcgNDUuNDU2NyA0OC4wMDE3IDQ3LjIzNDcgNTEuMzE2N0M0OC4yNzk3IDUzLjI2NDcgNDguMzIyNyA1NC4yNTA3IDQ3LjQzODcgNTUuOTU4N0M0NS45MjQ3IDU4Ljg4NjcgNDUuMjQ3NyA1OS4xMzA3IDM3LjkyNzcgNTkuMzg5N0wzMS4xODQ3IDU5LjYyODdWNjMuOTE3N0g4NS4wNDQ3TDg1LjE3MjcgNTMuMDE0N0M4NS4yNjI3IDQ1LjM3MzcgODUuMTM4NyA0MS45MTY3IDg0Ljc1NzcgNDEuNDU2N0M4NC4zMTU3IDQwLjkyNDcgODEuNjgwNyA0MC44MTc3IDcwLjgwNjcgNDAuODg1N0M2My40MzI3IDQwLjkzMjcgNTUuMjU0NyA0MS4xNjI3IDUyLjYzMzcgNDEuMzk3N1pNODguNDYwNyA0My4wMjU3Qzg4LjA2MzcgNDMuNDIyNyA4OC4wMzY3IDYzLjMyNTcgODguNDMxNyA2NC4zNTU3Qzg4LjY3NDcgNjQuOTg3NyA4OS42ODU3IDY1LjEwOTcgOTQuNjc5NyA2NS4xMDk3Qzk5LjkxNjcgNjUuMTA5NyAxMDAuNjAzIDY1LjIwMDcgMTAwLjM0OCA2NS44NjM3QzEwMC4xODkgNjYuMjc4NyAxMDAuMDU5IDY2LjcwNzcgMTAwLjA1OSA2Ni44MTY3QzEwMC4wNTkgNjYuOTI2NyA5Mi4xMTY3IDY3LjAxNTcgODIuNDA4NyA2Ny4wMTU3SDY0Ljc1ODdMNjUuNzc5NyA2OC4zOTY3QzY2LjM0MDcgNjkuMTU1NyA2Ni45MTE3IDcwLjc2NjcgNjcuMDQ4NyA3MS45NzY3TDY3LjI5NTcgNzQuMTc3N0w4NC4yNjc3IDc0LjA1MjdMMTAxLjIzOSA3My45Mjc3TDEwMS41NjggNzEuNjIyN0MxMDIuNTk3IDY0LjQzMjcgMTExLjAwMSA2MS42MjI3IDExNS44NzcgNjYuODM4N0MxMTcuMzc1IDY4LjQ0MDcgMTE4LjE3MSA3MC4zMzE3IDExOC4xNzEgNzIuMjg5N0MxMTguMTcxIDczLjY2MTcgMTE4LjIyMSA3My42ODg3IDEyMC42OTcgNzMuNjg4N0MxMjIuMDg3IDczLjY4ODcgMTIzLjQ4MSA3My40MzE3IDEyMy43OTYgNzMuMTE2N0MxMjQuNjI3IDcyLjI4NTcgMTI0LjUyMyA2OC4yMTU3IDEyMy42NTMgNjcuNDkyN0MxMjMuMjM5IDY3LjE0OTcgMTIyLjkyNiA2Ni4wNjg3IDEyMi45MDkgNjQuOTMyN0MxMjIuODYgNjEuNTEwNyAxMjIuMTQzIDU4LjMwMTcgMTIxLjI4OCA1Ny42NzY3QzEyMC44MzYgNTcuMzQ1NyAxMTcuNzUxIDU2LjQxOTcgMTE0LjQzMyA1NS42MTg3QzEwOS43MDcgNTQuNDc3NyAxMDguMjQ1IDUzLjkzMjcgMTA3LjY4NSA1My4xMDI3QzEwMi44OTMgNDUuOTk3NyAxMDEuMTIgNDMuODYyNyA5OS41Njk3IDQzLjMyOTdDOTcuODE2NyA0Mi43Mjg3IDg4Ljk5OTcgNDIuNDg1NyA4OC40NjA3IDQzLjAyNTdaTTEwMS44NTYgNDkuNzM3N0w5OS4zNjE3IDQ2LjA0MzdIOTIuOTA5N1Y1NC4xNDY3SDk4LjYyODdDMTAxLjc3NSA1NC4xNDY3IDEwNC4zNDkgNTMuOTg1NyAxMDQuMzQ5IDUzLjc4OTdDMTA0LjM0OSA1My41OTI3IDEwMy4yMjcgNTEuNzY5NyAxMDEuODU2IDQ5LjczNzdaTTAuNzUzNzI3IDUyLjE1ODdDLTAuMjgxMjczIDUzLjMwMjcgLTAuMjQ3MjY1IDU0Ljc2MDcgMC44MzY3MzUgNTUuNzQwN0MxLjYxOTczIDU2LjQ0OTcgMy44MjE3MyA1Ni41Mjk3IDIyLjQ4OTcgNTYuNTI5N0gyMy4zNzk3QzQwLjYyNzcgNTYuNTMwNyA0My45Njk3IDU2LjUzMDcgNDQuNjE1NyA1NS4yMTA3QzQ0Ljc2OTcgNTQuODk0NyA0NC43Njk3IDU0LjUwMDcgNDQuNzY4NyA1NC4wMTM3QzQ0Ljc2ODcgNTMuOTc4NyA0NC43Njg3IDUzLjk0MzcgNDQuNzY4NyA1My45MDg3QzQ0Ljc2ODcgNTMuODcxNyA0NC43Njg3IDUzLjgzNTcgNDQuNzY4NyA1My44MDA3QzQ0Ljc2OTcgNTMuMzE0NyA0NC43Njk3IDUyLjkyMjcgNDQuNjE1NyA1Mi42MDY3QzQzLjk3MDcgNTEuMjg2NyA0MC42MjM3IDUxLjI4NjcgMjMuMzE3NyA1MS4yODY3SDIyLjQwNjdDMi43OTg3MiA1MS4yODY3IDEuNDk0NzMgNTEuMzM5NyAwLjc1MzcyNyA1Mi4xNTg3Wk0xNi4zODE3IDYyLjM2ODdDMTYuNTQ5NyA2NC4wMDc3IDE2LjgwMzcgNjYuMTUyNyAxNi45NDY3IDY3LjEzNTdMMTcuMjA3NyA2OC45MjI3SDIzLjE3NDdDMjguNjYxNyA2OC45MjI3IDI5LjExNTcgNjguODU1NyAyOC44MjA3IDY4LjA4ODdDMjguNjQzNyA2Ny42Mjk3IDI4LjI3MDcgNjUuNDg0NyAyNy45OTE3IDYzLjMyMTdMMjcuNDgyNyA1OS4zODk3SDE2LjA3NjdMMTYuMzgxNyA2Mi4zNjg3Wk0xMTUuMTEzIDYyLjA3OTdDMTE0Ljk0OCA2Mi41MTA3IDExNC44NzEgNjIuOTAxNyAxMTQuOTQzIDYyLjk0ODdDMTE1LjAxNSA2Mi45OTU3IDExNS43NSA2My41MDE3IDExNi41NzYgNjQuMDcyN0MxMTcuNDAzIDY0LjY0MjcgMTE4Ljc0NCA2NS4xMDk3IDExOS41NTYgNjUuMTA5N0MxMjAuODU0IDY1LjEwOTcgMTIxLjAzMSA2NC45NDk3IDEyMS4wMzEgNjMuNzc0N0MxMjEuMDMxIDYxLjg5MDcgMTIwLjIyIDYxLjI5NjcgMTE3LjY1IDYxLjI5NjdDMTE2LjAxNSA2MS4yOTY3IDExNS4zMzIgNjEuNTA2NyAxMTUuMTEzIDYyLjA3OTdaTTMxLjg5OTcgNjcuNjc5N0MzMS44OTk3IDY5LjIxMDcgMzYuMzQ2NyA2OS40NTU3IDM3LjE0MjcgNjcuOTY5N0MzNy42MjY3IDY3LjA2NTcgMzcuNTA0NyA2Ny4wMTU3IDM0Ljc3NTcgNjcuMDE1N0MzMi42MzQ3IDY3LjAxNTcgMzEuODk5NyA2Ny4xODU3IDMxLjg5OTcgNjcuNjc5N1pNNTAuMjkzNyA2OC4yMDc3QzUxLjI1NDcgNjkuNjczNyA1MS40NTk3IDY5LjY3MjcgNTIuNTM2NyA2OC4xOTI3TDUzLjM5MjcgNjcuMDE1N0g0OS41MTM3TDUwLjI5MzcgNjguMjA3N1pNMTA2LjYxOSA2Ny43NjE3QzEwMy44ODYgNjkuMjQ0NyAxMDMuMTE1IDcyLjkwMTcgMTA0Ljk1OSA3NS42Mzc3QzEwOC40MjQgODAuNzc4NyAxMTUuMzExIDc4LjUxNDcgMTE1LjMxMSA3Mi4yMzU3QzExNS4zMTEgNzAuNjIxNyAxMTUuMDEzIDY5Ljk1ODcgMTEzLjY5MSA2OC42MzY3QzExMi4zMzQgNjcuMjgwNyAxMTEuNzMyIDY3LjAxOTcgMTA5Ljk5NyA2Ny4wMzQ3QzEwOC44NTYgNjcuMDQ1NyAxMDcuMzM2IDY3LjM3MjcgMTA2LjYxOSA2Ny43NjE3Wk01NS45MzE3IDY4LjM5MTdDNTQuMDU3NyA2OS41MzQ3IDUyLjcwMTcgNzIuMzA4NyA1My4xMDk3IDc0LjE2NTdDNTQuMTcyNyA3OS4wMDI3IDU5Ljg5OTcgODAuMjg4NyA2My4xNTQ3IDc2LjQxOTdDNjQuMjQ0NyA3NS4xMjQ3IDY0LjM4MjcgNzQuNjA0NyA2NC4xODQ3IDcyLjU0NzdDNjMuNzY2NyA2OC4xOTU3IDU5LjY1MDcgNjYuMTIzNyA1NS45MzE3IDY4LjM5MTdaTTQwLjgzOTcgNjguMzI5N0MzOS40NTI3IDY5LjE4ODcgMzguMDk1NyA3MS41NDU3IDM4LjA5NTcgNzMuMDk0N0MzOC4wOTU3IDc0LjM4NjcgNDAuMDMwNyA3Ny4xMjg3IDQxLjQ0NjcgNzcuODQ1N0M0NC43OTE3IDc5LjUzODcgNDguODY2NyA3Ny4yMjU3IDQ5LjM4ODcgNzMuMzM3N0M0OS42Mzk3IDcxLjQ2MTcgNDkuNTIyNyA3MS4xODE3IDQ3Ljc0NjcgNjkuNDA0N0M0Ni4xNjQ3IDY3LjgyMzcgNDUuNTE0NyA2Ny40OTQ3IDQzLjk5MDcgNjcuNTA1N0M0Mi45NzY3IDY3LjUxMjcgNDEuNTU4NyA2Ny44ODI3IDQwLjgzOTcgNjguMzI5N1pNNS40Nzk3MiA3Mi41MzE3QzQuNTM3NzIgNzMuNDczNyA0LjUzNjczIDc0LjE1MTcgNS40NzM3MyA3NS40ODk3QzYuMjEyNzMgNzYuNTQ1NyA2LjI1MzcyIDc2LjU0ODcgMjEuMjM0NyA3Ni41NDg3QzM1LjMwOTcgNzYuNTQ4NyAzNi4yMzg3IDc2LjQ5NjcgMzYuMDE4NyA3NS43MTQ3QzM1Ljg4OTcgNzUuMjU2NyAzNS42NDM3IDc0LjE4MzcgMzUuNDcxNyA3My4zMzE3TDM1LjE1OTcgNzEuNzgyN0gyMC42OTQ3QzguMTc5NzMgNzEuNzgyNyA2LjEyNzcyIDcxLjg4MzcgNS40Nzk3MiA3Mi41MzE3WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMTIuMTc5IDgzLjE0ODdDMTE0LjkwMiA4Mi43NzU3IDExNy44ODkgODEuMjU0NyAxMTguODg1IDc5LjczMzdDMTE5LjU2NyA3OC42OTQ3IDEyMC4wMDUgNzguNTQ4NyAxMjIuNDYgNzguNTQ4N0gxMjUuMjU4TDEyNC4yNzMgODEuMDUxN0MxMTYuMjYzIDEwMS4zOTMgOTcuNTkwNSAxMTUuMTE5IDc2LjA3MTUgMTE2LjQ4M0M1NC40NTE1IDExNy44NTIgMzMuMDY1NSAxMDUuMDg1IDIzLjQ3NDUgODUuMDgxN0wyMS44Mjg2IDgxLjY0NjdMMjcuODg3NSA4MS41MTM3QzMxLjIxOTUgODEuNDM5NyAzNC4xODg1IDgxLjQ3MTcgMzQuNDg1NSA4MS41ODU3QzM0Ljc4MTUgODEuNjk5NyAzNS45Mjg1IDgzLjMxNDcgMzcuMDM0NSA4NS4xNzU3QzM4LjEzOTUgODcuMDM1NyAzOS4yMjQ1IDg4LjU1ODcgMzkuNDQ2NSA4OC41NTg3QzM5LjY2NzUgODguNTU4NyA0MC4zNDc2IDg4LjE1NDcgNDAuOTU1NiA4Ny42NjE3TDQyLjA2MzYgODYuNzY1N0w0MC44NTY2IDg0LjkyMDdDMzkuNjc4NiA4My4xMjA3IDM4Ljg2NzUgODEuNDA4NyAzOS4xOTM1IDgxLjQwODdDMzkuMjgzNSA4MS40MDg3IDQwLjM4NDUgODEuODYzNyA0MS42NDA1IDgyLjQxOTdDNDQuNTk1NSA4My43MjY3IDQ3Ljg1MzUgODMuNDA0NyA1MC45MTA1IDgxLjUwMzdMNTMuMDkyNSA4MC4xNDc3TDU1LjAwNjUgODIuMTMxN0M1OC42NzQ1IDg1LjkzMjcgNjUuMjEwNSA4OC44NTQ3IDcxLjEwNTUgODkuMzI5N0M3Ny44MDU1IDg5Ljg2NzcgODUuMjM0NSA4Ny4zMzA3IDkwLjE3MzUgODIuODE2N0w5Mi43NTI1IDgwLjQ1OTdMOTQuNzczNSA4MS4xNzI3Qzk1Ljg4NDUgODEuNTY0NyA5Ny40NTA1IDgxLjg4NTcgOTguMjUyNSA4MS44ODU3Qzk5Ljk1MzUgODEuODg1NyAxMDMuODI1IDgwLjEzNTcgMTAzLjgyNSA3OS4zNjY3QzEwMy44MjUgNzkuMDc1NyAxMDQuNTUgNzkuNTQxNyAxMDUuNDM3IDgwLjQwMTdMMTA3LjA1IDgxLjk2NDdMMTA1LjkwNyA4NC4wMTA3TDEwNC43NjMgODYuMDU1N0wxMDYuMDIzIDg2Ljg4MDdDMTA3LjI2IDg3LjY5MjcgMTA3LjMwMiA4Ny42ODI3IDEwOC4zOTggODYuMzQ1N0MxMDkuMDEyIDg1LjU5NTcgMTA5LjYzNCA4NC42MzY3IDEwOS43OCA4NC4yMTI3QzEwOS45NDcgODMuNzI1NyAxMTAuODMxIDgzLjMzMzcgMTEyLjE3OSA4My4xNDg3Wk05My42MzQ1IDk3LjcyNTdDOTIuOTUyNSA5Ni40MDc3IDkyLjk1NDUgOTYuNDA1NyA5Ny4wNzc1IDkzLjAzNjdMMTAxLjIwMiA4OS42Njc3TDEwMi41MTQgOTAuNTc0N0MxMDMuMjM1IDkxLjA3NDcgMTAzLjgyNSA5MS42NDI3IDEwMy44MjUgOTEuODM3N0MxMDMuODI1IDkyLjYyNTcgOTUuNzIyNSA5OS4wNDQ3IDk0LjcyNzUgOTkuMDQ0N0M5NC41MDE1IDk5LjA0NDcgOTQuMDA5NSA5OC40NTA3IDkzLjYzNDUgOTcuNzI1N1pNNDQuMDU4NSA5My44NTg3QzQzLjE3NjUgOTIuODg0NyA0My4xODA1IDkyLjg1MTcgNDQuMjk4NSA5MS45MjA3QzQ0LjkyMzUgOTEuMzk5NyA0NS41NDM1IDkwLjk2NzcgNDUuNjc0NSA5MC45NjE3QzQ1LjgwNTUgOTAuOTU1NyA0Ni44Nzc1IDkxLjcyMjcgNDguMDU3NSA5Mi42NjY3QzQ5LjIzNzUgOTMuNjA5NyA1MS4zMzU1IDk1LjExMDcgNTIuNzE5NSA5Ni4wMDE3QzU0Ljk2NTUgOTcuNDQ2NyA1NS4xODA1IDk3LjcyNjcgNTQuNzE0NSA5OC41OTc3QzU0LjQyNjUgOTkuMTM1NyA1My44ODY1IDk5LjY5MTcgNTMuNTE0NSA5OS44MzQ3QzUyLjgwMTUgMTAwLjEwOSA0NS41OTA1IDk1LjU1MTcgNDQuMDU4NSA5My44NTg3Wk03OS4zOTY1IDEwMC45OTZDODAuMzc5NSAxMDAuNzM4IDgyLjM2MzUgMTAwLjIxMyA4My44MDU1IDk5LjgyODdDODcuNzQ3NSA5OC43Nzk3IDg4LjI4ODUgOTguODQ1NyA4OC44OTQ1IDEwMC40NTVDODkuNDI3NSAxMDEuODY1IDg5LjQyNTUgMTAxLjg2NSA4Ni45NzQ1IDEwMi41NTZDODMuNzk4NSAxMDMuNDUxIDc5LjcyMDUgMTA0LjI4OCA3OC41Mzg1IDEwNC4yODhDNzcuODI2NSAxMDQuMjg4IDc3LjYwOTUgMTAzLjk1OCA3Ny42MDk1IDEwMi44NzZDNzcuNjA5NSAxMDEuNjQ2IDc3LjgzODUgMTAxLjQwNCA3OS4zOTY1IDEwMC45OTZaTTU5LjgyODUgMTAyLjQyQzU5LjYxNjUgMTAyLjIxMiA1OS41ODY1IDEwMS40NzUgNTkuNzYwNSAxMDAuNzgyQzU5LjkzNDUgMTAwLjA4OCA2MC4xMjg1IDk5LjUyMDcgNjAuMTkxNSA5OS41MjA3QzYwLjI1NDUgOTkuNTIwNyA2Mi4zMjE1IDk5Ljk0NjcgNjQuNzg2NSAxMDAuNDY3QzY3LjI1MTUgMTAwLjk4NyA2OS43NTA1IDEwMS40MTYgNzAuMzQwNSAxMDEuNDJDNzEuMjQ2NSAxMDEuNDI3IDcxLjQxMjUgMTAxLjY4NiA3MS40MTI1IDEwMy4wOTZDNzEuNDEyNSAxMDQuMzA0IDcxLjIwMzUgMTA0Ljc2NCA3MC42NTM1IDEwNC43NjRDNjkuMjY5NSAxMDQuNzY0IDYwLjIxODUgMTAyLjgwNCA1OS44Mjg1IDEwMi40MloiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPC9zdmc+" alt="" style={{ height: '48px', width: 'auto', display: 'block' }} />
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgzIiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTgzIDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjMuMDE1NiAyNC42NDlINDQuNTQ2M1Y1Mi43ODc0QzQxLjA1NjkgNTMuOTI1OCAzNy43NzE2IDU0LjcyMzkgMzQuNjkwNCA1NS4xODE3QzMxLjYwOTMgNTUuNjM5NiAyOC40NjAyIDU1Ljg2ODUgMjUuMjQyOSA1NS44Njg1QzE3LjA1MTMgNTUuODY4NSAxMC43OTYzIDUzLjQ2MTggNi40Nzc3NyA0OC42NDgzQzIuMTU5MjUgNDMuODM0OCAwIDM2LjkyMzkgMCAyNy45MTU3QzAgMTkuMTU0OSAyLjUwNTcyIDEyLjMyNDUgNy41MTcxOCA3LjQyNDM4QzEyLjUyODYgMi41MjQyOCAxOS40NzY2IDAuMDc0MjE4OCAyOC4zNjEyIDAuMDc0MjE4OEMzMy45Mjk1IDAuMDc0MjE4OCAzOS4yOTk4IDEuMTg3ODggNDQuNDcyMSAzLjQxNTE5TDQwLjY0ODUgMTIuNjIxNEMzNi42ODg4IDEwLjY0MTYgMzIuNTY4MyA5LjY1MTY3IDI4LjI4NjkgOS42NTE2N0MyMy4zMTI2IDkuNjUxNjcgMTkuMzI4MSAxMS4zMjIyIDE2LjMzMzYgMTQuNjYzMUMxMy4zMzkxIDE4LjAwNDEgMTEuODQxOSAyMi40OTU5IDExLjg0MTkgMjguMTM4NEMxMS44NDE5IDM0LjAyODQgMTMuMDQ4NCAzOC41MjY0IDE1LjQ2MTMgNDEuNjMyMkMxNy44NzQyIDQ0LjczODEgMjEuMzgyMiA0Ni4yOTEgMjUuOTg1NCA0Ni4yOTFDMjguMzg1OSA0Ni4yOTEgMzAuODIzNiA0Ni4wNDM1IDMzLjI5ODQgNDUuNTQ4NlYzNC4yMjY0SDIzLjAxNTZMMjMuMDE1NiAyNC42NDlaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik0xMy42ODEyIDcwLjQxNTRDMTEuMzU0NCA3MC40MTU0IDkuNTUyODcgNzEuMjg5NiA4LjI3NjQ5IDczLjAzOEM3LjAwMDExIDc0Ljc4NjMgNi4zNjE5NCA3Ny4yMjI4IDYuMzYxOTQgODAuMzQ3MkM2LjM2MTk0IDg2Ljg0ODggOC44MDE2NyA5MC4wOTk1IDEzLjY4MTIgOTAuMDk5NUMxNS43Mjg3IDkwLjA5OTUgMTguMjA4MyA4OS41ODc2IDIxLjEyIDg4LjU2MzlWOTMuNzQ5MkMxOC43MjY4IDk0Ljc0NjMgMTYuMDU0NCA5NS4yNDQ5IDEzLjEwMjggOTUuMjQ0OUM4Ljg2MTUxIDk1LjI0NDkgNS42MTczNyA5My45NTg2IDMuMzcwNDIgOTEuMzg1OUMxLjEyMzQ3IDg4LjgxMzIgMCA4NS4xMjAzIDAgODAuMzA3M0MwIDc3LjI3NTkgMC41NTE3NTkgNzQuNjIwMSAxLjY1NTI5IDcyLjMzOTlDMi43NTg4MiA3MC4wNTk3IDQuMzQ0MzIgNjguMzExNCA2LjQxMTc5IDY3LjA5NDhDOC40NzkyNSA2NS44NzgzIDEwLjkwMjQgNjUuMjcgMTMuNjgxMiA2NS4yN0MxNi41MTMxIDY1LjI3IDE5LjM1ODQgNjUuOTU0NyAyMi4yMTY5IDY3LjMyNDJMMjAuMjIyNiA3Mi4zNDk5QzE5LjEzMjMgNzEuODMxNCAxOC4wMzU1IDcxLjM3OTMgMTYuOTMxOSA3MC45OTM4QzE1LjgyODQgNzAuNjA4MiAxNC43NDQ4IDcwLjQxNTQgMTMuNjgxMiA3MC40MTU0WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE4Mi4wODMgMjcuOTE1N0MxODIuMDgzIDM2Ljg5OTIgMTc5Ljg1NiA0My44MDM5IDE3NS40MDEgNDguNjI5N0MxNzAuOTQ2IDUzLjQ1NTYgMTY0LjU2MiA1NS44Njg1IDE1Ni4yNDYgNTUuODY4NUMxNDcuOTMxIDU1Ljg2ODUgMTQxLjU0NiA1My40NTU2IDEzNy4wOTEgNDguNjI5N0MxMzIuNjM3IDQzLjgwMzkgMTMwLjQwOSAzNi44NzQ0IDEzMC40MDkgMjcuODQxNEMxMzAuNDA5IDE4LjgwODQgMTMyLjY0MyAxMS45MDk5IDEzNy4xMSA3LjE0NTk3QzE0MS41NzcgMi4zODE5OSAxNDcuOTggMCAxNTYuMzIgMEMxNjQuNjYgMCAxNzEuMDM5IDIuNDAwNTUgMTc1LjQ1NyA3LjIwMTY2QzE3OS44NzQgMTIuMDAyOCAxODIuMDgzIDE4LjkwNzQgMTgyLjA4MyAyNy45MTU3Wk0xNDIuNDc0IDI3LjkxNTdDMTQyLjQ3NCAzMy45Nzg5IDE0My42MjUgMzguNTQ0OSAxNDUuOTI2IDQxLjYxMzdDMTQ4LjIyOCA0NC42ODI0IDE1MS42NjggNDYuMjE2OCAxNTYuMjQ2IDQ2LjIxNjhDMTY1LjQyOCA0Ni4yMTY4IDE3MC4wMTggNDAuMTE2NCAxNzAuMDE4IDI3LjkxNTdDMTcwLjAxOCAxNS42OTAyIDE2NS40NTIgOS41Nzc0MiAxNTYuMzIgOS41Nzc0MkMxNTEuNzQyIDkuNTc3NDIgMTQ4LjI5IDExLjExOCAxNDUuOTYzIDE0LjE5OTFDMTQzLjYzNyAxNy4yODAyIDE0Mi40NzQgMjEuODUyNCAxNDIuNDc0IDI3LjkxNTdaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik05Ny4xNjQyIDk0Ljg0NjFIOTEuMDgxNFY2NS42ODg4SDEwNy43OTRWNzAuNzU0NUg5Ny4xNjQyVjc4LjI3MzFIMTA3LjA1NlY4My4zMTg4SDk3LjE2NDJWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xMTkuNTgxIDk0Ljg0NjFIMTEzLjQ5OFY2NS42ODg4SDEzMC4yMVY3MC43NTQ1SDExOS41ODFWNzguMjczMUgxMjkuNDcyVjgzLjMxODhIMTE5LjU4MVY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE1Mi43MDYgOTQuODQ2MUgxMzUuOTE0VjY1LjY4ODhIMTUyLjcwNlY3MC43NTQ1SDE0Mi4wOTdWNzcuMTU2M0gxNTEuOTY5VjgyLjIyMTlIMTQyLjA5N1Y4OS43NDA2SDE1Mi43MDZWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xNjQuOTcyIDc4LjYzMjFIMTY2Ljk2NkMxNjguOTIgNzguNjMyMSAxNzAuMzYzIDc4LjMwNjQgMTcxLjI5NCA3Ny42NTQ5QzE3Mi4yMjQgNzcuMDAzNCAxNzIuNjkgNzUuOTc5NiAxNzIuNjkgNzQuNTgzNkMxNzIuNjkgNzMuMjAwOCAxNzIuMjE0IDcyLjIxNyAxNzEuMjY0IDcxLjYzMkMxNzAuMzEzIDcxLjA0NjkgMTY4Ljg0MSA3MC43NTQ1IDE2Ni44NDYgNzAuNzU0NUgxNjQuOTcyVjc4LjYzMjFaTTE2NC45NzIgODMuNjU3OFY5NC44NDYxSDE1OC43ODlWNjUuNjg4OEgxNjcuMjg1QzE3MS4yNDcgNjUuNjg4OCAxNzQuMTc5IDY2LjQxMDEgMTc2LjA4IDY3Ljg1MjdDMTc3Ljk4MSA2OS4yOTUzIDE3OC45MzIgNzEuNDg1NyAxNzguOTMyIDc0LjQyNEMxNzguOTMyIDc2LjEzOTIgMTc4LjQ2IDc3LjY2NDggMTc3LjUxNiA3OS4wMDFDMTc2LjU3MiA4MC4zMzcyIDE3NS4yMzYgODEuMzg0MyAxNzMuNTA3IDgyLjE0MjFDMTc3Ljg5NSA4OC42OTY5IDE4MC43NTQgOTIuOTMxNSAxODIuMDgzIDk0Ljg0NjFIMTc1LjIyM0wxNjguMjYyIDgzLjY1NzhMMTY0Ljk3MiA4My42NTc4WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTU3LjQ2NDcgNTUuMTI2VjAuODUzNzZINjguOTcyNVY1NS4xMjZINTcuNDY0N1oiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPHBhdGggZD0iTTk0LjE0MTIgMjQuOTQ1OUg5Ny44NTM0QzEwMS40OTEgMjQuOTQ1OSAxMDQuMTc3IDI0LjMzOTYgMTA1LjkwOSAyMy4xMjY5QzEwNy42NDEgMjEuOTE0MyAxMDguNTA3IDIwLjAwODcgMTA4LjUwNyAxNy40MTAxQzEwOC41MDcgMTQuODM2MyAxMDcuNjIzIDEzLjAwNSAxMDUuODUzIDExLjkxNjFDMTA0LjA4NCAxMC44MjcyIDEwMS4zNDMgMTAuMjgyNyA5Ny42MzA3IDEwLjI4MjdIOTQuMTQxMlYyNC45NDU5Wk05NC4xNDEyIDM0LjMwMDZWNTUuMTI2SDgyLjYzMzRWMC44NTM3Nkg5OC40NDc0QzEwNS44MjIgMC44NTM3NiAxMTEuMjc5IDIuMTk2MzIgMTE0LjgxOCA0Ljg4MTQ3QzExOC4zNTcgNy41NjY2MiAxMjAuMTI3IDExLjY0MzkgMTIwLjEyNyAxNy4xMTMyQzEyMC4xMjcgMjAuMzA1NiAxMTkuMjQ4IDIzLjE0NTUgMTE3LjQ5MSAyNS42MzI2QzExNS43MzQgMjguMTE5OCAxMTMuMjQ3IDMwLjA2ODcgMTEwLjAyOSAzMS40NzkzQzExOC4xOTYgNDMuNjgwMSAxMjMuNTE3IDUxLjU2MjMgMTI1Ljk5MiA1NS4xMjZIMTEzLjIyMkwxMDAuMjY2IDM0LjMwMDZMOTQuMTQxMiAzNC4zMDA2WiIgZmlsbD0iIzEyODRENyI+PC9wYXRoPgo8cGF0aCBkPSJNNTEuMjE0NiA5NC44NDYxSDQ1LjA1MjFWODIuMjYxOEgzMy41MDQ5Vjk0Ljg0NjFIMjcuMzIyNFY2NS42ODg4SDMzLjUwNDlWNzcuMTE2NEg0NS4wNTIxVjY1LjY4ODhINTEuMjE0NlY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTg1LjAzODYgODAuMjI3NUM4NS4wMzg2IDg1LjA1MzggODMuODQyIDg4Ljc2MzMgODEuNDQ4OCA5MS4zNTZDNzkuMDU1NiA5My45NDg2IDc1LjYyNTMgOTUuMjQ0OSA3MS4xNTggOTUuMjQ0OUM2Ni42OTA3IDk1LjI0NDkgNjMuMjYwNCA5My45NDg2IDYwLjg2NzIgOTEuMzU2QzU4LjQ3NCA4OC43NjMzIDU3LjI3NzQgODUuMDQwNSA1Ny4yNzc0IDgwLjE4NzdDNTcuMjc3NCA3NS4zMzQ4IDU4LjQ3NzMgNzEuNjI4NiA2MC44NzcyIDY5LjA2OTJDNjMuMjc3IDY2LjUwOTggNjYuNzE3MyA2NS4yMzAxIDcxLjE5NzkgNjUuMjMwMUM3NS42Nzg1IDY1LjIzMDEgNzkuMTA1NCA2Ni41MTk4IDgxLjQ3ODcgNjkuMDk5MkM4My44NTE5IDcxLjY3ODUgODUuMDM4NiA3NS4zODc5IDg1LjAzODYgODAuMjI3NVpNNjMuNzU5IDgwLjIyNzVDNjMuNzU5IDgzLjQ4NSA2NC4zNzcyIDg1LjkzOCA2NS42MTM3IDg3LjU4NjZDNjYuODUwMiA4OS4yMzUzIDY4LjY5ODMgOTAuMDU5NiA3MS4xNTggOTAuMDU5NkM3Ni4wOTA2IDkwLjA1OTYgNzguNTU3IDg2Ljc4MjMgNzguNTU3IDgwLjIyNzVDNzguNTU3IDczLjY1OTUgNzYuMTAzOSA3MC4zNzU1IDcxLjE5NzkgNzAuMzc1NUM2OC43MzgyIDcwLjM3NTUgNjYuODgzNCA3MS4yMDMyIDY1LjYzMzcgNzIuODU4NUM2NC4zODM5IDc0LjUxMzggNjMuNzU5IDc2Ljk3MDEgNjMuNzU5IDgwLjIyNzVaIiBmaWxsPSJibGFjayI+PC9wYXRoPgo8L3N2Zz4=" alt="GiroChoffer" style={{ height: '36px', width: 'auto', display: 'block' }} />
+      </div>
+      <div style={{ width: '100%', maxWidth: '440px', background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '18px', padding: '32px', boxShadow: '0 4px 24px rgba(16,24,40,.05)' }}>
+        <div style={{ display: 'flex', gap: '4px', background: '#F1F4F8', borderRadius: '12px', padding: '4px', marginBottom: '26px' }}>
+          <button onClick={() => setMode('cadastro')} style={tabSty(isCadastro)}>Criar conta</button>
+          <button onClick={() => setMode('login')} style={tabSty(!isCadastro)}>Entrar</button>
+        </div>
+        <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 22px' }}>
+          {isCadastro ? 'Criar sua conta' : 'Entrar na sua conta'}
+        </h2>
+
+        {isCadastro ? (
+          <div>
+            {RolePicker}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={lblStyle}>{nomeLabel}</label>
+              <input style={inputStyle} placeholder={nomePh} />
+            </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={lblStyle}>{docLabel}</label>
+              <input style={inputStyle} placeholder={docPh} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+              <div>
+                <label style={lblStyle}>E-mail</label>
+                <input type="email" style={inputStyle} placeholder="email@dominio.com" />
+              </div>
+              <div>
+                <label style={lblStyle}>Telefone</label>
+                <input style={inputStyle} placeholder="(11) 90000-0000" />
+              </div>
+            </div>
+            <div style={{ marginBottom: '22px' }}>
+              <label style={lblStyle}>Senha</label>
+              <input type="password" style={inputStyle} placeholder="••••••••" />
+            </div>
+            <Button onClick={submit} style={{ width: '100%', padding: '14px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '11px', fontWeight: 700, fontSize: '16px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+              Criar conta e entrar
+            </Button>
+          </div>
+        ) : (
+          <div>
+            {RolePicker}
+            <div style={{ marginBottom: '14px' }}>
+              <label style={lblStyle}>E-mail</label>
+              <input type="email" style={inputStyle} placeholder="email@dominio.com" />
+            </div>
+            <div style={{ marginBottom: '10px' }}>
+              <label style={lblStyle}>Senha</label>
+              <input type="password" style={inputStyle} placeholder="••••••••" />
+            </div>
+            <div style={{ textAlign: 'right', marginBottom: '22px' }}>
+              <a onClick={() => navigate('/recuperar-senha')} style={{ fontSize: '13px', color: colors.primary, textDecoration: 'none', cursor: 'pointer' }}>Esqueci minha senha</a>
+            </div>
+            <Button onClick={submit} style={{ width: '100%', padding: '14px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '11px', fontWeight: 700, fontSize: '16px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+              Entrar
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/pages/EmpresaPainel.jsx =====
+
+const tabDefs = [
+  ['todas', 'Todas'],
+  ['Disponível', 'Disponíveis'],
+  ['Com interessados', 'Com interessados'],
+  ['Contratada', 'Contratadas'],
+  ['Concluída', 'Concluídas'],
+];
+
+function StatCard({ value, label, color }) {
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '14px', padding: '20px' }}>
+      <div style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '32px', color }}>{value}</div>
+      <div style={{ fontSize: '13px', color: colors.muted, marginTop: '2px' }}>{label}</div>
+    </div>
+  );
+}
+
+function EmpresaPainel() {
+  const navigate = useNavigate();
+  const { cargas } = useApp();
+  const [tab, setTab] = useState('todas');
+
+  const mine = cargas.filter((c) => c.mine);
+  const stats = {
+    disp: mine.filter((c) => c.status === 'Disponível' && c.interessados.length === 0).length,
+    inter: mine.filter((c) => c.status === 'Disponível' && c.interessados.length > 0).length,
+    contr: mine.filter((c) => c.status === 'Contratada').length,
+    concl: mine.filter((c) => c.status === 'Concluída').length,
+  };
+
+  let list = mine;
+  if (tab !== 'todas') list = mine.filter((c) => dispStatus(c) === tab);
+
+  return (
+    <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '20px', marginBottom: '28px', flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, margin: '0 0 4px' }}>Painel da empresa</h1>
+          <p style={{ margin: 0, color: colors.muted, fontSize: '15px' }}>Acompanhe suas cargas publicadas e os motoristas interessados.</p>
+        </div>
+        <Button onClick={() => navigate('/empresa/nova')} style={{ padding: '13px 24px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '11px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+          + Publicar nova carga
+        </Button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '16px', marginBottom: '28px' }}>
+        <StatCard value={stats.disp} label="Disponíveis" color={colors.primary} />
+        <StatCard value={stats.inter} label="Com interessados" color="#B7791F" />
+        <StatCard value={stats.contr} label="Contratadas" color="#1E8E5A" />
+        <StatCard value={stats.concl} label="Concluídas" color={colors.muted3} />
+      </div>
+
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+        {tabDefs.map(([key, label]) => {
+          const on = tab === key;
+          return (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '999px',
+                border: `1px solid ${on ? colors.primary : colors.border}`,
+                background: on ? colors.primary : '#fff',
+                color: on ? '#fff' : colors.muted3,
+                fontWeight: 600,
+                fontSize: '13px',
+                cursor: 'pointer',
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        {list.map((c) => (
+          <CargaCardEmpresa key={c.id} carga={c} />
+        ))}
+      </div>
+      {list.length === 0 && <EmptyState>Nenhuma carga neste status.</EmptyState>}
+    </div>
+  );
+}
+
+
+// ===== src/pages/EmpresaNovaCarga.jsx =====
+
+const initial = {
+  titulo: '',
+  origem: '',
+  destino: '',
+  tipoVeiculo: 'Caminhão',
+  carroceria: 'Baú',
+  peso: '',
+  valor: '',
+  dataColeta: '',
+  descricao: '',
+};
+
+function EmpresaNovaCarga() {
+  const navigate = useNavigate();
+  const { opcoes, publicar } = useApp();
+  const [form, setForm] = useState(initial);
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const onPublicar = () => {
+    if (publicar(form)) navigate('/empresa');
+  };
+
+  return (
+    <div style={{ maxWidth: '760px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <button onClick={() => navigate('/empresa')} style={{ background: 'none', border: 'none', color: colors.muted, fontWeight: 600, fontSize: '14px', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
+        ← Voltar ao painel
+      </button>
+      <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, margin: '0 0 4px' }}>Publicar nova carga</h1>
+      <p style={{ margin: '0 0 28px', color: colors.muted, fontSize: '15px' }}>
+        Preencha os dados do frete. Ele ficará disponível para os motoristas imediatamente.
+      </p>
+
+      <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '30px' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <TextInput label="Título da carga" value={form.titulo} onChange={set('titulo')} placeholder="Ex.: Eletrodomésticos — linha branca" />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+          <TextInput label="Origem" value={form.origem} onChange={set('origem')} placeholder="Cidade/UF" />
+          <TextInput label="Destino" value={form.destino} onChange={set('destino')} placeholder="Cidade/UF" />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+          <SelectInput label="Tipo de veículo" value={form.tipoVeiculo} onChange={set('tipoVeiculo')}>
+            {opcoes.tiposVeiculo.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </SelectInput>
+          <SelectInput label="Tipo de carroceria" value={form.carroceria} onChange={set('carroceria')}>
+            {opcoes.carrocerias.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </SelectInput>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '18px' }}>
+          <TextInput label="Peso" value={form.peso} onChange={set('peso')} placeholder="Ex.: 8.500 kg" />
+          <TextInput label="Valor do frete (R$)" value={form.valor} onChange={set('valor')} placeholder="Ex.: 4200" />
+          <TextInput label="Data de coleta" value={form.dataColeta} onChange={set('dataColeta')} placeholder="dd/mm/aaaa" />
+        </div>
+        <div style={{ marginBottom: '26px' }}>
+          <TextArea label="Descrição" rows={4} value={form.descricao} onChange={set('descricao')} placeholder="Detalhes da carga, exigências de manuseio, agendamento de descarga..." />
+        </div>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          <button onClick={() => navigate('/empresa')} style={{ padding: '13px 24px', background: '#fff', color: colors.ink, border: `1px solid ${colors.borderInput}`, borderRadius: '10px', fontWeight: 600, fontSize: '15px', cursor: 'pointer' }}>
+            Cancelar
+          </button>
+          <Button onClick={onPublicar} style={{ padding: '13px 28px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+            Publicar carga
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/pages/EmpresaDetalhes.jsx =====
+
+function EmpresaDetalhes() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { cargas, motoristas, escolher, concluir, cancelarCarga } = useApp();
+
+  const carga = cargas.find((c) => c.id === id) || cargas[0];
+  const statusLabel = dispStatus(carga);
+  const isContratada = carga.status === 'Contratada';
+  const isDisponivel = carga.status === 'Disponível';
+
+  const interessados = carga.interessados.map((mid) => motoristas[mid]).filter(Boolean);
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <button onClick={() => navigate('/empresa')} style={{ background: 'none', border: 'none', color: colors.muted, fontWeight: 600, fontSize: '14px', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
+        ← Voltar ao painel
+      </button>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '24px', alignItems: 'start' }}>
+        <CargaDetalheCard carga={carga} statusLabel={statusLabel} />
+
+        <div>
+          <div style={{ background: colors.navy, borderRadius: '16px', padding: '26px', color: '#fff', marginBottom: '18px' }}>
+            <div style={{ fontSize: '13px', color: '#9FC2E0', marginBottom: '4px' }}>Valor do frete</div>
+            <div style={{ fontFamily: fonts.heading, fontWeight: 900, fontSize: '36px', lineHeight: 1 }}>{fmt(carga.valor)}</div>
+          </div>
+
+          {isContratada && (
+            <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '14px', padding: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1E8E5A', marginBottom: '12px' }}>✓ Carga contratada</div>
+              <button onClick={() => concluir(carga.id)} style={{ width: '100%', padding: '13px', background: '#1E8E5A', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer', marginBottom: '10px' }}>
+                Marcar como concluída
+              </button>
+              <button onClick={() => cancelarCarga(carga.id)} style={{ width: '100%', padding: '13px', background: '#fff', color: '#C0392B', border: '1px solid #F0D2CE', borderRadius: '10px', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+                Cancelar carga
+              </button>
+            </div>
+          )}
+          {isDisponivel && (
+            <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '14px', padding: '20px' }}>
+              <button onClick={() => cancelarCarga(carga.id)} style={{ width: '100%', padding: '13px', background: '#fff', color: '#C0392B', border: '1px solid #F0D2CE', borderRadius: '10px', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+                Cancelar carga
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ marginTop: '32px' }}>
+        <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '20px', color: colors.inkStrong, margin: '0 0 16px' }}>Motoristas interessados</h2>
+        {interessados.length === 0 ? (
+          <EmptyState padding="40px">Ainda não há motoristas interessados nesta carga.</EmptyState>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {interessados.map((m) => (
+              <MotoristaInteressadoCard
+                key={m.id}
+                motorista={m}
+                escolhido={carga.escolhido === m.id}
+                podeEscolher={!carga.escolhido}
+                onEscolher={() => escolher(carga.id, m.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/pages/MotoristaPainel.jsx =====
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px 13px',
+  border: `1px solid ${colors.borderInput}`,
+  borderRadius: '9px',
+  fontSize: '14px',
+  background: '#fff',
+};
+const lblStyle = { display: 'block', fontSize: '12px', fontWeight: 600, color: colors.muted, marginBottom: '6px' };
+
+function MotoristaPainel() {
+  const { cargas, opcoes } = useApp();
+  const [filtro, setFiltro] = useState({ origem: '', destino: '', carroceria: '' });
+
+  const set = (k) => (e) => setFiltro((f) => ({ ...f, [k]: e.target.value }));
+  const limpar = () => setFiltro({ origem: '', destino: '', carroceria: '' });
+
+  let market = cargas.filter((c) => c.status === 'Disponível');
+  if (filtro.origem.trim()) market = market.filter((c) => c.origem.toLowerCase().includes(filtro.origem.toLowerCase().trim()));
+  if (filtro.destino.trim()) market = market.filter((c) => c.destino.toLowerCase().includes(filtro.destino.toLowerCase().trim()));
+  if (filtro.carroceria) market = market.filter((c) => c.carroceria === filtro.carroceria);
+
+  return (
+    <div style={{ maxWidth: '1160px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, margin: '0 0 4px' }}>Cargas disponíveis</h1>
+      <p style={{ margin: '0 0 24px', color: colors.muted, fontSize: '15px' }}>Encontre fretes compatíveis e demonstre seu interesse.</p>
+
+      <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '14px', padding: '18px 20px', display: 'flex', gap: '14px', alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: '24px' }}>
+        <div style={{ flex: 1, minWidth: '160px' }}>
+          <label style={lblStyle}>Origem</label>
+          <input value={filtro.origem} onChange={set('origem')} placeholder="Cidade ou UF" style={inputStyle} />
+        </div>
+        <div style={{ flex: 1, minWidth: '160px' }}>
+          <label style={lblStyle}>Destino</label>
+          <input value={filtro.destino} onChange={set('destino')} placeholder="Cidade ou UF" style={inputStyle} />
+        </div>
+        <div style={{ flex: 1, minWidth: '180px' }}>
+          <label style={lblStyle}>Carroceria</label>
+          <select value={filtro.carroceria} onChange={set('carroceria')} style={{ ...inputStyle, ...selectArrow }}>
+            <option value="">Todas as carrocerias</option>
+            {opcoes.carrocerias.map((v) => (
+              <option key={v} value={v}>{v}</option>
+            ))}
+          </select>
+        </div>
+        <button onClick={limpar} style={{ padding: '10px 18px', background: '#F1F4F8', color: colors.muted, border: 'none', borderRadius: '9px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', height: '40px' }}>
+          Limpar
+        </button>
+      </div>
+
+      <div style={{ fontSize: '14px', color: colors.muted, marginBottom: '14px' }}>{market.length} carga(s) encontrada(s)</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {market.map((c) => (
+          <CargaCardMercado key={c.id} carga={c} />
+        ))}
+      </div>
+      {market.length === 0 && <EmptyState>Nenhuma carga corresponde aos filtros.</EmptyState>}
+    </div>
+  );
+}
+
+
+// ===== src/pages/MotoristaDetalhes.jsx =====
+
+function MotoristaDetalhes() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { cargas, usuarios, currentMotorista, interesse } = useApp();
+
+  const carga = cargas.find((c) => c.id === id) || cargas[0];
+  const statusLabel = dispStatus(carga);
+
+  const jaInteresse = carga.interessados.includes(currentMotorista);
+  const podeInteresse = carga.status === 'Disponível' && !jaInteresse;
+  const contatoLiberado = jaInteresse || carga.escolhido === currentMotorista;
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <button onClick={() => navigate('/motorista')} style={{ background: 'none', border: 'none', color: colors.muted, fontWeight: 600, fontSize: '14px', cursor: 'pointer', padding: 0, marginBottom: '16px' }}>
+        ← Voltar às cargas
+      </button>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '24px', alignItems: 'start' }}>
+        <CargaDetalheCard carga={carga} statusLabel={statusLabel} subtitulo={`Publicada por ${carga.empresa}`} />
+
+        <div>
+          <div style={{ background: colors.navy, borderRadius: '16px', padding: '26px', color: '#fff', marginBottom: '18px' }}>
+            <div style={{ fontSize: '13px', color: '#9FC2E0', marginBottom: '4px' }}>Valor do frete</div>
+            <div style={{ fontFamily: fonts.heading, fontWeight: 900, fontSize: '36px', lineHeight: 1 }}>{fmt(carga.valor)}</div>
+          </div>
+
+          {podeInteresse && (
+            <Button onClick={() => interesse(carga.id)} style={{ width: '100%', padding: '16px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 700, fontSize: '16px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+              Tenho interesse
+            </Button>
+          )}
+
+          {contatoLiberado && (
+            <div style={{ background: '#fff', border: '1px solid #CDE8D9', borderRadius: '14px', padding: '20px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: '#1E8E5A', marginBottom: '12px' }}>✓ Interesse enviado — contato liberado</div>
+              <div style={{ fontSize: '12px', color: colors.muted2, marginBottom: '2px' }}>Telefone</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: colors.ink, marginBottom: '10px' }}>{usuarios.empresa.telefone}</div>
+              <div style={{ fontSize: '12px', color: colors.muted2, marginBottom: '2px' }}>WhatsApp</div>
+              <div style={{ fontSize: '16px', fontWeight: 700, color: colors.ink, marginBottom: '16px' }}>{usuarios.empresa.whatsapp}</div>
+              <button onClick={() => navigate('/motorista/minhas')} style={{ width: '100%', padding: '12px', background: '#fff', color: colors.primary, border: '1px solid #BBD9F1', borderRadius: '10px', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+                Ver em Minhas cargas
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/pages/MotoristaMinhas.jsx =====
+
+function Secao({ titulo, cor, children }) {
+  return (
+    <>
+      <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '15px', color: cor, marginBottom: '12px' }}>{titulo}</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>{children}</div>
+    </>
+  );
+}
+
+function MotoristaMinhas() {
+  const { cargas, currentMotorista } = useApp();
+  const me = currentMotorista;
+
+  const enviados = cargas.filter((c) => c.interessados.includes(me) && c.escolhido !== me && c.status === 'Disponível');
+  const contratadas = cargas.filter((c) => c.escolhido === me && c.status === 'Contratada');
+  const concluidas = cargas.filter((c) => c.escolhido === me && c.status === 'Concluída');
+
+  return (
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, margin: '0 0 4px' }}>Minhas cargas</h1>
+      <p style={{ margin: '0 0 28px', color: colors.muted, fontSize: '15px' }}>Acompanhe seus interesses, fretes contratados e o histórico.</p>
+
+      <Secao titulo="Interesse enviado" cor="#B7791F">
+        {enviados.length === 0 && (
+          <EmptyState padding="24px" radius="12px">Você ainda não demonstrou interesse em nenhuma carga.</EmptyState>
+        )}
+        {enviados.map((c) => (
+          <CargaResumoRow key={c.id} carga={c} pill={{ label: 'Aguardando empresa', bg: '#FBF1E0', color: '#B7791F' }} verButton />
+        ))}
+      </Secao>
+
+      <Secao titulo="Contratadas" cor="#1E8E5A">
+        {contratadas.length === 0 && (
+          <EmptyState padding="24px" radius="12px">Nenhum frete contratado no momento.</EmptyState>
+        )}
+        {contratadas.map((c) => (
+          <CargaResumoRow key={c.id} carga={c} borderColor="#CDE8D9" pill={{ label: 'Contratada', bg: '#E3F4EC', color: '#1E8E5A' }} />
+        ))}
+      </Secao>
+
+      <Secao titulo="Concluídas" cor={colors.muted3}>
+        {concluidas.length === 0 && (
+          <EmptyState padding="24px" radius="12px">Nenhum frete concluído ainda.</EmptyState>
+        )}
+        {concluidas.map((c) => (
+          <CargaResumoRow key={c.id} carga={c} dimmed pill={{ label: 'Concluída', bg: '#EDF0F4', color: colors.muted3 }} />
+        ))}
+      </Secao>
+    </div>
+  );
+}
+
+
+// ===== src/pages/Perfil.jsx =====
+
+function Cartao({ titulo, children }) {
+  return (
+    <div style={{ background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '16px', padding: '30px' }}>
+      <div style={{ fontFamily: fonts.heading, fontWeight: 700, fontSize: '18px', color: colors.inkStrong, marginBottom: '20px' }}>{titulo}</div>
+      {children}
+    </div>
+  );
+}
+
+function Perfil() {
+  const { role, usuarios, showToast } = useApp();
+  const isEmpresa = role === 'empresa';
+  const emp = usuarios.empresa;
+  const mot = usuarios.motorista;
+
+  const salvar = (
+    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Button onClick={() => showToast('Alterações salvas com sucesso.')} style={{ padding: '13px 28px', background: colors.primary, color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }} hoverStyle={{ background: colors.primaryHover }}>
+        Salvar alterações
+      </Button>
+    </div>
+  );
+
+  return (
+    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '36px 32px 64px' }}>
+      <h1 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '30px', color: colors.inkStrong, margin: '0 0 4px' }}>Meu perfil</h1>
+      <p style={{ margin: '0 0 28px', color: colors.muted, fontSize: '15px' }}>Edite seus dados cadastrais.</p>
+
+      {isEmpresa ? (
+        <Cartao titulo="Dados da empresa">
+          <div style={{ marginBottom: '16px' }}>
+            <TextInput label="Razão social" defaultValue={emp.razaoSocial} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <TextInput label="Nome fantasia" defaultValue={emp.nomeFantasia} />
+            <TextInput label="CNPJ" defaultValue={emp.cnpj} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+            <TextInput label="Telefone" defaultValue={emp.telefone} />
+            <TextInput label="E-mail" defaultValue={emp.email} />
+          </div>
+          {salvar}
+        </Cartao>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <Cartao titulo="Dados pessoais">
+            <div style={{ marginBottom: '16px' }}>
+              <TextInput label="Nome completo" defaultValue={mot.nome} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <TextInput label="Telefone" defaultValue={mot.telefone} />
+              <TextInput label="E-mail" defaultValue={mot.email} />
+            </div>
+          </Cartao>
+          <Cartao titulo="Meu veículo">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <TextInput label="Tipo de veículo" defaultValue={mot.tipoVeiculo} />
+              <TextInput label="Carroceria" defaultValue={mot.carroceria} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <TextInput label="Capacidade" defaultValue={mot.capacidade} />
+              <TextInput label="Placa" defaultValue={mot.placa} />
+            </div>
+          </Cartao>
+          {salvar}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ===== src/pages/RecuperarSenha.jsx =====
+
+/* Fluxo de recuperação de senha em três etapas:
+   solicitar (e-mail) → enviado (confirmação) → redefinir (código + nova senha). */
+function RecuperarSenha() {
+  const navigate = useNavigate();
+  const { showToast } = useApp();
+
+  const [etapa, setEtapa] = useState('solicitar'); // 'solicitar' | 'enviado' | 'redefinir'
+  const [email, setEmail] = useState('');
+  const [codigo, setCodigo] = useState('');
+  const [senha, setSenha] = useState('');
+  const [conf, setConf] = useState('');
+
+  const inputStyle = {
+    width: '100%',
+    padding: '11px 14px',
+    border: `1px solid ${colors.borderInput}`,
+    borderRadius: '10px',
+    fontSize: '14px',
+    background: '#fff',
+  };
+  const lblStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: colors.text, marginBottom: '6px' };
+  const primaryBtn = {
+    width: '100%',
+    padding: '14px',
+    background: colors.primary,
+    color: '#fff',
+    border: 'none',
+    borderRadius: '11px',
+    fontWeight: 700,
+    fontSize: '16px',
+    cursor: 'pointer',
+  };
+
+  const enviarLink = () => {
+    if (!email.trim()) {
+      showToast('Informe o e-mail cadastrado.');
+      return;
+    }
+    setEtapa('enviado');
+  };
+
+  const redefinir = () => {
+    if (!codigo.trim() || !senha || !conf) {
+      showToast('Preencha o código e a nova senha.');
+      return;
+    }
+    if (senha !== conf) {
+      showToast('As senhas não coincidem.');
+      return;
+    }
+    showToast('Senha redefinida com sucesso. Faça login.');
+    navigate('/entrar?modo=login');
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: colors.bg, fontFamily: fonts.body, color: colors.text, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', cursor: 'pointer' }} onClick={() => navigate('/')}>
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI2IiBoZWlnaHQ9IjExNyIgdmlld0JveD0iMCAwIDEyNiAxMTciIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNjQuMDcyNyAwLjI4OTcwOUM1Ni4yNjM3IDEuNzEwNzEgNDcuMDM0NyA1LjQ4MzcxIDQwLjc2ODcgOS44MTU3QzM2LjI5MjcgMTIuOTA4NyAyOC44MDE3IDIwLjYwMDcgMjUuOTExNyAyNS4wNjc3QzIzLjU4OTcgMjguNjU3NyAyMC4yODc3IDM1LjM0MjcgMTkuNzI5NyAzNy41ODM3TDE5LjQwMzcgMzguODk0N0gzMS4zNDA3TDMzLjAyODcgMzUuOTE1N0MzMy45NTY3IDM0LjI3NzcgMzUuMjQxNyAzMi4yOTM3IDM1Ljg4MjcgMzEuNTA4N0MzNy4wMzA3IDMwLjEwMjcgMzcuMDYyNyAzMC4wOTQ3IDM4LjAzNjcgMzAuOTc2N0wzOS4wMjU3IDMxLjg3MTdMMzcuMzY4NyAzNC44MzI3QzM2LjQ1NzcgMzYuNDYxNyAzNS43MTI3IDM4LjA0MTcgMzUuNzEyNyAzOC4zNDQ3QzM1LjcxMjcgMzguNzMyNyAzNy41ODk3IDM4Ljg5NDcgNDIuMDg5NyAzOC44OTQ3SDQ4LjQ2NjdMNTIuMjE3NyAzNS4xNjE3QzYwLjMwOTcgMjcuMTExNyA3MC44ODk3IDI0LjU1ODcgODEuMDE2NyAyOC4yMTE3Qzg1LjE1NTcgMjkuNzAzNyA4NS44ODM3IDMwLjEyNjcgOTAuMTgzNyAzMy41MzY3TDkzLjQxNjcgMzYuMTAwN0w5OC40MTA3IDMzLjQ1NzdDMTA1Ljg5MSAyOS40OTg3IDExNC40NzcgMjQuNzM2NyAxMTUuNTEgMjMuOTc0N0MxMTYuMzg3IDIzLjMyNzcgMTE2LjMzNSAyMy4xODM3IDExNC4yMjIgMjAuNDM4N0MxMDkuMiAxMy45MTI3IDk5LjkwMjcgNi44Mjg3IDkyLjcxNDcgNC4wNTA3Qzg1LjUzOTcgMS4yNzg3IDgwLjQ0NjcgMC4yMzQ3MDQgNzMuMTI4NyAwLjAzNTcwMzVDNjkuNDU4NyAtMC4wNjMyOTY1IDY1LjM4MzcgMC4wNTA3MDg5IDY0LjA3MjcgMC4yODk3MDlaTTczLjg0MjcgMTIuODY4N0M3My44Mzk3IDEzLjI3MTcgNzMuODM2NyAxMy41NTc3IDczLjk1MzcgMTMuNzgyN0M3NC4yNjE3IDE0LjM3NzcgNzUuNDAzNyAxNC41NDA3IDc5LjU2MzcgMTUuMjczN0M4Mi4wNTM3IDE1LjcxMjcgODQuMjg3NyAxNi4xMTI3IDg0LjUyODcgMTYuMTYyN0M4NC43Njg3IDE2LjIxMzcgODUuMTY5NyAxNS42Mzk3IDg1LjQyMDcgMTQuODg3N0M4NS43NTg3IDEzLjg3NDcgODUuNzEzNyAxMy40MjE3IDg1LjI0NTcgMTMuMTMzN0M4NC42MTE3IDEyLjc0MTcgODAuOTY1NyAxMi4wNjI3IDc2LjM0NTcgMTEuNDc3N0w3My44NDM3IDExLjE1OTdWMTIuNjQ5N0M3My44NDM3IDEyLjcyNjcgNzMuODQyNyAxMi43OTk3IDczLjg0MjcgMTIuODY4N1pNNjUuMDI1NyAxMS43NjY3QzYwLjU5NjcgMTIuNzQ2NyA1NS43MzE3IDE0LjI3MzcgNTUuNzMxNyAxNC42ODM3QzU1LjczMTcgMTUuMDU5NyA1Ni41NjE3IDE2LjkwMTcgNTYuOTMyNyAxNy4zNTA3QzU2Ljk5NzcgMTcuNDI5NyA1OC45NTI3IDE2Ljk2NTcgNjEuMjc2NyAxNi4zMTk3QzYzLjYwMDcgMTUuNjczNyA2Ni4wOTI3IDE1LjAxNTcgNjYuODEyNyAxNC44NTY3QzY3LjkzNjcgMTQuNjA4NyA2OC4xMjM3IDE0LjMzMDcgNjguMTIzNyAxMi45MDg3QzY4LjEyMzcgMTEuMTE3NyA2OC4wNjM3IDExLjA5NDcgNjUuMDI1NyAxMS43NjY3Wk05MC45MTQ3IDE3LjIwOTdDOTAuNjE1NyAxNy44NjY3IDkwLjQ1OTcgMTguNDYyNyA5MC41Njc3IDE4LjUzNTdDOTAuNjc1NyAxOC42MDk3IDkyLjMzMDcgMTkuNjkwNyA5NC4yNDU3IDIwLjkzNzdMOTcuNzI2NyAyMy4yMDc3TDk4LjYxMDcgMjIuMTE2N0M5OS4wOTY3IDIxLjUxNjcgOTkuMzgwNyAyMC44NDI3IDk5LjI0MjcgMjAuNjE5N0M5OC44NTk3IDE5Ljk5ODcgOTIuNTc1NyAxNi4wMTU3IDkxLjk4MDcgMTYuMDE1N0M5MS42OTM3IDE2LjAxNTcgOTEuMjE0NyAxNi41NTI3IDkwLjkxNDcgMTcuMjA5N1pNNDcuNDIxNyAxOS4xMjQ3QzQ2LjEyODcgMjAuMDE4NyA0My45MTY3IDIxLjc0NzcgNDIuNTA1NyAyMi45NjY3TDM5LjkzODcgMjUuMTgxN0w0MS4wMDY3IDI2LjMxODdDNDIuMjIzNyAyNy42MTM3IDQyLjc3MTcgMjcuNzIyNyA0My41MjQ3IDI2LjgyMTdDNDQuNDI5NyAyNS43Mzg3IDQ5LjcxNzcgMjEuNDA3NyA1MC44NDg3IDIwLjgyNDdDNTEuODcxNyAyMC4yOTU3IDUxLjg4ODcgMjAuMjAwNyA1MS4xOTM3IDE4Ljg1NzdDNTAuNzkyNyAxOC4wODA3IDUwLjMwODcgMTcuNDU3NyA1MC4xMTg3IDE3LjQ3MTdDNDkuOTI4NyAxNy40ODY3IDQ4LjcxNTcgMTguMjMwNyA0Ny40MjE3IDE5LjEyNDdaTTUyLjYzMzcgNDEuMzk3N0M1MC4wMTE3IDQxLjYzMjcgMzkuMDg0NyA0MS45MTk3IDI4LjM1MDcgNDIuMDM3N0MxMS4xNjA3IDQyLjIyNjcgOC43MzE3MiA0Mi4zNDQ3IDcuOTc0NzIgNDMuMDMwN0M2Ljg0MTcyIDQ0LjA1NTcgNi44ODI3MiA0NS44MTE3IDguMDY3NzIgNDYuOTk3N0M4Ljk4NDcyIDQ3LjkxNDcgOS42NTY3MiA0Ny45NTA3IDI2LjA2ODcgNDcuOTUwN0M0NS4xMzU3IDQ3Ljk1MDcgNDUuNDU2NyA0OC4wMDE3IDQ3LjIzNDcgNTEuMzE2N0M0OC4yNzk3IDUzLjI2NDcgNDguMzIyNyA1NC4yNTA3IDQ3LjQzODcgNTUuOTU4N0M0NS45MjQ3IDU4Ljg4NjcgNDUuMjQ3NyA1OS4xMzA3IDM3LjkyNzcgNTkuMzg5N0wzMS4xODQ3IDU5LjYyODdWNjMuOTE3N0g4NS4wNDQ3TDg1LjE3MjcgNTMuMDE0N0M4NS4yNjI3IDQ1LjM3MzcgODUuMTM4NyA0MS45MTY3IDg0Ljc1NzcgNDEuNDU2N0M4NC4zMTU3IDQwLjkyNDcgODEuNjgwNyA0MC44MTc3IDcwLjgwNjcgNDAuODg1N0M2My40MzI3IDQwLjkzMjcgNTUuMjU0NyA0MS4xNjI3IDUyLjYzMzcgNDEuMzk3N1pNODguNDYwNyA0My4wMjU3Qzg4LjA2MzcgNDMuNDIyNyA4OC4wMzY3IDYzLjMyNTcgODguNDMxNyA2NC4zNTU3Qzg4LjY3NDcgNjQuOTg3NyA4OS42ODU3IDY1LjEwOTcgOTQuNjc5NyA2NS4xMDk3Qzk5LjkxNjcgNjUuMTA5NyAxMDAuNjAzIDY1LjIwMDcgMTAwLjM0OCA2NS44NjM3QzEwMC4xODkgNjYuMjc4NyAxMDAuMDU5IDY2LjcwNzcgMTAwLjA1OSA2Ni44MTY3QzEwMC4wNTkgNjYuOTI2NyA5Mi4xMTY3IDY3LjAxNTcgODIuNDA4NyA2Ny4wMTU3SDY0Ljc1ODdMNjUuNzc5NyA2OC4zOTY3QzY2LjM0MDcgNjkuMTU1NyA2Ni45MTE3IDcwLjc2NjcgNjcuMDQ4NyA3MS45NzY3TDY3LjI5NTcgNzQuMTc3N0w4NC4yNjc3IDc0LjA1MjdMMTAxLjIzOSA3My45Mjc3TDEwMS41NjggNzEuNjIyN0MxMDIuNTk3IDY0LjQzMjcgMTExLjAwMSA2MS42MjI3IDExNS44NzcgNjYuODM4N0MxMTcuMzc1IDY4LjQ0MDcgMTE4LjE3MSA3MC4zMzE3IDExOC4xNzEgNzIuMjg5N0MxMTguMTcxIDczLjY2MTcgMTE4LjIyMSA3My42ODg3IDEyMC42OTcgNzMuNjg4N0MxMjIuMDg3IDczLjY4ODcgMTIzLjQ4MSA3My40MzE3IDEyMy43OTYgNzMuMTE2N0MxMjQuNjI3IDcyLjI4NTcgMTI0LjUyMyA2OC4yMTU3IDEyMy42NTMgNjcuNDkyN0MxMjMuMjM5IDY3LjE0OTcgMTIyLjkyNiA2Ni4wNjg3IDEyMi45MDkgNjQuOTMyN0MxMjIuODYgNjEuNTEwNyAxMjIuMTQzIDU4LjMwMTcgMTIxLjI4OCA1Ny42NzY3QzEyMC44MzYgNTcuMzQ1NyAxMTcuNzUxIDU2LjQxOTcgMTE0LjQzMyA1NS42MTg3QzEwOS43MDcgNTQuNDc3NyAxMDguMjQ1IDUzLjkzMjcgMTA3LjY4NSA1My4xMDI3QzEwMi44OTMgNDUuOTk3NyAxMDEuMTIgNDMuODYyNyA5OS41Njk3IDQzLjMyOTdDOTcuODE2NyA0Mi43Mjg3IDg4Ljk5OTcgNDIuNDg1NyA4OC40NjA3IDQzLjAyNTdaTTEwMS44NTYgNDkuNzM3N0w5OS4zNjE3IDQ2LjA0MzdIOTIuOTA5N1Y1NC4xNDY3SDk4LjYyODdDMTAxLjc3NSA1NC4xNDY3IDEwNC4zNDkgNTMuOTg1NyAxMDQuMzQ5IDUzLjc4OTdDMTA0LjM0OSA1My41OTI3IDEwMy4yMjcgNTEuNzY5NyAxMDEuODU2IDQ5LjczNzdaTTAuNzUzNzI3IDUyLjE1ODdDLTAuMjgxMjczIDUzLjMwMjcgLTAuMjQ3MjY1IDU0Ljc2MDcgMC44MzY3MzUgNTUuNzQwN0MxLjYxOTczIDU2LjQ0OTcgMy44MjE3MyA1Ni41Mjk3IDIyLjQ4OTcgNTYuNTI5N0gyMy4zNzk3QzQwLjYyNzcgNTYuNTMwNyA0My45Njk3IDU2LjUzMDcgNDQuNjE1NyA1NS4yMTA3QzQ0Ljc2OTcgNTQuODk0NyA0NC43Njk3IDU0LjUwMDcgNDQuNzY4NyA1NC4wMTM3QzQ0Ljc2ODcgNTMuOTc4NyA0NC43Njg3IDUzLjk0MzcgNDQuNzY4NyA1My45MDg3QzQ0Ljc2ODcgNTMuODcxNyA0NC43Njg3IDUzLjgzNTcgNDQuNzY4NyA1My44MDA3QzQ0Ljc2OTcgNTMuMzE0NyA0NC43Njk3IDUyLjkyMjcgNDQuNjE1NyA1Mi42MDY3QzQzLjk3MDcgNTEuMjg2NyA0MC42MjM3IDUxLjI4NjcgMjMuMzE3NyA1MS4yODY3SDIyLjQwNjdDMi43OTg3MiA1MS4yODY3IDEuNDk0NzMgNTEuMzM5NyAwLjc1MzcyNyA1Mi4xNTg3Wk0xNi4zODE3IDYyLjM2ODdDMTYuNTQ5NyA2NC4wMDc3IDE2LjgwMzcgNjYuMTUyNyAxNi45NDY3IDY3LjEzNTdMMTcuMjA3NyA2OC45MjI3SDIzLjE3NDdDMjguNjYxNyA2OC45MjI3IDI5LjExNTcgNjguODU1NyAyOC44MjA3IDY4LjA4ODdDMjguNjQzNyA2Ny42Mjk3IDI4LjI3MDcgNjUuNDg0NyAyNy45OTE3IDYzLjMyMTdMMjcuNDgyNyA1OS4zODk3SDE2LjA3NjdMMTYuMzgxNyA2Mi4zNjg3Wk0xMTUuMTEzIDYyLjA3OTdDMTE0Ljk0OCA2Mi41MTA3IDExNC44NzEgNjIuOTAxNyAxMTQuOTQzIDYyLjk0ODdDMTE1LjAxNSA2Mi45OTU3IDExNS43NSA2My41MDE3IDExNi41NzYgNjQuMDcyN0MxMTcuNDAzIDY0LjY0MjcgMTE4Ljc0NCA2NS4xMDk3IDExOS41NTYgNjUuMTA5N0MxMjAuODU0IDY1LjEwOTcgMTIxLjAzMSA2NC45NDk3IDEyMS4wMzEgNjMuNzc0N0MxMjEuMDMxIDYxLjg5MDcgMTIwLjIyIDYxLjI5NjcgMTE3LjY1IDYxLjI5NjdDMTE2LjAxNSA2MS4yOTY3IDExNS4zMzIgNjEuNTA2NyAxMTUuMTEzIDYyLjA3OTdaTTMxLjg5OTcgNjcuNjc5N0MzMS44OTk3IDY5LjIxMDcgMzYuMzQ2NyA2OS40NTU3IDM3LjE0MjcgNjcuOTY5N0MzNy42MjY3IDY3LjA2NTcgMzcuNTA0NyA2Ny4wMTU3IDM0Ljc3NTcgNjcuMDE1N0MzMi42MzQ3IDY3LjAxNTcgMzEuODk5NyA2Ny4xODU3IDMxLjg5OTcgNjcuNjc5N1pNNTAuMjkzNyA2OC4yMDc3QzUxLjI1NDcgNjkuNjczNyA1MS40NTk3IDY5LjY3MjcgNTIuNTM2NyA2OC4xOTI3TDUzLjM5MjcgNjcuMDE1N0g0OS41MTM3TDUwLjI5MzcgNjguMjA3N1pNMTA2LjYxOSA2Ny43NjE3QzEwMy44ODYgNjkuMjQ0NyAxMDMuMTE1IDcyLjkwMTcgMTA0Ljk1OSA3NS42Mzc3QzEwOC40MjQgODAuNzc4NyAxMTUuMzExIDc4LjUxNDcgMTE1LjMxMSA3Mi4yMzU3QzExNS4zMTEgNzAuNjIxNyAxMTUuMDEzIDY5Ljk1ODcgMTEzLjY5MSA2OC42MzY3QzExMi4zMzQgNjcuMjgwNyAxMTEuNzMyIDY3LjAxOTcgMTA5Ljk5NyA2Ny4wMzQ3QzEwOC44NTYgNjcuMDQ1NyAxMDcuMzM2IDY3LjM3MjcgMTA2LjYxOSA2Ny43NjE3Wk01NS45MzE3IDY4LjM5MTdDNTQuMDU3NyA2OS41MzQ3IDUyLjcwMTcgNzIuMzA4NyA1My4xMDk3IDc0LjE2NTdDNTQuMTcyNyA3OS4wMDI3IDU5Ljg5OTcgODAuMjg4NyA2My4xNTQ3IDc2LjQxOTdDNjQuMjQ0NyA3NS4xMjQ3IDY0LjM4MjcgNzQuNjA0NyA2NC4xODQ3IDcyLjU0NzdDNjMuNzY2NyA2OC4xOTU3IDU5LjY1MDcgNjYuMTIzNyA1NS45MzE3IDY4LjM5MTdaTTQwLjgzOTcgNjguMzI5N0MzOS40NTI3IDY5LjE4ODcgMzguMDk1NyA3MS41NDU3IDM4LjA5NTcgNzMuMDk0N0MzOC4wOTU3IDc0LjM4NjcgNDAuMDMwNyA3Ny4xMjg3IDQxLjQ0NjcgNzcuODQ1N0M0NC43OTE3IDc5LjUzODcgNDguODY2NyA3Ny4yMjU3IDQ5LjM4ODcgNzMuMzM3N0M0OS42Mzk3IDcxLjQ2MTcgNDkuNTIyNyA3MS4xODE3IDQ3Ljc0NjcgNjkuNDA0N0M0Ni4xNjQ3IDY3LjgyMzcgNDUuNTE0NyA2Ny40OTQ3IDQzLjk5MDcgNjcuNTA1N0M0Mi45NzY3IDY3LjUxMjcgNDEuNTU4NyA2Ny44ODI3IDQwLjgzOTcgNjguMzI5N1pNNS40Nzk3MiA3Mi41MzE3QzQuNTM3NzIgNzMuNDczNyA0LjUzNjczIDc0LjE1MTcgNS40NzM3MyA3NS40ODk3QzYuMjEyNzMgNzYuNTQ1NyA2LjI1MzcyIDc2LjU0ODcgMjEuMjM0NyA3Ni41NDg3QzM1LjMwOTcgNzYuNTQ4NyAzNi4yMzg3IDc2LjQ5NjcgMzYuMDE4NyA3NS43MTQ3QzM1Ljg4OTcgNzUuMjU2NyAzNS42NDM3IDc0LjE4MzcgMzUuNDcxNyA3My4zMzE3TDM1LjE1OTcgNzEuNzgyN0gyMC42OTQ3QzguMTc5NzMgNzEuNzgyNyA2LjEyNzcyIDcxLjg4MzcgNS40Nzk3MiA3Mi41MzE3WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xMTIuMTc5IDgzLjE0ODdDMTE0LjkwMiA4Mi43NzU3IDExNy44ODkgODEuMjU0NyAxMTguODg1IDc5LjczMzdDMTE5LjU2NyA3OC42OTQ3IDEyMC4wMDUgNzguNTQ4NyAxMjIuNDYgNzguNTQ4N0gxMjUuMjU4TDEyNC4yNzMgODEuMDUxN0MxMTYuMjYzIDEwMS4zOTMgOTcuNTkwNSAxMTUuMTE5IDc2LjA3MTUgMTE2LjQ4M0M1NC40NTE1IDExNy44NTIgMzMuMDY1NSAxMDUuMDg1IDIzLjQ3NDUgODUuMDgxN0wyMS44Mjg2IDgxLjY0NjdMMjcuODg3NSA4MS41MTM3QzMxLjIxOTUgODEuNDM5NyAzNC4xODg1IDgxLjQ3MTcgMzQuNDg1NSA4MS41ODU3QzM0Ljc4MTUgODEuNjk5NyAzNS45Mjg1IDgzLjMxNDcgMzcuMDM0NSA4NS4xNzU3QzM4LjEzOTUgODcuMDM1NyAzOS4yMjQ1IDg4LjU1ODcgMzkuNDQ2NSA4OC41NTg3QzM5LjY2NzUgODguNTU4NyA0MC4zNDc2IDg4LjE1NDcgNDAuOTU1NiA4Ny42NjE3TDQyLjA2MzYgODYuNzY1N0w0MC44NTY2IDg0LjkyMDdDMzkuNjc4NiA4My4xMjA3IDM4Ljg2NzUgODEuNDA4NyAzOS4xOTM1IDgxLjQwODdDMzkuMjgzNSA4MS40MDg3IDQwLjM4NDUgODEuODYzNyA0MS42NDA1IDgyLjQxOTdDNDQuNTk1NSA4My43MjY3IDQ3Ljg1MzUgODMuNDA0NyA1MC45MTA1IDgxLjUwMzdMNTMuMDkyNSA4MC4xNDc3TDU1LjAwNjUgODIuMTMxN0M1OC42NzQ1IDg1LjkzMjcgNjUuMjEwNSA4OC44NTQ3IDcxLjEwNTUgODkuMzI5N0M3Ny44MDU1IDg5Ljg2NzcgODUuMjM0NSA4Ny4zMzA3IDkwLjE3MzUgODIuODE2N0w5Mi43NTI1IDgwLjQ1OTdMOTQuNzczNSA4MS4xNzI3Qzk1Ljg4NDUgODEuNTY0NyA5Ny40NTA1IDgxLjg4NTcgOTguMjUyNSA4MS44ODU3Qzk5Ljk1MzUgODEuODg1NyAxMDMuODI1IDgwLjEzNTcgMTAzLjgyNSA3OS4zNjY3QzEwMy44MjUgNzkuMDc1NyAxMDQuNTUgNzkuNTQxNyAxMDUuNDM3IDgwLjQwMTdMMTA3LjA1IDgxLjk2NDdMMTA1LjkwNyA4NC4wMTA3TDEwNC43NjMgODYuMDU1N0wxMDYuMDIzIDg2Ljg4MDdDMTA3LjI2IDg3LjY5MjcgMTA3LjMwMiA4Ny42ODI3IDEwOC4zOTggODYuMzQ1N0MxMDkuMDEyIDg1LjU5NTcgMTA5LjYzNCA4NC42MzY3IDEwOS43OCA4NC4yMTI3QzEwOS45NDcgODMuNzI1NyAxMTAuODMxIDgzLjMzMzcgMTEyLjE3OSA4My4xNDg3Wk05My42MzQ1IDk3LjcyNTdDOTIuOTUyNSA5Ni40MDc3IDkyLjk1NDUgOTYuNDA1NyA5Ny4wNzc1IDkzLjAzNjdMMTAxLjIwMiA4OS42Njc3TDEwMi41MTQgOTAuNTc0N0MxMDMuMjM1IDkxLjA3NDcgMTAzLjgyNSA5MS42NDI3IDEwMy44MjUgOTEuODM3N0MxMDMuODI1IDkyLjYyNTcgOTUuNzIyNSA5OS4wNDQ3IDk0LjcyNzUgOTkuMDQ0N0M5NC41MDE1IDk5LjA0NDcgOTQuMDA5NSA5OC40NTA3IDkzLjYzNDUgOTcuNzI1N1pNNDQuMDU4NSA5My44NTg3QzQzLjE3NjUgOTIuODg0NyA0My4xODA1IDkyLjg1MTcgNDQuMjk4NSA5MS45MjA3QzQ0LjkyMzUgOTEuMzk5NyA0NS41NDM1IDkwLjk2NzcgNDUuNjc0NSA5MC45NjE3QzQ1LjgwNTUgOTAuOTU1NyA0Ni44Nzc1IDkxLjcyMjcgNDguMDU3NSA5Mi42NjY3QzQ5LjIzNzUgOTMuNjA5NyA1MS4zMzU1IDk1LjExMDcgNTIuNzE5NSA5Ni4wMDE3QzU0Ljk2NTUgOTcuNDQ2NyA1NS4xODA1IDk3LjcyNjcgNTQuNzE0NSA5OC41OTc3QzU0LjQyNjUgOTkuMTM1NyA1My44ODY1IDk5LjY5MTcgNTMuNTE0NSA5OS44MzQ3QzUyLjgwMTUgMTAwLjEwOSA0NS41OTA1IDk1LjU1MTcgNDQuMDU4NSA5My44NTg3Wk03OS4zOTY1IDEwMC45OTZDODAuMzc5NSAxMDAuNzM4IDgyLjM2MzUgMTAwLjIxMyA4My44MDU1IDk5LjgyODdDODcuNzQ3NSA5OC43Nzk3IDg4LjI4ODUgOTguODQ1NyA4OC44OTQ1IDEwMC40NTVDODkuNDI3NSAxMDEuODY1IDg5LjQyNTUgMTAxLjg2NSA4Ni45NzQ1IDEwMi41NTZDODMuNzk4NSAxMDMuNDUxIDc5LjcyMDUgMTA0LjI4OCA3OC41Mzg1IDEwNC4yODhDNzcuODI2NSAxMDQuMjg4IDc3LjYwOTUgMTAzLjk1OCA3Ny42MDk1IDEwMi44NzZDNzcuNjA5NSAxMDEuNjQ2IDc3LjgzODUgMTAxLjQwNCA3OS4zOTY1IDEwMC45OTZaTTU5LjgyODUgMTAyLjQyQzU5LjYxNjUgMTAyLjIxMiA1OS41ODY1IDEwMS40NzUgNTkuNzYwNSAxMDAuNzgyQzU5LjkzNDUgMTAwLjA4OCA2MC4xMjg1IDk5LjUyMDcgNjAuMTkxNSA5OS41MjA3QzYwLjI1NDUgOTkuNTIwNyA2Mi4zMjE1IDk5Ljk0NjcgNjQuNzg2NSAxMDAuNDY3QzY3LjI1MTUgMTAwLjk4NyA2OS43NTA1IDEwMS40MTYgNzAuMzQwNSAxMDEuNDJDNzEuMjQ2NSAxMDEuNDI3IDcxLjQxMjUgMTAxLjY4NiA3MS40MTI1IDEwMy4wOTZDNzEuNDEyNSAxMDQuMzA0IDcxLjIwMzUgMTA0Ljc2NCA3MC42NTM1IDEwNC43NjRDNjkuMjY5NSAxMDQuNzY0IDYwLjIxODUgMTAyLjgwNCA1OS44Mjg1IDEwMi40MloiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPC9zdmc+" alt="" style={{ height: '48px', width: 'auto', display: 'block' }} />
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgzIiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTgzIDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMjMuMDE1NiAyNC42NDlINDQuNTQ2M1Y1Mi43ODc0QzQxLjA1NjkgNTMuOTI1OCAzNy43NzE2IDU0LjcyMzkgMzQuNjkwNCA1NS4xODE3QzMxLjYwOTMgNTUuNjM5NiAyOC40NjAyIDU1Ljg2ODUgMjUuMjQyOSA1NS44Njg1QzE3LjA1MTMgNTUuODY4NSAxMC43OTYzIDUzLjQ2MTggNi40Nzc3NyA0OC42NDgzQzIuMTU5MjUgNDMuODM0OCAwIDM2LjkyMzkgMCAyNy45MTU3QzAgMTkuMTU0OSAyLjUwNTcyIDEyLjMyNDUgNy41MTcxOCA3LjQyNDM4QzEyLjUyODYgMi41MjQyOCAxOS40NzY2IDAuMDc0MjE4OCAyOC4zNjEyIDAuMDc0MjE4OEMzMy45Mjk1IDAuMDc0MjE4OCAzOS4yOTk4IDEuMTg3ODggNDQuNDcyMSAzLjQxNTE5TDQwLjY0ODUgMTIuNjIxNEMzNi42ODg4IDEwLjY0MTYgMzIuNTY4MyA5LjY1MTY3IDI4LjI4NjkgOS42NTE2N0MyMy4zMTI2IDkuNjUxNjcgMTkuMzI4MSAxMS4zMjIyIDE2LjMzMzYgMTQuNjYzMUMxMy4zMzkxIDE4LjAwNDEgMTEuODQxOSAyMi40OTU5IDExLjg0MTkgMjguMTM4NEMxMS44NDE5IDM0LjAyODQgMTMuMDQ4NCAzOC41MjY0IDE1LjQ2MTMgNDEuNjMyMkMxNy44NzQyIDQ0LjczODEgMjEuMzgyMiA0Ni4yOTEgMjUuOTg1NCA0Ni4yOTFDMjguMzg1OSA0Ni4yOTEgMzAuODIzNiA0Ni4wNDM1IDMzLjI5ODQgNDUuNTQ4NlYzNC4yMjY0SDIzLjAxNTZMMjMuMDE1NiAyNC42NDlaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik0xMy42ODEyIDcwLjQxNTRDMTEuMzU0NCA3MC40MTU0IDkuNTUyODcgNzEuMjg5NiA4LjI3NjQ5IDczLjAzOEM3LjAwMDExIDc0Ljc4NjMgNi4zNjE5NCA3Ny4yMjI4IDYuMzYxOTQgODAuMzQ3MkM2LjM2MTk0IDg2Ljg0ODggOC44MDE2NyA5MC4wOTk1IDEzLjY4MTIgOTAuMDk5NUMxNS43Mjg3IDkwLjA5OTUgMTguMjA4MyA4OS41ODc2IDIxLjEyIDg4LjU2MzlWOTMuNzQ5MkMxOC43MjY4IDk0Ljc0NjMgMTYuMDU0NCA5NS4yNDQ5IDEzLjEwMjggOTUuMjQ0OUM4Ljg2MTUxIDk1LjI0NDkgNS42MTczNyA5My45NTg2IDMuMzcwNDIgOTEuMzg1OUMxLjEyMzQ3IDg4LjgxMzIgMCA4NS4xMjAzIDAgODAuMzA3M0MwIDc3LjI3NTkgMC41NTE3NTkgNzQuNjIwMSAxLjY1NTI5IDcyLjMzOTlDMi43NTg4MiA3MC4wNTk3IDQuMzQ0MzIgNjguMzExNCA2LjQxMTc5IDY3LjA5NDhDOC40NzkyNSA2NS44NzgzIDEwLjkwMjQgNjUuMjcgMTMuNjgxMiA2NS4yN0MxNi41MTMxIDY1LjI3IDE5LjM1ODQgNjUuOTU0NyAyMi4yMTY5IDY3LjMyNDJMMjAuMjIyNiA3Mi4zNDk5QzE5LjEzMjMgNzEuODMxNCAxOC4wMzU1IDcxLjM3OTMgMTYuOTMxOSA3MC45OTM4QzE1LjgyODQgNzAuNjA4MiAxNC43NDQ4IDcwLjQxNTQgMTMuNjgxMiA3MC40MTU0WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE4Mi4wODMgMjcuOTE1N0MxODIuMDgzIDM2Ljg5OTIgMTc5Ljg1NiA0My44MDM5IDE3NS40MDEgNDguNjI5N0MxNzAuOTQ2IDUzLjQ1NTYgMTY0LjU2MiA1NS44Njg1IDE1Ni4yNDYgNTUuODY4NUMxNDcuOTMxIDU1Ljg2ODUgMTQxLjU0NiA1My40NTU2IDEzNy4wOTEgNDguNjI5N0MxMzIuNjM3IDQzLjgwMzkgMTMwLjQwOSAzNi44NzQ0IDEzMC40MDkgMjcuODQxNEMxMzAuNDA5IDE4LjgwODQgMTMyLjY0MyAxMS45MDk5IDEzNy4xMSA3LjE0NTk3QzE0MS41NzcgMi4zODE5OSAxNDcuOTggMCAxNTYuMzIgMEMxNjQuNjYgMCAxNzEuMDM5IDIuNDAwNTUgMTc1LjQ1NyA3LjIwMTY2QzE3OS44NzQgMTIuMDAyOCAxODIuMDgzIDE4LjkwNzQgMTgyLjA4MyAyNy45MTU3Wk0xNDIuNDc0IDI3LjkxNTdDMTQyLjQ3NCAzMy45Nzg5IDE0My42MjUgMzguNTQ0OSAxNDUuOTI2IDQxLjYxMzdDMTQ4LjIyOCA0NC42ODI0IDE1MS42NjggNDYuMjE2OCAxNTYuMjQ2IDQ2LjIxNjhDMTY1LjQyOCA0Ni4yMTY4IDE3MC4wMTggNDAuMTE2NCAxNzAuMDE4IDI3LjkxNTdDMTcwLjAxOCAxNS42OTAyIDE2NS40NTIgOS41Nzc0MiAxNTYuMzIgOS41Nzc0MkMxNTEuNzQyIDkuNTc3NDIgMTQ4LjI5IDExLjExOCAxNDUuOTYzIDE0LjE5OTFDMTQzLjYzNyAxNy4yODAyIDE0Mi40NzQgMjEuODUyNCAxNDIuNDc0IDI3LjkxNTdaIiBmaWxsPSIjMTI4NEQ3Ij48L3BhdGg+CjxwYXRoIGQ9Ik05Ny4xNjQyIDk0Ljg0NjFIOTEuMDgxNFY2NS42ODg4SDEwNy43OTRWNzAuNzU0NUg5Ny4xNjQyVjc4LjI3MzFIMTA3LjA1NlY4My4zMTg4SDk3LjE2NDJWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xMTkuNTgxIDk0Ljg0NjFIMTEzLjQ5OFY2NS42ODg4SDEzMC4yMVY3MC43NTQ1SDExOS41ODFWNzguMjczMUgxMjkuNDcyVjgzLjMxODhIMTE5LjU4MVY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTE1Mi43MDYgOTQuODQ2MUgxMzUuOTE0VjY1LjY4ODhIMTUyLjcwNlY3MC43NTQ1SDE0Mi4wOTdWNzcuMTU2M0gxNTEuOTY5VjgyLjIyMTlIMTQyLjA5N1Y4OS43NDA2SDE1Mi43MDZWOTQuODQ2MVoiIGZpbGw9ImJsYWNrIj48L3BhdGg+CjxwYXRoIGQ9Ik0xNjQuOTcyIDc4LjYzMjFIMTY2Ljk2NkMxNjguOTIgNzguNjMyMSAxNzAuMzYzIDc4LjMwNjQgMTcxLjI5NCA3Ny42NTQ5QzE3Mi4yMjQgNzcuMDAzNCAxNzIuNjkgNzUuOTc5NiAxNzIuNjkgNzQuNTgzNkMxNzIuNjkgNzMuMjAwOCAxNzIuMjE0IDcyLjIxNyAxNzEuMjY0IDcxLjYzMkMxNzAuMzEzIDcxLjA0NjkgMTY4Ljg0MSA3MC43NTQ1IDE2Ni44NDYgNzAuNzU0NUgxNjQuOTcyVjc4LjYzMjFaTTE2NC45NzIgODMuNjU3OFY5NC44NDYxSDE1OC43ODlWNjUuNjg4OEgxNjcuMjg1QzE3MS4yNDcgNjUuNjg4OCAxNzQuMTc5IDY2LjQxMDEgMTc2LjA4IDY3Ljg1MjdDMTc3Ljk4MSA2OS4yOTUzIDE3OC45MzIgNzEuNDg1NyAxNzguOTMyIDc0LjQyNEMxNzguOTMyIDc2LjEzOTIgMTc4LjQ2IDc3LjY2NDggMTc3LjUxNiA3OS4wMDFDMTc2LjU3MiA4MC4zMzcyIDE3NS4yMzYgODEuMzg0MyAxNzMuNTA3IDgyLjE0MjFDMTc3Ljg5NSA4OC42OTY5IDE4MC43NTQgOTIuOTMxNSAxODIuMDgzIDk0Ljg0NjFIMTc1LjIyM0wxNjguMjYyIDgzLjY1NzhMMTY0Ljk3MiA4My42NTc4WiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTU3LjQ2NDcgNTUuMTI2VjAuODUzNzZINjguOTcyNVY1NS4xMjZINTcuNDY0N1oiIGZpbGw9IiMxMjg0RDciPjwvcGF0aD4KPHBhdGggZD0iTTk0LjE0MTIgMjQuOTQ1OUg5Ny44NTM0QzEwMS40OTEgMjQuOTQ1OSAxMDQuMTc3IDI0LjMzOTYgMTA1LjkwOSAyMy4xMjY5QzEwNy42NDEgMjEuOTE0MyAxMDguNTA3IDIwLjAwODcgMTA4LjUwNyAxNy40MTAxQzEwOC41MDcgMTQuODM2MyAxMDcuNjIzIDEzLjAwNSAxMDUuODUzIDExLjkxNjFDMTA0LjA4NCAxMC44MjcyIDEwMS4zNDMgMTAuMjgyNyA5Ny42MzA3IDEwLjI4MjdIOTQuMTQxMlYyNC45NDU5Wk05NC4xNDEyIDM0LjMwMDZWNTUuMTI2SDgyLjYzMzRWMC44NTM3Nkg5OC40NDc0QzEwNS44MjIgMC44NTM3NiAxMTEuMjc5IDIuMTk2MzIgMTE0LjgxOCA0Ljg4MTQ3QzExOC4zNTcgNy41NjY2MiAxMjAuMTI3IDExLjY0MzkgMTIwLjEyNyAxNy4xMTMyQzEyMC4xMjcgMjAuMzA1NiAxMTkuMjQ4IDIzLjE0NTUgMTE3LjQ5MSAyNS42MzI2QzExNS43MzQgMjguMTE5OCAxMTMuMjQ3IDMwLjA2ODcgMTEwLjAyOSAzMS40NzkzQzExOC4xOTYgNDMuNjgwMSAxMjMuNTE3IDUxLjU2MjMgMTI1Ljk5MiA1NS4xMjZIMTEzLjIyMkwxMDAuMjY2IDM0LjMwMDZMOTQuMTQxMiAzNC4zMDA2WiIgZmlsbD0iIzEyODRENyI+PC9wYXRoPgo8cGF0aCBkPSJNNTEuMjE0NiA5NC44NDYxSDQ1LjA1MjFWODIuMjYxOEgzMy41MDQ5Vjk0Ljg0NjFIMjcuMzIyNFY2NS42ODg4SDMzLjUwNDlWNzcuMTE2NEg0NS4wNTIxVjY1LjY4ODhINTEuMjE0NlY5NC44NDYxWiIgZmlsbD0iYmxhY2siPjwvcGF0aD4KPHBhdGggZD0iTTg1LjAzODYgODAuMjI3NUM4NS4wMzg2IDg1LjA1MzggODMuODQyIDg4Ljc2MzMgODEuNDQ4OCA5MS4zNTZDNzkuMDU1NiA5My45NDg2IDc1LjYyNTMgOTUuMjQ0OSA3MS4xNTggOTUuMjQ0OUM2Ni42OTA3IDk1LjI0NDkgNjMuMjYwNCA5My45NDg2IDYwLjg2NzIgOTEuMzU2QzU4LjQ3NCA4OC43NjMzIDU3LjI3NzQgODUuMDQwNSA1Ny4yNzc0IDgwLjE4NzdDNTcuMjc3NCA3NS4zMzQ4IDU4LjQ3NzMgNzEuNjI4NiA2MC44NzcyIDY5LjA2OTJDNjMuMjc3IDY2LjUwOTggNjYuNzE3MyA2NS4yMzAxIDcxLjE5NzkgNjUuMjMwMUM3NS42Nzg1IDY1LjIzMDEgNzkuMTA1NCA2Ni41MTk4IDgxLjQ3ODcgNjkuMDk5MkM4My44NTE5IDcxLjY3ODUgODUuMDM4NiA3NS4zODc5IDg1LjAzODYgODAuMjI3NVpNNjMuNzU5IDgwLjIyNzVDNjMuNzU5IDgzLjQ4NSA2NC4zNzcyIDg1LjkzOCA2NS42MTM3IDg3LjU4NjZDNjYuODUwMiA4OS4yMzUzIDY4LjY5ODMgOTAuMDU5NiA3MS4xNTggOTAuMDU5NkM3Ni4wOTA2IDkwLjA1OTYgNzguNTU3IDg2Ljc4MjMgNzguNTU3IDgwLjIyNzVDNzguNTU3IDczLjY1OTUgNzYuMTAzOSA3MC4zNzU1IDcxLjE5NzkgNzAuMzc1NUM2OC43MzgyIDcwLjM3NTUgNjYuODgzNCA3MS4yMDMyIDY1LjYzMzcgNzIuODU4NUM2NC4zODM5IDc0LjUxMzggNjMuNzU5IDc2Ljk3MDEgNjMuNzU5IDgwLjIyNzVaIiBmaWxsPSJibGFjayI+PC9wYXRoPgo8L3N2Zz4=" alt="GiroChoffer" style={{ height: '36px', width: 'auto', display: 'block' }} />
+      </div>
+
+      <div style={{ width: '100%', maxWidth: '440px', background: '#fff', border: `1px solid ${colors.border}`, borderRadius: '18px', padding: '32px', boxShadow: '0 4px 24px rgba(16,24,40,.05)' }}>
+        {etapa === 'solicitar' && (
+          <div>
+            <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 8px' }}>
+              Recuperar senha
+            </h2>
+            <p style={{ margin: '0 0 24px', color: colors.muted, fontSize: '14px', lineHeight: 1.5 }}>
+              Informe o e-mail cadastrado e enviaremos um código para você redefinir sua senha.
+            </p>
+            <div style={{ marginBottom: '22px' }}>
+              <label style={lblStyle}>E-mail</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={inputStyle} placeholder="email@dominio.com" />
+            </div>
+            <Button onClick={enviarLink} style={primaryBtn} hoverStyle={{ background: colors.primaryHover }}>
+              Enviar código de recuperação
+            </Button>
+          </div>
+        )}
+
+        {etapa === 'enviado' && (
+          <div>
+            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: colors.tintBlue, color: colors.primary, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: '18px' }}>
+              ✓
+            </div>
+            <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 8px' }}>
+              Verifique seu e-mail
+            </h2>
+            <p style={{ margin: '0 0 24px', color: colors.muted, fontSize: '14px', lineHeight: 1.5 }}>
+              Enviamos um código de recuperação para <strong style={{ color: colors.ink }}>{email}</strong>. O código expira em 30 minutos.
+            </p>
+            <Button onClick={() => setEtapa('redefinir')} style={primaryBtn} hoverStyle={{ background: colors.primaryHover }}>
+              Já tenho o código
+            </Button>
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              <button onClick={() => { showToast('Reenviamos o código de recuperação.'); }} style={{ background: 'none', border: 'none', color: colors.primary, fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+                Reenviar código
+              </button>
+            </div>
+          </div>
+        )}
+
+        {etapa === 'redefinir' && (
+          <div>
+            <h2 style={{ fontFamily: fonts.heading, fontWeight: 800, fontSize: '24px', color: colors.inkStrong, margin: '0 0 8px' }}>
+              Definir nova senha
+            </h2>
+            <p style={{ margin: '0 0 24px', color: colors.muted, fontSize: '14px', lineHeight: 1.5 }}>
+              Digite o código recebido por e-mail e escolha uma nova senha.
+            </p>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={lblStyle}>Código de recuperação</label>
+              <input value={codigo} onChange={(e) => setCodigo(e.target.value)} style={inputStyle} placeholder="Ex.: 8X4K2P" />
+            </div>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={lblStyle}>Nova senha</label>
+              <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} style={inputStyle} placeholder="••••••••" />
+            </div>
+            <div style={{ marginBottom: '22px' }}>
+              <label style={lblStyle}>Confirmar nova senha</label>
+              <input type="password" value={conf} onChange={(e) => setConf(e.target.value)} style={inputStyle} placeholder="••••••••" />
+            </div>
+            <Button onClick={redefinir} style={primaryBtn} hoverStyle={{ background: colors.primaryHover }}>
+              Redefinir senha
+            </Button>
+          </div>
+        )}
+
+        <div style={{ textAlign: 'center', marginTop: '20px', paddingTop: '20px', borderTop: `1px solid ${colors.border}` }}>
+          <button onClick={() => navigate('/entrar?modo=login')} style={{ background: 'none', border: 'none', color: colors.muted, fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+            ← Voltar ao login
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ===== src/App.jsx =====
+
+/* Protege rotas que exigem um papel específico. Sem papel ativo,
+   redireciona para a tela de login. */
+function Require({ role, children }) {
+  const { role: active } = useApp();
+  if (!active) return <Navigate to="/entrar" replace />;
+  if (role && active !== role) {
+    return <Navigate to={active === 'empresa' ? '/empresa' : '/motorista'} replace />;
+  }
+  return children;
+}
+
+function App() {
+  return (
+    <>
+      <Routes>
+        {/* Públicas */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/entrar" element={<Auth />} />
+        <Route path="/recuperar-senha" element={<RecuperarSenha />} />
+
+        {/* Área autenticada (com header) */}
+        <Route element={<AppLayout />}>
+          <Route
+            path="/empresa"
+            element={
+              <Require role="empresa">
+                <EmpresaPainel />
+              </Require>
+            }
+          />
+          <Route
+            path="/empresa/nova"
+            element={
+              <Require role="empresa">
+                <EmpresaNovaCarga />
+              </Require>
+            }
+          />
+          <Route
+            path="/empresa/carga/:id"
+            element={
+              <Require role="empresa">
+                <EmpresaDetalhes />
+              </Require>
+            }
+          />
+          <Route
+            path="/motorista"
+            element={
+              <Require role="motorista">
+                <MotoristaPainel />
+              </Require>
+            }
+          />
+          <Route
+            path="/motorista/carga/:id"
+            element={
+              <Require role="motorista">
+                <MotoristaDetalhes />
+              </Require>
+            }
+          />
+          <Route
+            path="/motorista/minhas"
+            element={
+              <Require role="motorista">
+                <MotoristaMinhas />
+              </Require>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <Require>
+                <Perfil />
+              </Require>
+            }
+          />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <Toast />
+    </>
+  );
+}
+
+
+
+createRoot(document.getElementById('root')).render(
+  React.createElement(React.StrictMode, null,
+    React.createElement(BrowserRouter, null,
+      React.createElement(AppProvider, null,
+        React.createElement(App, null)))));
+
+</script>
+<script>
+/* Transpila o JSX com Babel (mantendo os import/export do módulo) e
+   executa o resultado como um módulo ES real via blob URL, para que o
+   import map (React 19 + React Router 8) seja respeitado. */
+window.addEventListener('DOMContentLoaded', function () {
+  function showErr(e) {
+    document.getElementById('root').innerHTML =
+      '<pre style="padding:24px;color:#c0392b;font-family:monospace;white-space:pre-wrap">' +
+      (e && e.message ? e.message : e) + '</pre>';
+    console.error(e);
+  }
+  try {
+    var src = document.getElementById('app-src').textContent;
+    var out = Babel.transform(src, { presets: ['react'], sourceType: 'module' }).code;
+    var url = URL.createObjectURL(new Blob([out], { type: 'text/javascript' }));
+    import(url).catch(showErr);
+  } catch (e) {
+    showErr(e);
+  }
+});
+</script>
+</body>
+</html>
