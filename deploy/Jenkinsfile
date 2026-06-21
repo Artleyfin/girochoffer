@@ -12,7 +12,7 @@ pipeline {
                     // copia o backend com "COPY backend/ ./" (contexto = raiz do repo).
                     sh '''#!/bin/bash
                         cat > backend/.env << ENVFILE
-# Database (dentro do volume persistente dwa_data -> /app/data)
+# Database (dentro do volume persistente girochoffer_data -> /app/data)
 DATABASE_PATH=/app/data/dados.db
 
 # Logging
@@ -21,15 +21,15 @@ LOG_RETENTION_DAYS=30
 
 # Email (Resend.com)
 RESEND_API_KEY=${RESEND_API_KEY}
-RESEND_FROM_EMAIL=noreply@ifes.site
-RESEND_FROM_NAME="Default Web App"
+RESEND_FROM_EMAIL=girochoffer@ifes.site
+RESEND_FROM_NAME="GiroChoffer"
 
 # App
-APP_NAME=DefaultWebApp
+APP_NAME=GiroChoffer
 # BASE_URL = origem pública HTTPS (links de e-mail e back_urls/webhooks de
 # pagamento). NUNCA use localhost aqui: todo link enviado ao usuário ficaria
 # inacessível. Fork: troque pelo seu domínio público (ver docs/FORKING.md §2b).
-BASE_URL=https://dwa.ifes.site
+BASE_URL=https://girochoffer.ifes.site
 SECRET_KEY=${SECRET_KEY}
 TIMEZONE=America/Sao_Paulo
 RUNNING_MODE=Production
@@ -111,7 +111,7 @@ RATE_LIMIT_PUBLIC_MINUTOS=1
 RATE_LIMIT_EXAMPLES_MAX=100
 RATE_LIMIT_EXAMPLES_MINUTOS=1
 
-# Server (porta INTERNA do container; o compose publica 8410:8000)
+# Server (porta INTERNA do container; o compose publica 8412:8000)
 HOST=0.0.0.0
 PORT=8000
 ENVFILE

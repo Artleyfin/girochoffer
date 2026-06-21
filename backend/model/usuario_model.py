@@ -14,3 +14,5 @@ class Usuario:
     data_token: Optional[datetime] = None
     data_cadastro: Optional[datetime] = None
     data_atualizacao: Optional[datetime] = None
+    telefone: Optional[str] = None
+    foto_url: Optional[str] = None

@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
+import Toasts from '../ui/Toasts'
+import ConfirmModal from '../ui/ConfirmModal'
+import AlertModal from '../ui/AlertModal'
 
 // Componente raiz: verifica a sessão (GET /api/me) uma vez no boot e
 // segura a renderização até saber se há usuário logado.
@@ -22,5 +25,12 @@ export default function RootGate() {
     )
   }
 
-  return <Outlet />
+  return (
+    <>
+      <Outlet />
+      <Toasts />
+      <ConfirmModal />
+      <AlertModal />
+    </>
+  )
 }

@@ -56,11 +56,18 @@ class TestCsrfToken:
 class TestCadastrar:
     def _payload(self, **over):
         base = {
-            "perfil": Perfil.CLIENTE.value,
+            "tipo": "Empresa",
             "nome": "Fulano de Tal",
             "email": "fulano@example.com",
             "senha": "Senha@123",
             "confirmar_senha": "Senha@123",
+            "empresa": {
+                "cnpj": "11.222.333/0001-81",
+                "razao_social": "Empresa Teste LTDA",
+                "nome_fantasia": "Empresa Teste",
+                "telefone": "(27) 99999-0000",
+                "whatsapp": None,
+            },
         }
         base.update(over)
         return base
@@ -73,7 +80,7 @@ class TestCadastrar:
         corpo = resp.json()
         assert corpo["email"] == "fulano@example.com"
         assert corpo["nome"] == "Fulano de Tal"
-        assert corpo["perfil"] == Perfil.CLIENTE.value
+        assert corpo["perfil"] == Perfil.EMPRESA.value
         assert "id" in corpo
         assert "senha" not in corpo  # nunca expor senha
 
@@ -116,9 +123,9 @@ class TestCadastrar:
                            headers={"X-CSRF-Token": token})
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def test_cadastro_perfil_invalido_422(self, client):
+    def test_cadastro_tipo_invalido_422(self, client):
         token = _csrf(client)
-        resp = client.post("/api/cadastrar", json=self._payload(perfil="Inexistente"),
+        resp = client.post("/api/cadastrar", json=self._payload(tipo="Inexistente"),
                            headers={"X-CSRF-Token": token})
         assert resp.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 

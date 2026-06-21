@@ -33,11 +33,18 @@ def _registrar(client, nome, email, senha="Senha@123"):
     resp = client.post(
         "/api/cadastrar",
         json={
-            "perfil": "Cliente",
+            "tipo": "Empresa",
             "nome": nome,
             "email": email,
             "senha": senha,
             "confirmar_senha": senha,
+            "empresa": {
+                "cnpj": "11.222.333/0001-81",
+                "razao_social": "Empresa Teste LTDA",
+                "nome_fantasia": "Empresa Teste",
+                "telefone": "(27) 99999-0000",
+                "whatsapp": None,
+            },
         },
         headers={"X-CSRF-Token": token},
     )

@@ -107,7 +107,7 @@ Dicionário com dados de um usuário de teste (Cliente).
 ```python
 def test_com_dados_usuario(usuario_teste):
     assert usuario_teste["email"] == "teste@example.com"
-    assert usuario_teste["perfil"] == Perfil.CLIENTE.value
+    assert usuario_teste["perfil"] == Perfil.EMPRESA.value
 ```
 
 #### `admin_teste` - Dados de admin
@@ -123,7 +123,7 @@ Dicionário com dados de um vendedor de teste.
 
 ```python
 def test_com_dados_vendedor(vendedor_teste):
-    assert vendedor_teste["perfil"] == Perfil.VENDEDOR.value
+    assert vendedor_teste["perfil"] == Perfil.MOTORISTA.value
 ```
 
 ### Fixtures de Ação
@@ -500,7 +500,7 @@ def test_fluxo_completo_cadastro_e_login(client):
 
     # 1. Cadastrar novo usuário
     response_cadastro = client.post("/cadastrar", data={
-        "perfil": Perfil.CLIENTE.value,
+        "perfil": Perfil.EMPRESA.value,
         "nome": "João da Silva",
         "email": "joao@example.com",
         "senha": "Senha@123",
@@ -515,7 +515,7 @@ def test_fluxo_completo_cadastro_e_login(client):
     usuario = usuario_repo.obter_por_email("joao@example.com")
     assert usuario is not None
     assert usuario.nome == "João da Silva"
-    assert usuario.perfil == Perfil.CLIENTE.value
+    assert usuario.perfil == Perfil.EMPRESA.value
 
     # 3. Fazer login
     response_login = client.post("/login", data={
@@ -581,7 +581,7 @@ def test_restaurar_backup_cria_backup_automatico(
         nome="Usuario Teste",
         email="teste_restauracao@example.com",
         senha=criar_hash_senha("Senha@123"),
-        perfil=Perfil.CLIENTE.value
+        perfil=Perfil.EMPRESA.value
     )
     usuario_id = usuario_repo.inserir(novo_usuario)
     assert usuario_id is not None

@@ -34,6 +34,14 @@ from repo import (
     pagamento_repo,
 )
 from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo
+from repo import (
+    catalogo_repo,
+    empresa_repo,
+    motorista_repo,
+    veiculo_repo,
+    carga_repo,
+    interesse_carga_repo,
+)
 
 # Rotas (API JSON)
 from routes.auth_routes import router as auth_router
@@ -47,6 +55,9 @@ from routes.pagamento_routes import router as pagamento_router
 from routes.admin_pagamentos_routes import router as admin_pagamentos_router
 from routes.admin_backups_routes import router as admin_backups_router
 from routes.admin_usuarios_routes import router as admin_usuarios_router
+from routes.catalogo_routes import router as catalogo_router
+from routes.empresa_routes import router as empresa_router
+from routes.motorista_routes import router as motorista_router
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -95,6 +106,13 @@ if static_path.exists():
 # ---------------------------------------------------------------------------
 TABELAS = [
     (usuario_repo, "usuario"),
+    # GiroChoffer (ordem de FK; catalogo_repo cria tipo_veiculo + tipo_carroceria)
+    (catalogo_repo, "tipo_veiculo + tipo_carroceria"),
+    (empresa_repo, "empresa"),
+    (motorista_repo, "motorista"),
+    (veiculo_repo, "veiculo"),
+    (carga_repo, "carga"),
+    (interesse_carga_repo, "interesse_carga"),
     (configuracao_repo, "configuracao"),
     (chamado_repo, "chamado"),
     (chamado_interacao_repo, "chamado_interacao"),
@@ -115,6 +133,13 @@ try:
 except sqlite3.Error as e:
     logger.error(f"Erro ao criar tabelas: {e}")
     raise
+
+# Seed fixo dos catálogos (tipos de veículo e carroceria)
+try:
+    catalogo_repo.seed_inicial()
+    logger.info("Seed de catálogos (tipo_veiculo/tipo_carroceria) verificado")
+except sqlite3.Error as e:
+    logger.error(f"Erro ao executar seed de catálogos: {e}", exc_info=True)
 
 try:
     inicializar_dados()
@@ -148,6 +173,9 @@ ROUTERS = [
     (admin_pagamentos_router, ["Admin - Pagamentos"], "admin de pagamentos"),
     (admin_backups_router, ["Admin - Backups"], "admin de backups"),
     (admin_usuarios_router, ["Admin - Usuários"], "admin de usuários"),
+    (catalogo_router, ["Catalogos"], "catalogos"),
+    (empresa_router, ["Empresa"], "empresa"),
+    (motorista_router, ["Motorista"], "motorista"),
 ]
 
 for router, tags, nome in ROUTERS:

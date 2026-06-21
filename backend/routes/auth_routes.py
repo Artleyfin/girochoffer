@@ -8,7 +8,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Request, status
 
 # DTOs (entrada)
-from dtos.auth_dto import LoginDTO, CadastroDTO, EsqueciSenhaDTO, RedefinirSenhaDTO
+from dtos.auth_dto import LoginDTO, EsqueciSenhaDTO, RedefinirSenhaDTO
+from dtos.cadastro_dto import CadastroDTO, TIPO_EMPRESA, TIPO_MOTORISTA
 
 # Schemas (saída)
 from dtos.responses.comum import MensagemResponse, TokenCsrfResponse
@@ -17,9 +18,12 @@ from dtos.responses.usuario_response import UsuarioResponse
 # Models
 from model.usuario_model import Usuario
 from model.usuario_logado_model import UsuarioLogado
+from model.empresa_model import Empresa
+from model.motorista_model import Motorista
+from model.veiculo_model import Veiculo
 
 # Repositories
-from repo import usuario_repo
+from repo import usuario_repo, empresa_repo, motorista_repo, veiculo_repo
 
 # Utilities
 from util.api_helpers import checar_rate_limit
@@ -134,22 +138,32 @@ async def post_logout(request: Request):
     status_code=status.HTTP_201_CREATED,
 )
 async def post_cadastrar(request: Request, dto: CadastroDTO):
-    """Cria um novo usuário."""
+    """
+    Cadastro composto: cria Usuario + (Empresa) OU Usuario + (Motorista + Veículo).
+
+    O PERFIL é FIXADO no servidor a partir de ``dto.tipo`` (Empresa|Motorista),
+    NUNCA aceito do cliente — evita escalada de privilégio (ADMIN jamais é
+    selecionável no auto-cadastro público).
+
+    Como o stack é SQL puro (sem ORM/transação automática que abranja as duas
+    inserções), o ROLLBACK é MANUAL: se a 2ª inserção (Empresa/Motorista) ou a
+    do veículo falhar, o usuário recém-criado é excluído para não deixar conta
+    órfã sem perfil de domínio.
+    """
     checar_rate_limit(cadastro_limiter, request)
 
-    # Guarda anti-escalada de privilégio: o perfil chega do cliente, então o
-    # servidor precisa rejeitar qualquer perfil fora da lista de auto-cadastro
-    # (que NUNCA inclui ADMIN). Sem isso, um anônimo poderia se registrar como
-    # Administrador. A escolha de perfil admin só existe nas rotas de admin.
-    perfis_permitidos = {perfil.value for perfil in Perfil.perfis_autocadastro()}
-    if dto.perfil not in perfis_permitidos:
-        mensagem_perfil = "Perfil não permitido para auto-cadastro."
+    # Perfil derivado do tipo — fonte única via enum Perfil (nunca string literal).
+    if dto.tipo == TIPO_EMPRESA:
+        perfil = Perfil.EMPRESA.value
+    elif dto.tipo == TIPO_MOTORISTA:
+        perfil = Perfil.MOTORISTA.value
+    else:  # defesa extra (o DTO já valida, mas não confiamos cegamente)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={
-                "detail": mensagem_perfil,
+                "detail": "Tipo de cadastro não permitido.",
                 "type": "forbidden",
-                "errors": {"perfil": [mensagem_perfil]},
+                "errors": {"tipo": ["Tipo de cadastro não permitido."]},
             },
         )
 
@@ -169,7 +183,7 @@ async def post_cadastrar(request: Request, dto: CadastroDTO):
         nome=dto.nome,
         email=dto.email,
         senha=criar_hash_senha(dto.senha),
-        perfil=dto.perfil,
+        perfil=perfil,
     )
     usuario_id = usuario_repo.inserir(usuario)
     if not usuario_id:
@@ -178,11 +192,105 @@ async def post_cadastrar(request: Request, dto: CadastroDTO):
             detail="Erro ao realizar cadastro. Tente novamente.",
         )
 
-    logger.info(f"Novo usuário cadastrado: {usuario.email}")
+    # A partir daqui, qualquer falha exige ROLLBACK manual do usuário criado.
+    try:
+        if dto.tipo == TIPO_EMPRESA:
+            _criar_perfil_empresa(usuario_id, dto)
+        else:
+            _criar_perfil_motorista(usuario_id, dto)
+    except HTTPException:
+        usuario_repo.excluir(usuario_id)
+        raise
+    except Exception:
+        usuario_repo.excluir(usuario_id)
+        logger.exception(
+            f"Falha ao criar perfil de domínio para usuário {usuario_id}; "
+            "usuário revertido (rollback manual)."
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao realizar cadastro. Tente novamente.",
+        )
+
+    logger.info(f"Novo usuário cadastrado ({perfil}): {usuario.email}")
     servico_email.enviar_boas_vindas(usuario.email, usuario.nome)
 
     criado = usuario_repo.obter_por_id(usuario_id)
+    # Auto-login: o fluxo "Criar conta e entrar" estabelece a sessão na hora.
+    criar_sessao(request, UsuarioLogado.from_usuario(criado))
     return UsuarioResponse.de_usuario(criado)
+
+
+def _criar_perfil_empresa(usuario_id: int, dto: CadastroDTO) -> None:
+    """Cria a Empresa vinculada ao usuário. Levanta em caso de falha (caller faz rollback)."""
+    bloco = dto.empresa
+    assert bloco is not None  # garantido pelo model_validator do DTO
+    empresa = Empresa(
+        id=0,
+        usuario_id=usuario_id,
+        cnpj=bloco.cnpj,
+        razao_social=bloco.razao_social,
+        nome_fantasia=bloco.nome_fantasia,
+        telefone=bloco.telefone,
+        whatsapp=bloco.whatsapp,
+        foto_url=None,
+        verificada=False,
+        data_cadastro=agora(),
+    )
+    empresa_id = empresa_repo.inserir(empresa)
+    if not empresa_id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao criar dados da empresa.",
+        )
+
+
+def _criar_perfil_motorista(usuario_id: int, dto: CadastroDTO) -> None:
+    """
+    Cria o Motorista + Veículo inicial vinculados ao usuário.
+
+    Se a inserção do veículo falhar após criar o motorista, o motorista é
+    removido aqui e a exceção propaga — o caller então reverte o usuário.
+    """
+    bloco = dto.motorista
+    assert bloco is not None  # garantido pelo model_validator do DTO
+    motorista = Motorista(
+        id=0,
+        usuario_id=usuario_id,
+        cpf=bloco.cpf,
+        telefone=bloco.telefone,
+        cidade=bloco.cidade,
+        nota=0.0,
+        total_viagens=0,
+        foto_url=None,
+        verificado=False,
+        data_cadastro=agora(),
+    )
+    motorista_id = motorista_repo.inserir(motorista)
+    if not motorista_id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao criar dados do motorista.",
+        )
+
+    veiculo = Veiculo(
+        id=0,
+        motorista_id=motorista_id,
+        tipo_veiculo_id=bloco.tipo_veiculo_id,
+        tipo_carroceria_id=bloco.tipo_carroceria_id,
+        placa=bloco.placa,
+        capacidade_kg=bloco.capacidade_kg,
+        ativo=True,
+        data_cadastro=agora(),
+    )
+    veiculo_id = veiculo_repo.inserir(veiculo)
+    if not veiculo_id:
+        # Propaga: o caller faz o rollback manual excluindo o usuário recém-criado
+        # (motorista_repo não expõe exclusão; reverter o usuário é o contrato).
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao criar veículo do motorista.",
+        )
 
 
 # =============================================================================

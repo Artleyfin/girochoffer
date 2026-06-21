@@ -8,6 +8,8 @@ interface AuthState {
   /** true até a verificação inicial de sessão terminar. */
   carregando: boolean
   isAdmin: () => boolean
+  isEmpresa: () => boolean
+  isMotorista: () => boolean
   /** Verifica a sessão atual no backend (GET /api/me). Chamado no boot. */
   carregarSessao: () => Promise<void>
   login: (email: string, senha: string) => Promise<Usuario>
@@ -21,6 +23,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   carregando: true,
 
   isAdmin: () => get().usuario?.perfil === Perfil.ADMIN,
+  isEmpresa: () => get().usuario?.perfil === Perfil.EMPRESA,
+  isMotorista: () => get().usuario?.perfil === Perfil.MOTORISTA,
 
   carregarSessao: async () => {
     try {

@@ -69,9 +69,11 @@ class MiddlewareSegurancaHeaders(BaseHTTPMiddleware):
             # Manter apenas enquanto scripts inline forem necessários
             "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
             # Bootstrap requer 'unsafe-inline' para estilos dinâmicos
-            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+            # https://fonts.googleapis.com: folha de estilo (@font-face) do Google Fonts (Archivo + Public Sans)
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com",
             "img-src 'self' data: https:",
-            "font-src 'self' https://cdn.jsdelivr.net",
+            # https://fonts.gstatic.com: arquivos de fonte (.woff2) servidos pelo Google Fonts
+            "font-src 'self' https://cdn.jsdelivr.net https://fonts.gstatic.com",
             "connect-src 'self'",
             "frame-ancestors 'none'",
             # Bloquear object e embed para prevenir plugins maliciosos

@@ -48,7 +48,7 @@ class TestLogin:
         corpo = response.json()
         assert corpo["email"] == usuario_teste["email"]
         assert corpo["nome"] == usuario_teste["nome"]
-        assert corpo["perfil"] == Perfil.CLIENTE.value
+        assert corpo["perfil"] == Perfil.EMPRESA.value
         assert "foto_url" in corpo
         # Senha nunca deve ser exposta
         assert "senha" not in corpo
@@ -143,11 +143,18 @@ class TestCadastro:
         response = client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.CLIENTE.value,
+                "tipo": "Empresa",
                 "nome": "Novo Usuario",
                 "email": "novo@example.com",
                 "senha": "Senha@123",
                 "confirmar_senha": "Senha@123",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
             },
             headers={"X-CSRF-Token": token},
         )
@@ -156,7 +163,7 @@ class TestCadastro:
         corpo = response.json()
         assert corpo["email"] == "novo@example.com"
         assert corpo["nome"] == "Novo Usuario"
-        assert corpo["perfil"] == Perfil.CLIENTE.value
+        assert corpo["perfil"] == Perfil.EMPRESA.value
         assert corpo["id"] > 0
         assert "senha" not in corpo
 
@@ -168,28 +175,40 @@ class TestCadastro:
         client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.CLIENTE.value,
+                "tipo": "Empresa",
                 "nome": "Usuario Teste",
                 "email": "persist@example.com",
                 "senha": "Senha@123",
                 "confirmar_senha": "Senha@123",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
             },
             headers={"X-CSRF-Token": token},
         )
 
         usuario = usuario_repo.obter_por_email("persist@example.com")
         assert usuario is not None
-        assert usuario.perfil == Perfil.CLIENTE.value
+        assert usuario.perfil == Perfil.EMPRESA.value
 
-    def test_cadastro_com_perfil_admin_retorna_403(self, client):
-        """Auto-cadastro com perfil Administrador deve ser rejeitado (anti-escalada)."""
+    def test_cadastro_com_tipo_admin_retorna_422(self, client):
+        """Auto-cadastro com tipo Administrador deve ser rejeitado (anti-escalada).
+
+        O perfil é FIXADO no servidor a partir de ``tipo`` (Empresa|Motorista).
+        Administrador não é um tipo selecionável publicamente, então o DTO o
+        rejeita (422) e nenhum usuário é persistido.
+        """
         from repo import usuario_repo
 
         token = _csrf(client)
         response = client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.ADMIN.value,
+                "tipo": Perfil.ADMIN.value,
                 "nome": "Invasor Malicioso",
                 "email": "invasor@example.com",
                 "senha": "Senha@123",
@@ -198,9 +217,39 @@ class TestCadastro:
             headers={"X-CSRF-Token": token},
         )
 
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         # Não deve ter criado nada no banco.
         assert usuario_repo.obter_por_email("invasor@example.com") is None
+
+    def test_cadastro_ignora_perfil_enviado_pelo_cliente(self, client):
+        """Campo ``perfil`` malicioso enviado pelo cliente é ignorado (anti-escalada)."""
+        from repo import usuario_repo
+
+        token = _csrf(client)
+        response = client.post(
+            "/api/cadastrar",
+            json={
+                "tipo": "Empresa",
+                "perfil": Perfil.ADMIN.value,  # tentativa de escalada — deve ser ignorada
+                "nome": "Cliente Esperto",
+                "email": "esperto@example.com",
+                "senha": "Senha@123",
+                "confirmar_senha": "Senha@123",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
+            },
+            headers={"X-CSRF-Token": token},
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        usuario = usuario_repo.obter_por_email("esperto@example.com")
+        assert usuario is not None
+        assert usuario.perfil == Perfil.EMPRESA.value
 
     def test_cadastro_com_email_duplicado_retorna_409(self, client, criar_usuario, usuario_teste):
         """E-mail já cadastrado deve retornar 409 (conflito)"""
@@ -214,11 +263,18 @@ class TestCadastro:
         response = client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.CLIENTE.value,
+                "tipo": "Empresa",
                 "nome": "Outro Nome",
                 "email": usuario_teste["email"],
                 "senha": "OutraSenha@123",
                 "confirmar_senha": "OutraSenha@123",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
             },
             headers={"X-CSRF-Token": token},
         )
@@ -235,11 +291,18 @@ class TestCadastro:
         response = client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.CLIENTE.value,
+                "tipo": "Empresa",
                 "nome": "Usuario Teste",
                 "email": "diff@example.com",
                 "senha": "Senha@123",
                 "confirmar_senha": "SenhaDiferente@123",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
             },
             headers={"X-CSRF-Token": token},
         )
@@ -253,11 +316,18 @@ class TestCadastro:
         response = client.post(
             "/api/cadastrar",
             json={
-                "perfil": Perfil.CLIENTE.value,
+                "tipo": "Empresa",
                 "nome": "Usuario Teste",
                 "email": "fraca@example.com",
                 "senha": "123456",
                 "confirmar_senha": "123456",
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
             },
             headers={"X-CSRF-Token": token},
         )

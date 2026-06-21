@@ -8,18 +8,20 @@ CREATE TABLE IF NOT EXISTS usuario (
     token_redefinicao TEXT,
     data_token TIMESTAMP,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    data_atualizacao TIMESTAMP
+    data_atualizacao TIMESTAMP,
+    telefone TEXT,
+    foto_url TEXT
 )
 """
 
 INSERIR = """
-INSERT INTO usuario (nome, email, senha, perfil)
-VALUES (?, ?, ?, ?)
+INSERT INTO usuario (nome, email, senha, perfil, telefone, foto_url)
+VALUES (?, ?, ?, ?, ?, ?)
 """
 
 ALTERAR = """
 UPDATE usuario
-SET nome = ?, email = ?, perfil = ?, data_atualizacao = CURRENT_TIMESTAMP
+SET nome = ?, email = ?, perfil = ?, telefone = ?, foto_url = ?, data_atualizacao = CURRENT_TIMESTAMP
 WHERE id = ?
 """
 
@@ -66,8 +68,13 @@ BUSCAR_POR_TERMO = """
 SELECT id, nome, email, senha, perfil,
        token_redefinicao, data_token,
        data_cadastro AS "data_cadastro [timestamp]",
-       data_atualizacao AS "data_atualizacao [timestamp]"
+       data_atualizacao AS "data_atualizacao [timestamp]",
+       telefone, foto_url
 FROM usuario
 WHERE (LOWER(nome) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?))
 LIMIT ?
 """
+
+# Migração defensiva: adiciona colunas em bancos pré-existentes (forks/starter).
+ADICIONAR_COLUNA_TELEFONE = "ALTER TABLE usuario ADD COLUMN telefone TEXT"
+ADICIONAR_COLUNA_FOTO_URL = "ALTER TABLE usuario ADD COLUMN foto_url TEXT"

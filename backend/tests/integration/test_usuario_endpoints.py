@@ -68,7 +68,7 @@ class TestGetPerfil:
         corpo = resp.json()
         assert corpo["email"] == usuario_teste["email"]
         assert corpo["nome"] == usuario_teste["nome"]
-        assert corpo["perfil"] == Perfil.CLIENTE.value
+        assert corpo["perfil"] == Perfil.EMPRESA.value
         assert "id" in corpo
         assert "foto_url" in corpo
         assert "senha" not in corpo  # nunca expor senha

@@ -133,7 +133,7 @@ class TestStream:
                 nome="Usuario SSE",
                 email="sse@example.com",
                 senha=criar_hash_senha("Senha@123"),
-                perfil=Perfil.CLIENTE.value,
+                perfil=Perfil.EMPRESA.value,
             )
         )
 

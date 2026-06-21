@@ -61,6 +61,31 @@ class TestMiddlewareSegurancaHeaders:
         assert "object-src 'none'" in csp
         assert "base-uri 'self'" in csp
         assert "form-action 'self'" in csp
+        # Google Fonts (Archivo + Public Sans): folha de estilo via style-src,
+        # arquivos de fonte via font-src
+        assert "https://fonts.googleapis.com" in csp
+        assert "https://fonts.gstatic.com" in csp
+
+    def test_csp_permite_google_fonts(self, client):
+        """style-src deve liberar fonts.googleapis.com e font-src fonts.gstatic.com"""
+        response = client.get("/test")
+        csp = response.headers.get("Content-Security-Policy", "")
+
+        # Cada diretiva da CSP é separada por ';'
+        diretivas = {
+            partes[0]: partes
+            for d in csp.split(";")
+            if (partes := d.strip().split())
+        }
+
+        assert "https://fonts.googleapis.com" in diretivas["style-src"]
+        assert "https://fonts.gstatic.com" in diretivas["font-src"]
+        # 'self' deve permanecer como primeira origem das diretivas
+        assert diretivas["style-src"][1] == "'self'"
+        assert diretivas["font-src"][1] == "'self'"
+        # Google Fonts NÃO deve aparecer onde não pertence
+        assert "https://fonts.gstatic.com" not in diretivas["style-src"]
+        assert "https://fonts.googleapis.com" not in diretivas["font-src"]
 
     def test_header_referrer_policy(self, client):
         """Deve adicionar Referrer-Policy: strict-origin-when-cross-origin"""

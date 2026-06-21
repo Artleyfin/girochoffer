@@ -17,6 +17,8 @@ from sql.usuario_sql import (
     LIMPAR_TOKEN,
     OBTER_TODOS_POR_PERFIL,
     BUSCAR_POR_TERMO,
+    ADICIONAR_COLUNA_TELEFONE,
+    ADICIONAR_COLUNA_FOTO_URL,
 )
 from util.db_util import obter_conexao
 from util.foto_util import criar_foto_padrao_usuario
@@ -32,6 +34,7 @@ def _row_to_usuario(row: sqlite3.Row) -> Usuario:
     Returns:
         Objeto Usuario populado
     """
+    colunas = row.keys()
     return Usuario(
         id=row["id"],
         nome=row["nome"],
@@ -41,14 +44,27 @@ def _row_to_usuario(row: sqlite3.Row) -> Usuario:
         token_redefinicao=row["token_redefinicao"],
         data_token=row["data_token"],
         data_cadastro=row["data_cadastro"],
-        data_atualizacao=row["data_atualizacao"]
+        data_atualizacao=row["data_atualizacao"],
+        telefone=row["telefone"] if "telefone" in colunas else None,
+        foto_url=row["foto_url"] if "foto_url" in colunas else None,
     )
+
+
+def _coluna_existe(cursor: sqlite3.Cursor, tabela: str, coluna: str) -> bool:
+    cursor.execute(f"PRAGMA table_info({tabela})")
+    return any(linha[1] == coluna for linha in cursor.fetchall())
 
 
 def criar_tabela() -> bool:
     with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
+        # Migração defensiva para bancos pré-existentes (forks/starter) que
+        # ainda não possuem as colunas telefone/foto_url.
+        if not _coluna_existe(cursor, "usuario", "telefone"):
+            cursor.execute(ADICIONAR_COLUNA_TELEFONE)
+        if not _coluna_existe(cursor, "usuario", "foto_url"):
+            cursor.execute(ADICIONAR_COLUNA_FOTO_URL)
         return True
 
 
@@ -59,7 +75,9 @@ def inserir(usuario: Usuario) -> Optional[int]:
             usuario.nome,
             usuario.email,
             usuario.senha,
-            usuario.perfil
+            usuario.perfil,
+            usuario.telefone,
+            usuario.foto_url
         ))
         usuario_id = cursor.lastrowid
 
@@ -77,6 +95,8 @@ def alterar(usuario: Usuario) -> bool:
             usuario.nome,
             usuario.email,
             usuario.perfil,
+            usuario.telefone,
+            usuario.foto_url,
             usuario.id
         ))
         return cursor.rowcount > 0

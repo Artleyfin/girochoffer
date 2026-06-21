@@ -37,6 +37,13 @@ class TestSecurityHeaders:
         csp = response.headers.get("Content-Security-Policy", "")
         assert "default-src 'self'" in csp
 
+    def test_csp_libera_google_fonts(self, client):
+        """CSP deve liberar Google Fonts em style-src (CSS) e font-src (.woff2)"""
+        response = client.get("/health")
+        csp = response.headers.get("Content-Security-Policy", "")
+        assert "https://fonts.googleapis.com" in csp
+        assert "https://fonts.gstatic.com" in csp
+
 
 class TestSQLInjection:
     """Proteção contra SQL Injection"""
@@ -193,11 +200,18 @@ class TestPasswordSecurity:
             response = client.post(
                 "/api/cadastrar",
                 json={
-                    "perfil": Perfil.CLIENTE.value,
+                    "tipo": "Empresa",
                     "nome": "Usuario Teste",
                     "email": f"fraca{i}@example.com",
                     "senha": senha,
                     "confirmar_senha": senha,
+                    "empresa": {
+                        "cnpj": "11.222.333/0001-81",
+                        "razao_social": "Empresa Teste LTDA",
+                        "nome_fantasia": "Empresa Teste",
+                        "telefone": "(27) 99999-0000",
+                        "whatsapp": None,
+                    },
                 },
                 headers={"X-CSRF-Token": token},
             )

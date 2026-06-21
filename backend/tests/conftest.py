@@ -179,7 +179,7 @@ def usuario_teste():
         "nome": "Usuario Teste",
         "email": "teste@example.com",
         "senha": "Senha@123",
-        "perfil": Perfil.CLIENTE.value  # Usa Enum Perfil
+        "perfil": Perfil.EMPRESA.value  # Usa Enum Perfil
     }
 
 
@@ -200,16 +200,52 @@ def criar_usuario(client):
     Fixture que retorna uma função para criar usuários
     Útil para criar múltiplos usuários em um teste
     """
-    def _criar_usuario(nome: str, email: str, senha: str, perfil: str = Perfil.CLIENTE.value):
-        """Cadastra um usuário via endpoint JSON de cadastro (com CSRF)."""
+    def _criar_usuario(nome: str, email: str, senha: str, perfil: str = Perfil.EMPRESA.value):
+        """Cadastra um usuário via endpoint JSON de cadastro (com CSRF).
+
+        O cadastro público do GiroChoffer é composto: o cliente envia ``tipo``
+        ('Empresa' ou 'Motorista') + o bloco aninhado correspondente. O servidor
+        deriva o perfil a partir do ``tipo``. Para Administrador (não cadastrável
+        publicamente) usar as fixtures que inserem direto no banco.
+        """
         token = client.get("/api/csrf-token").json()["token"]
-        response = client.post("/api/cadastrar", json={
-            "perfil": perfil,
-            "nome": nome,
-            "email": email,
-            "senha": senha,
-            "confirmar_senha": senha
-        }, headers={"X-CSRF-Token": token})
+
+        if perfil == Perfil.MOTORISTA.value:
+            payload = {
+                "tipo": "Motorista",
+                "nome": nome,
+                "email": email,
+                "senha": senha,
+                "confirmar_senha": senha,
+                "motorista": {
+                    "cpf": "111.444.777-35",
+                    "telefone": "(27) 99999-0000",
+                    "cidade": "Vitória",
+                    "tipo_veiculo_id": 1,
+                    "tipo_carroceria_id": 1,
+                    "placa": "ABC1D23",
+                    "capacidade_kg": 5000,
+                },
+            }
+        else:
+            payload = {
+                "tipo": "Empresa",
+                "nome": nome,
+                "email": email,
+                "senha": senha,
+                "confirmar_senha": senha,
+                "empresa": {
+                    "cnpj": "11.222.333/0001-81",
+                    "razao_social": "Empresa Teste LTDA",
+                    "nome_fantasia": "Empresa Teste",
+                    "telefone": "(27) 99999-0000",
+                    "whatsapp": None,
+                },
+            }
+
+        response = client.post(
+            "/api/cadastrar", json=payload, headers={"X-CSRF-Token": token}
+        )
         return response
 
     return _criar_usuario
@@ -282,19 +318,19 @@ def admin_autenticado(client, criar_usuario, fazer_login, admin_teste):
 
 @pytest.fixture
 def vendedor_teste():
-    """Dados de um vendedor de teste"""
+    """Dados de um vendedor de teste (nome legado: agora Motorista)"""
     return {
         "nome": "Vendedor Teste",
         "email": "vendedor@example.com",
         "senha": "Vendedor@123",
-        "perfil": Perfil.VENDEDOR.value
+        "perfil": Perfil.MOTORISTA.value
     }
 
 
 @pytest.fixture
 def vendedor_autenticado(client, criar_usuario, fazer_login, vendedor_teste):
     """
-    Fixture que retorna um cliente autenticado como vendedor
+    Fixture que retorna um cliente autenticado como vendedor (nome legado: agora Motorista)
     """
     # Importar para manipular diretamente o banco
     from repo import usuario_repo
@@ -307,7 +343,7 @@ def vendedor_autenticado(client, criar_usuario, fazer_login, vendedor_teste):
         nome=vendedor_teste["nome"],
         email=vendedor_teste["email"],
         senha=criar_hash_senha(vendedor_teste["senha"]),
-        perfil=Perfil.VENDEDOR.value
+        perfil=Perfil.MOTORISTA.value
     )
     usuario_repo.inserir(vendedor)
 
@@ -361,13 +397,13 @@ def dois_usuarios(client, criar_usuario):
         "nome": "Usuario Um",
         "email": "usuario1@example.com",
         "senha": "Senha@123",
-        "perfil": Perfil.CLIENTE.value
+        "perfil": Perfil.EMPRESA.value
     }
     usuario2 = {
         "nome": "Usuario Dois",
         "email": "usuario2@example.com",
         "senha": "Senha@456",
-        "perfil": Perfil.CLIENTE.value
+        "perfil": Perfil.EMPRESA.value
     }
 
     # Criar ambos usuários
@@ -440,7 +476,7 @@ def criar_usuario_direto():
         nome: str,
         email: str,
         senha: str,
-        perfil: str = Perfil.CLIENTE.value
+        perfil: str = Perfil.EMPRESA.value
     ) -> int:
         """
         Cria usuário diretamente no banco.

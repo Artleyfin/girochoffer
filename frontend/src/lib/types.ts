@@ -1,42 +1,23 @@
 // Tipos TypeScript espelhando os schemas de resposta do backend (dtos/responses/).
-// Enums são strings de valor (ex: "Aberto", "Administrador"), nunca índices.
+// Enums são strings de valor (ex: "Disponível", "Administrador"), nunca índices.
 
 // ===== Enums de domínio =====
 export const Perfil = {
   ADMIN: 'Administrador',
-  CLIENTE: 'Cliente',
-  VENDEDOR: 'Vendedor',
+  EMPRESA: 'Empresa',
+  MOTORISTA: 'Motorista',
 } as const
 export type PerfilValor = (typeof Perfil)[keyof typeof Perfil]
 
-export const StatusChamado = {
-  ABERTO: 'Aberto',
-  EM_ANALISE: 'Em Análise',
-  RESOLVIDO: 'Resolvido',
-  FECHADO: 'Fechado',
+export const StatusCarga = {
+  DISPONIVEL: 'Disponível',
+  CONTRATADA: 'Contratada',
+  CONCLUIDA: 'Concluída',
+  CANCELADA: 'Cancelada',
 } as const
-export type StatusChamadoValor = (typeof StatusChamado)[keyof typeof StatusChamado]
-
-export const PrioridadeChamado = {
-  BAIXA: 'Baixa',
-  MEDIA: 'Média',
-  ALTA: 'Alta',
-  URGENTE: 'Urgente',
-} as const
-export type PrioridadeValor = (typeof PrioridadeChamado)[keyof typeof PrioridadeChamado]
-
-export const StatusPagamento = {
-  PENDENTE: 'Pendente',
-  EM_PROCESSAMENTO: 'Em Processamento',
-  APROVADO: 'Aprovado',
-  RECUSADO: 'Recusado',
-  CANCELADO: 'Cancelado',
-  REEMBOLSADO: 'Reembolsado',
-} as const
-export type StatusPagamentoValor = (typeof StatusPagamento)[keyof typeof StatusPagamento]
+export type StatusCargaValor = (typeof StatusCarga)[keyof typeof StatusCarga]
 
 export type TipoNotificacao = 'info' | 'sucesso' | 'aviso' | 'erro'
-export type TipoInteracao = 'Abertura' | 'Resposta do Usuário' | 'Resposta do Administrador'
 
 // ===== Comuns =====
 export interface MensagemResponse {
@@ -59,166 +40,116 @@ export interface Usuario {
   nome: string
   email: string
   perfil: string
-  foto_url: string
+  telefone?: string | null
+  foto_url?: string | null
   data_cadastro?: string | null
   data_atualizacao?: string | null
 }
-export interface DashboardData {
-  chamados_pendentes?: number | null
-  chamados_abertos?: number | null
+
+// ===== Catálogos (referência) =====
+export interface CatalogoItem {
+  id: number
+  nome: string
+}
+export interface Catalogo {
+  tipos_veiculo: CatalogoItem[]
+  carrocerias: CatalogoItem[]
 }
 
-// ===== Chamados =====
-export interface ChamadoInteracao {
+// ===== Veículo =====
+export interface Veiculo {
   id: number
-  chamado_id: number
-  usuario_id: number
-  mensagem: string
-  tipo: TipoInteracao
-  data_interacao?: string | null
-  status_resultante?: string | null
-  data_leitura?: string | null
-  usuario_nome?: string | null
-  usuario_email?: string | null
-}
-export interface Chamado {
-  id: number
-  titulo: string
-  status: string
-  prioridade: string
-  usuario_id: number
-  data_abertura?: string | null
-  data_fechamento?: string | null
-  usuario_nome?: string | null
-  usuario_email?: string | null
-  mensagens_nao_lidas?: number
-  tem_resposta_admin?: boolean
-  interacoes?: ChamadoInteracao[] | null
+  tipo_veiculo: string
+  carroceria: string
+  placa: string
+  capacidade_kg: number
+  ativo: boolean
 }
 
-// ===== Notificações =====
-export interface Notificacao {
-  id: number
-  usuario_id: number
-  titulo: string
-  mensagem: string
-  tipo: TipoNotificacao
-  lida: boolean
-  url_acao?: string | null
-  data_criacao?: string | null
-}
-export interface NaoLidasResumo {
-  total: number
-  items: {
-    id: number
-    titulo: string
-    mensagem: string
-    tipo: TipoNotificacao
-    url_acao?: string | null
-    data_criacao?: string | null
-  }[]
-}
-
-// ===== Pagamentos =====
-export interface Pagamento {
-  id: number
-  usuario_id: number
-  descricao: string
-  valor: number
-  status: string
-  provider: string
-  preference_id?: string | null
-  payment_id?: string | null
-  external_reference?: string | null
-  url_checkout?: string | null
-  data_criacao?: string | null
-  data_atualizacao?: string | null
-  usuario_nome?: string | null
-}
-export interface CriarPagamentoResultado {
-  init_point: string
-  pagamento_id: number
-}
-export interface DadosProvider {
-  pagamento: Pagamento
-  provider_nome: string
-  dados_provider: Record<string, unknown> | null
-}
-
-// ===== Chat =====
-export interface ChatSala {
-  sala_id: string
-}
-export interface ChatMensagem {
-  id: number
-  sala_id: string
-  usuario_id: number
-  mensagem: string
-  data_envio?: string | null
-  lida_em?: string | null
-}
-export interface Conversa {
-  sala_id: string
-  outro_usuario: { id: number; nome: string; email: string; foto_url: string }
-  ultima_mensagem?: {
-    mensagem: string
-    data_envio?: string | null
-    usuario_id: number
-  } | null
-  nao_lidas: number
-  ultima_atividade?: string | null
-}
-export interface UsuarioBusca {
+// ===== Empresa =====
+export interface Empresa {
   id: number
   nome: string
   email: string
-  foto_url: string
+  telefone: string
+  cnpj: string
+  razao_social: string
+  nome_fantasia: string
+  whatsapp?: string | null
+  foto_url?: string | null
+  verificada: boolean
+}
+export interface EmpresaContato {
+  telefone: string
+  whatsapp?: string | null
+  email: string
+  nome_fantasia: string
 }
 
-// ===== Configurações / Auditoria / Backups =====
-export interface ConfigItem {
-  chave: string
-  valor: string
-  descricao?: string | null
-  categoria: string
-}
-export interface ConfigCategoria {
-  categoria: string
-  itens: ConfigItem[]
-}
-export interface ConfigLista {
-  total: number
-  categorias: ConfigCategoria[]
-}
-export interface SalvarConfigResultado {
-  atualizadas: number
-  chaves_nao_encontradas: string[]
-  message: string
-}
-export interface LogArquivo {
-  data: string
-  nivel: string
-  total_linhas: number
-  conteudo: string
-  erro?: string | null
-}
-export interface AuditoriaRegistro {
+// ===== Motorista =====
+export interface MotoristaResumo {
   id: number
-  usuario_id?: number | null
-  usuario_nome?: string | null
-  acao: string
-  entidade: string
-  entidade_id?: number | null
-  dados_antes?: string | null
-  dados_depois?: string | null
-  ip?: string | null
-  data?: string | null
+  nome: string
+  cidade?: string | null
+  nota: number
+  total_viagens: number
+  foto_url?: string | null
+  veiculo_principal: string
+  carroceria: string
+  capacidade_kg: number
 }
-export interface BackupInfo {
-  nome_arquivo: string
-  caminho_completo: string
-  tipo: 'manual' | 'automatico'
-  tamanho_bytes: number
-  tamanho_formatado: string
-  data_criacao: string
+export interface Motorista {
+  id: number
+  nome: string
+  email: string
+  telefone: string
+  cpf: string
+  cidade?: string | null
+  nota: number
+  total_viagens: number
+  foto_url?: string | null
+  verificado: boolean
+  veiculos: Veiculo[]
+}
+
+// ===== Carga =====
+export interface CargaResumo {
+  id: number
+  titulo: string
+  origem: string
+  destino: string
+  tipo_veiculo: string
+  carroceria: string
+  peso_kg?: number | null
+  valor_frete: number
+  status: string
+  status_rotulo: string
+  total_interesses: number
+  foto_url?: string | null
+  empresa_nome: string
+  data_coleta?: string | null
+}
+export interface Carga extends CargaResumo {
+  descricao: string
+  volume_m3?: number | null
+  empresa_id: number
+  motorista_escolhido_id?: number | null
+  data_publicacao?: string | null
+}
+// Detalhe na rota da EMPRESA: inclui a lista de interessados.
+export interface CargaDetalhe extends Carga {
+  interessados: MotoristaResumo[]
+}
+// Detalhe na rota do MOTORISTA: inclui flags de interesse/contato.
+export interface CargaDetalheMotorista extends Carga {
+  ja_tenho_interesse: boolean
+  contato_liberado: boolean
+  empresa_contato?: EmpresaContato | null
+}
+
+// ===== Minhas cargas (painel do motorista) =====
+export interface MinhasCargas {
+  interesse_enviado: CargaResumo[]
+  contratadas: CargaResumo[]
+  concluidas: CargaResumo[]
 }

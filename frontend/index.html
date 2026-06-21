@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Nome do produto na aba: hardcoded aqui (não vem de APP_NAME do backend).
-         Fork: troque pelo nome do seu projeto (ver docs/FORKING.md §5a). -->
-    <title>Default Web App</title>
-    <!-- Bootstrap CSS/JS e ícones são empacotados via npm em src/main.tsx -->
+    <link rel="icon" type="image/svg+xml" href="/assets/giro_logo.svg" />
+    <!-- Nome do produto na aba (hardcoded; não vem de APP_NAME do backend). -->
+    <title>GiroChoffer</title>
+    <!-- Tipografia da marca: Archivo (headings) + Public Sans (corpo). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="d-flex flex-column min-vh-100">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
