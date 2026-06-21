@@ -1,3 +1,4 @@
+name: girochoffer
 # Execute a partir do diretório deploy/ (ou aponte -f deploy/docker-compose.yml).
 # O contexto de build é a RAIZ do repositório, pois o Dockerfile multi-stage
 # precisa de frontend/ (build do SPA) e backend/ (API FastAPI).
@@ -26,4 +27,6 @@ services:
 
 volumes:
   girochoffer_data:
+    name: deploy_girochoffer_data
   girochoffer_uploads:
+    name: deploy_girochoffer_uploads
