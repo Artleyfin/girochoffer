@@ -156,7 +156,7 @@ def _mapear_catalogo() -> tuple[dict, dict]:
 def carregar_girochoffer_demo():
     """
     Carrega dados de demonstração do GiroChoffer (5 empresas, 6 motoristas com
-    1 veículo cada, 9 cargas, interesses e contratações), espelhando o design
+    1 veículo cada, 10 cargas, interesses e contratações), espelhando o design
     de referência em design/girochoffer-react/src/data/*.json.
 
     Idempotente: se a empresa âncora (por e-mail) já existir, não faz nada.
@@ -585,6 +585,19 @@ def carregar_girochoffer_demo():
             "status": StatusCarga.DISPONIVEL,
             "interessados": [], "escolhido": None,
             "foto": "carga_9.jpg",
+        },
+        {
+            "ref": "c10", "empresa": "e1",
+            "titulo": "Carga de teste — eletrônicos diversos",
+            "origem": "Vitória/ES", "destino": "Rio de Janeiro/RJ",
+            "tipo_veiculo": "Caminhão", "carroceria": "Baú",
+            "peso_kg": 5500, "volume_m3": None, "valor_frete": 3800.0,
+            "data_coleta": "30/06/2026",
+            "descricao": "Carga de teste publicada via validação Playwright. "
+                         "Manuseio cuidadoso.",
+            "status": StatusCarga.DISPONIVEL,
+            "interessados": [], "escolhido": None,
+            "foto": "carga_10.jpg",
         },
     ]
 

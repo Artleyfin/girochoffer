@@ -1,19 +1,11 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import type { CSSProperties } from 'react'
 import { useAuthStore } from '@/store/authStore'
-import { colors, fonts } from '@/lib/theme'
+import { colors } from '@/lib/theme'
 
 /* Cabeçalho sticky da área autenticada, com navegação dependente do perfil.
    Portado de design/girochoffer-react/src/components/Header.jsx, ligado ao
    authStore (perfil/logout) e ao react-router-dom. */
-
-/* Extrai até duas iniciais do nome para o avatar. */
-function iniciais(nome: string): string {
-  const partes = nome.trim().split(/\s+/).filter(Boolean)
-  if (partes.length === 0) return '?'
-  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase()
-  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase()
-}
 
 export default function Header() {
   const navigate = useNavigate()
@@ -62,7 +54,7 @@ export default function Header() {
   }
 
   const userName = usuario?.nome ?? ''
-  const userInitials = iniciais(userName)
+  const userAvatarSrc = usuario?.foto_url || '/static/img/user.jpg'
   const userRoleLabel = isEmpresa ? 'Empresa · Transportadora' : 'Motorista autônomo'
 
   return (
@@ -103,23 +95,25 @@ export default function Header() {
           <div style={{ fontSize: '13px', fontWeight: 700, color: colors.ink }}>{userName}</div>
           <div style={{ fontSize: '11px', color: colors.muted }}>{userRoleLabel}</div>
         </div>
-        <div
+        <img
+          src={userAvatarSrc}
+          alt={userName ? `Foto de ${userName}` : 'Foto do usuário'}
+          onError={(event) => {
+            if (!event.currentTarget.src.endsWith('/static/img/user.jpg')) {
+              event.currentTarget.src = '/static/img/user.jpg'
+            }
+          }}
           style={{
             width: '38px',
             height: '38px',
             borderRadius: '50%',
-            background: colors.navy,
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: '13px',
-            fontFamily: fonts.heading,
+            objectFit: 'cover',
+            display: 'block',
+            flex: 'none',
+            background: colors.tintBlue,
+            border: `1px solid ${colors.border}`,
           }}
-        >
-          {userInitials}
-        </div>
+        />
         <button
           onClick={fazerLogout}
           style={{
