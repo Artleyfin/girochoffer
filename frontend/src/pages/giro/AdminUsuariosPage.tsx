@@ -12,7 +12,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Pagination from '@/components/ui/Pagination'
 import { TextInput, SelectInput } from '@/components/giro/FormControls'
 import { formatarData } from '@/lib/format'
-import { colors, fonts } from '@/lib/theme'
+import { colors, fonts, selectArrow } from '@/lib/theme'
 
 /* Gestão de usuários (admin): listar (filtro perfil + busca) + criar (somente
    Administrador) + editar (nome/e-mail; perfil read-only) + excluir.
@@ -196,7 +196,7 @@ export default function AdminUsuariosPage() {
             setPagina(1)
             setPerfilFiltro(e.target.value)
           }}
-          style={{ ...inputBase, minWidth: 180 }}
+          style={{ ...inputBase, ...selectArrow, minWidth: 180 }}
         >
           <option value="">Todos os perfis</option>
           <option value={Perfil.ADMIN}>Administrador</option>
