@@ -6,7 +6,7 @@ export default function AdminRoute() {
   const usuario = useAuthStore((s) => s.usuario)
   const isAdmin = useAuthStore((s) => s.isAdmin())
 
-  if (!usuario) return <Navigate to="/login" replace />
-  if (!isAdmin) return <Navigate to="/usuario" replace />
+  if (!usuario) return <Navigate to="/entrar" replace />
+  if (!isAdmin) return <Navigate to="/" replace />
   return <Outlet />
 }

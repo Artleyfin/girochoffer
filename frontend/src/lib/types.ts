@@ -153,3 +153,24 @@ export interface MinhasCargas {
   contratadas: CargaResumo[]
   concluidas: CargaResumo[]
 }
+
+// ===== Dashboard admin =====
+// Espelha backend/dtos/responses/admin_dashboard_response.py
+export interface ContagemItem {
+  rotulo: string
+  total: number
+}
+export interface SerieMensalItem {
+  mes: string
+  rotulo: string
+  total: number
+}
+export interface AdminDashboard {
+  total_usuarios: number
+  total_empresas: number
+  total_motoristas: number
+  total_cargas: number
+  cargas_por_status: ContagemItem[]
+  usuarios_por_perfil: ContagemItem[]
+  cadastros_por_mes: SerieMensalItem[]
+}

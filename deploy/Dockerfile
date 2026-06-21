@@ -55,11 +55,11 @@ ENV SPA_DIST_PATH=/app/frontend_dist
 ENV RUNNING_MODE=Production
 
 # Porta interna onde o Uvicorn escutará
-ENV PORT=8000
-EXPOSE 8000
+ENV PORT=8412
+EXPOSE 8412
 
 # --proxy-headers + --forwarded-allow-ips: roda atrás de proxy reverso que
 # termina TLS. Faz o Uvicorn honrar X-Forwarded-Proto/-For, para que redirects
 # (ex: redirect_slashes 307) e url_for usem o scheme https correto em vez de
 # http. Sem isso o browser bloqueia o redirect http via CSP connect-src 'self'.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--forwarded-allow-ips", "*"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8412", "--proxy-headers", "--forwarded-allow-ips", "*"]

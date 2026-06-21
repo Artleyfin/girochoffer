@@ -58,6 +58,7 @@ from routes.admin_usuarios_routes import router as admin_usuarios_router
 from routes.catalogo_routes import router as catalogo_router
 from routes.empresa_routes import router as empresa_router
 from routes.motorista_routes import router as motorista_router
+from routes.admin_dashboard_routes import router as admin_dashboard_router
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -176,6 +177,7 @@ ROUTERS = [
     (catalogo_router, ["Catalogos"], "catalogos"),
     (empresa_router, ["Empresa"], "empresa"),
     (motorista_router, ["Motorista"], "motorista"),
+    (admin_dashboard_router, ["Admin - Dashboard"], "admin dashboard"),
 ]
 
 for router, tags, nome in ROUTERS:

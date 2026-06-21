@@ -221,3 +221,26 @@ export const atualizarMotoristaSchema = z.object({
   capacidadeKg: capacidadeKgSchema,
 })
 export type AtualizarMotoristaForm = z.infer<typeof atualizarMotoristaSchema>
+
+// ===== Admin · gestão de usuários =====
+
+/** Criação de usuário pelo admin (apenas Administrador; perfil fixado no envio). */
+export const adminCriarUsuarioSchema = z
+  .object({
+    nome: nomePessoaSchema,
+    email: emailSchema,
+    senha: senhaSchema,
+    confirmarSenha: confirmarSenhaSchema,
+  })
+  .refine((d) => d.senha === d.confirmarSenha, {
+    message: 'As senhas não coincidem.',
+    path: ['confirmarSenha'],
+  })
+export type AdminCriarUsuarioForm = z.infer<typeof adminCriarUsuarioSchema>
+
+/** Edição de usuário pelo admin: nome e e-mail (perfil é read-only). */
+export const adminEditarUsuarioSchema = z.object({
+  nome: nomePessoaSchema,
+  email: emailSchema,
+})
+export type AdminEditarUsuarioForm = z.infer<typeof adminEditarUsuarioSchema>

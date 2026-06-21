@@ -111,9 +111,9 @@ RATE_LIMIT_PUBLIC_MINUTOS=1
 RATE_LIMIT_EXAMPLES_MAX=100
 RATE_LIMIT_EXAMPLES_MINUTOS=1
 
-# Server (porta INTERNA do container; o compose publica 8412:8000)
+# Server (porta INTERNA do container; o compose publica 8412:8412)
 HOST=0.0.0.0
-PORT=8000
+PORT=8412
 ENVFILE
                         chmod 600 backend/.env
                         echo "Arquivo backend/.env criado com sucesso!"

@@ -8,7 +8,7 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile
     ports:
-      - "8412:8000"
+      - "8412:8412"
     restart: unless-stopped
     environment:
       # Banco SQLite dentro do volume persistente (ver volume girochoffer_data abaixo).
@@ -18,7 +18,7 @@ services:
       - girochoffer_data:/app/data
       - girochoffer_uploads:/app/static/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8412/health"]
       interval: 30s
       timeout: 10s
       retries: 3

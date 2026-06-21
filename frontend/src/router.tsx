@@ -5,12 +5,18 @@ import RouteError from './components/routing/RouteError'
 import ProtectedRoute from './components/routing/ProtectedRoute'
 import EmpresaRoute from './components/routing/EmpresaRoute'
 import MotoristaRoute from './components/routing/MotoristaRoute'
+import AdminRoute from './components/routing/AdminRoute'
 import AppLayout from './components/giro/AppLayout'
+import AdminLayout from './components/giro/AdminLayout'
 
 // Páginas públicas
 import LandingPage from './pages/giro/LandingPage'
 import AuthPage from './pages/giro/AuthPage'
 import RecuperarSenhaPage from './pages/giro/RecuperarSenhaPage'
+
+// Admin
+import AdminDashboardPage from './pages/giro/AdminDashboardPage'
+import AdminUsuariosPage from './pages/giro/AdminUsuariosPage'
 
 // Empresa
 import EmpresaPainelPage from './pages/giro/EmpresaPainelPage'
@@ -98,6 +104,20 @@ export const router = createBrowserRouter([
               { path: '/motorista', element: <MotoristaPainelPage /> },
               { path: '/motorista/carga/:id', element: <MotoristaDetalhesPage /> },
               { path: '/motorista/minhas', element: <MotoristaMinhasPage /> },
+            ],
+          },
+        ],
+      },
+
+      // ===== Admin =====
+      {
+        element: <AdminRoute />,
+        children: [
+          {
+            element: <AdminLayout />,
+            children: [
+              { path: '/admin', element: <AdminDashboardPage /> },
+              { path: '/admin/usuarios', element: <AdminUsuariosPage /> },
             ],
           },
         ],

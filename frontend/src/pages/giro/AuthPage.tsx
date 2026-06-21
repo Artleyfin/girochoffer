@@ -77,7 +77,6 @@ export default function AuthPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const login = useAuthStore((s) => s.login)
-  const setUsuario = useAuthStore((s) => s.setUsuario)
 
   const [modo, setModo] = useState<Modo>(
     params.get('modo') === 'login' ? 'login' : 'cadastro',
@@ -123,6 +122,7 @@ export default function AuthPage() {
   function redirecionarPorPerfil(usuario: Usuario) {
     if (usuario.perfil === Perfil.EMPRESA) navigate('/empresa')
     else if (usuario.perfil === Perfil.MOTORISTA) navigate('/motorista')
+    else if (usuario.perfil === Perfil.ADMIN) navigate('/admin')
     else navigate('/')
   }
 
@@ -183,7 +183,7 @@ export default function AuthPage() {
     }
     setEnviando(true)
     try {
-      const usuario = await api.post<Usuario>('/cadastrar', {
+      await api.post<Usuario>('/cadastrar', {
         tipo: Perfil.EMPRESA,
         nome: parsed.data.nomeFantasia,
         email: parsed.data.email,
@@ -196,9 +196,10 @@ export default function AuthPage() {
           telefone: apenasDigitos(parsed.data.telefone),
         },
       })
-      setUsuario(usuario)
+      // "Criar conta e entrar": após o cadastro (stateless), faz login p/ criar a sessão.
+      const logado = await login(parsed.data.email, parsed.data.senha)
       toast.sucesso('Conta criada com sucesso!')
-      redirecionarPorPerfil(usuario)
+      redirecionarPorPerfil(logado)
     } catch (e) {
       if (e instanceof ApiError) aplicarErrosApi(e)
       else toast.erro((e as Error).message)
@@ -227,7 +228,7 @@ export default function AuthPage() {
     }
     setEnviando(true)
     try {
-      const usuario = await api.post<Usuario>('/cadastrar', {
+      await api.post<Usuario>('/cadastrar', {
         tipo: Perfil.MOTORISTA,
         nome: parsed.data.nome,
         email: parsed.data.email,
@@ -242,9 +243,10 @@ export default function AuthPage() {
           capacidade_kg: parsed.data.capacidadeKg,
         },
       })
-      setUsuario(usuario)
+      // "Criar conta e entrar": após o cadastro (stateless), faz login p/ criar a sessão.
+      const logado = await login(parsed.data.email, parsed.data.senha)
       toast.sucesso('Conta criada com sucesso!')
-      redirecionarPorPerfil(usuario)
+      redirecionarPorPerfil(logado)
     } catch (e) {
       if (e instanceof ApiError) aplicarErrosApi(e)
       else toast.erro((e as Error).message)

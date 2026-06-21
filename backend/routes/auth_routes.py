@@ -216,8 +216,8 @@ async def post_cadastrar(request: Request, dto: CadastroDTO):
     servico_email.enviar_boas_vindas(usuario.email, usuario.nome)
 
     criado = usuario_repo.obter_por_id(usuario_id)
-    # Auto-login: o fluxo "Criar conta e entrar" estabelece a sessão na hora.
-    criar_sessao(request, UsuarioLogado.from_usuario(criado))
+    # O cadastro NÃO cria sessão (mantém o endpoint stateless): o fluxo
+    # "Criar conta e entrar" é concluído no frontend, que faz login em seguida.
     return UsuarioResponse.de_usuario(criado)
 
 
