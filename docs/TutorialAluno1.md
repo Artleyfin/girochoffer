@@ -1,3 +1,135 @@
+# Setup: preparando o seu computador do zero
+
+Antes de programar qualquer coisa, você precisa deixar o projeto rodando na sua máquina. Esta seção ensina tudo desde o começo, sem assumir que você já tem nada instalado. Faça na ordem e, ao final, você terá o GiroChoffer abrindo no navegador.
+
+> Por que tanto cuidado no começo? Porque 90% das dores de cabeça de quem está começando não estão no código, e sim no ambiente mal configurado. Dez minutos arrumando o ambiente agora economizam horas de erro estranho depois.
+
+## 1. Instalar os programas que você vai usar
+
+Você vai precisar de quatro programas. Instale todos antes de continuar.
+
+- **Git** — guarda o histórico do seu código e baixa o projeto do GitHub. Baixe em https://git-scm.com/downloads.
+- **Python 3.11 ou mais novo** — a linguagem do backend (a parte do servidor). Baixe em https://www.python.org/downloads/. Atenção: durante a instalação no Windows, marque a caixinha "Add Python to PATH".
+- **Bun** — é o programa que instala as bibliotecas do frontend (a parte das telas) e roda o site em modo de desenvolvimento. Pense nele como uma versão mais rápida do clássico Node/npm. Instale seguindo as instruções de https://bun.sh. Neste projeto, o Bun é a ferramenta oficial: sempre que um comando antigo falar em `npm`, use o equivalente em `bun`.
+- **VSCode** — o editor de código onde você vai escrever tudo. Baixe em https://code.visualstudio.com.
+
+### Confira se deu certo
+
+Abra um terminal (no Windows, o "Prompt de Comando" ou o "PowerShell"; no Mac/Linux, o "Terminal") e rode os comandos abaixo. Cada um deve responder com um número de versão, sem dar erro:
+
+```bash
+git --version
+python --version
+bun --version
+```
+
+> Se algum comando responder "não encontrado", o programa não foi instalado direito ou não está no PATH (a lista de lugares onde o sistema procura programas). Reinstale prestando atenção na opção de adicionar ao PATH.
+
+> Sobre a versão do Python: o projeto tem um arquivo chamado `.python-version` que pede a versão 3.14. Essa versão pode ainda não existir no seu computador. Não tem problema: vamos criar o ambiente com o Python 3.11 (ou mais novo) que você acabou de instalar, e tudo funciona.
+
+## 2. Baixar (clonar) o projeto
+
+"Clonar" é o termo que o Git usa para baixar uma cópia completa do projeto, com todo o histórico. Escolha uma pasta onde você guarda seus projetos, abra o terminal nela e rode:
+
+```bash
+git clone https://github.com/Artleyfin/girochoffer.git
+cd girochoffer
+```
+
+Agora você está dentro da pasta do projeto. Todos os próximos comandos partem daqui (a "raiz do projeto").
+
+## 3. Criar uma branch para o seu trabalho
+
+Antes de mexer no código, crie uma **branch** só sua. Branch é como uma linha do tempo paralela do projeto: você faz suas alterações nela sem bagunçar a versão principal (a `main`). Se algo der errado, é fácil voltar atrás.
+
+```bash
+git checkout -b minha-feature
+```
+
+> Por que isso importa? Trabalhar direto na `main` é arriscado: qualquer erro fica misturado com o código que já funciona. Numa branch separada, seu experimento fica isolado, e você só junta com a versão principal quando estiver tudo certo.
+
+## 4. Preparar o backend (a parte do servidor)
+
+O backend é escrito em Python. Vamos criar um **ambiente virtual** (chamado de `venv`): uma "caixinha" isolada onde ficam só as bibliotecas deste projeto, sem misturar com o resto do seu computador. Assim, um projeto não atrapalha o outro.
+
+Ainda na raiz do projeto, entre na pasta do backend e crie o ambiente:
+
+```bash
+cd backend
+python -m venv .venv
+```
+
+Agora **ative** o ambiente. O comando muda conforme o seu sistema:
+
+- No Windows (PowerShell):
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+- No Mac ou Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+> Você sabe que deu certo quando aparece `(.venv)` no começo da linha do terminal. Sempre que abrir um terminal novo para mexer no backend, ative o ambiente de novo.
+
+Com o ambiente ativo, instale as bibliotecas que o backend precisa:
+
+```bash
+pip install -r requirements.txt
+```
+
+## 5. Preparar o frontend (a parte das telas)
+
+O frontend usa o Bun para instalar suas bibliotecas. Volte para a raiz e entre na pasta `frontend`:
+
+```bash
+cd ../frontend
+bun install
+```
+
+Isso baixa tudo que as telas precisam para funcionar. Só é necessário na primeira vez (ou quando alguém adiciona uma biblioteca nova).
+
+## 6. Rodar o projeto
+
+Você vai precisar de **dois terminais abertos ao mesmo tempo**: um para o backend, outro para o frontend. Eles rodam juntos.
+
+**Terminal 1 — Backend** (a partir da raiz do projeto, com o `.venv` ativado):
+
+```bash
+backend/.venv/bin/python backend/main.py
+```
+
+O backend sobe na porta `8412`. A documentação interativa da API (onde dá para testar as rotas no navegador) fica em `http://127.0.0.1:8412/docs`.
+
+**Terminal 2 — Frontend** (a partir da pasta `frontend/`):
+
+```bash
+cd frontend
+bun run dev
+```
+
+O Vite (a ferramenta que serve as telas em desenvolvimento) sobe na porta `5182`. Abra `http://127.0.0.1:5182` no navegador.
+
+> Pronto! Para testar, entre com um usuário de demonstração (a senha padrão é `1234aA@#`). Há empresas e motoristas já cadastrados. Confirme que você consegue logar como **empresa**, ver o painel, e logar como **motorista**. Se tudo isso funciona, seu ambiente está pronto e você pode seguir para o tutorial.
+
+## 7. Extensões recomendadas do VSCode
+
+Extensões são complementos que deixam o editor mais inteligente. Abra o VSCode, clique no ícone de blocos na barra lateral (Extensions) e instale estas:
+
+- **Python** — suporte básico à linguagem Python (rodar, depurar, reconhecer arquivos `.py`).
+- **Pylance** — completa o código e avisa de erros de Python enquanto você digita.
+- **Python Debugger** — permite pausar o código e investigar passo a passo o que está acontecendo.
+- **Python Environments** — ajuda a escolher e gerenciar o ambiente virtual (`.venv`) certo.
+- **ESLint** — aponta problemas e padroniza o código do frontend (JavaScript/TypeScript).
+- **SQLite3 Editor** — abre e lê o banco de dados do projeto direto no editor, sem ferramenta externa.
+- **vscode-icons** — coloca ícones bonitos nos arquivos, facilitando achar as coisas.
+- **HTML CSS Support** — completa nomes de classes e tags ao escrever HTML e CSS.
+
+---
+
 # Tutorial: Empresa favoritar motoristas + Avaliar motorista pós-frete
 
 Este tutorial ensina, passo a passo, do banco de dados até a tela, como implementar **duas funcionalidades** no projeto GiroChoffer. Ele foi escrito para quem está começando. Não pule nenhuma etapa: faça exatamente na ordem indicada, copiando os códigos e prestando atenção nas explicações.
@@ -6,7 +138,7 @@ Este tutorial ensina, passo a passo, do banco de dados até a tela, como impleme
 
 ## O que você vai construir
 
-Você vai adicionar duas funcionalidades novas ao GiroChoffer, ambas "full-stack" (mexem no backend **e** no frontend):
+Você vai adicionar duas funcionalidades novas ao GiroChoffer, ambas "full-stack" (ou seja, mexem nas duas pontas do sistema: no backend, que é o servidor **e** no frontend, que são as telas):
 
 **(A) Empresa favorita motoristas.** A empresa logada pode marcar um motorista como favorito (a partir do card do motorista interessado), desmarcar, e ver uma página com a lista dos seus motoristas favoritos.
 
@@ -14,17 +146,17 @@ Você vai adicionar duas funcionalidades novas ao GiroChoffer, ambas "full-stack
 
 Resultado final esperado:
 
-- Tabela nova `favorito_motorista` (relacionamento N:N empresa↔motorista, idempotente, igual ao padrão de `interesse_carga`).
-- Tabela nova `avaliacao` (uma avaliação por carga, com `carga_id` único).
-- Rotas backend: `POST/DELETE/GET /empresa/favoritos`, `POST /empresa/cargas/{id}/avaliar`, `GET /motorista/avaliacoes`.
-- Recálculo automático de `motorista.nota` a cada nova avaliação.
-- Frontend: botão "Favoritar" no card do motorista, nova página `EmpresaFavoritosPage`, item de menu novo, e a média de avaliação exibida no card.
+- Tabela nova `favorito_motorista`. Ela guarda um relacionamento **N:N** (lê-se "ene para ene") entre empresa e motorista. N:N quer dizer "muitos para muitos": uma empresa pode favoritar vários motoristas, e um mesmo motorista pode ser favorito de várias empresas. Vamos garantir que clicar em "favoritar" duas vezes no mesmo motorista não crie um favorito repetido. É o mesmo padrão já usado em `interesse_carga`.
+- Tabela nova `avaliacao` (uma avaliação por carga, com `carga_id` único — ou seja, cada carga só pode ser avaliada uma vez).
+- Rotas no backend (cada rota é um **endpoint**, isto é, um endereço da API que o frontend chama para fazer alguma coisa): `POST/DELETE/GET /empresa/favoritos`, `POST /empresa/cargas/{id}/avaliar`, `GET /motorista/avaliacoes`.
+- Recálculo automático da média de notas do motorista (`motorista.nota`) a cada nova avaliação.
+- Frontend: botão "Favoritar" no card do motorista, nova página `EmpresaFavoritosPage`, um item de menu novo, e a média de avaliação aparecendo no card.
 
 ---
 
 ## Pré-requisitos
 
-Antes de programar, garanta que o projeto **roda** na sua máquina. Abra dois terminais.
+Antes de programar, garanta que o projeto **roda** na sua máquina (se você seguiu a seção de Setup acima, já está tudo pronto). Abra dois terminais.
 
 **Terminal 1 — Backend** (a partir da raiz do projeto):
 
@@ -38,29 +170,29 @@ backend/.venv/bin/python backend/main.py
 
 ```bash
 cd frontend
-npm install      # só na primeira vez
-npm run dev
+bun install      # só na primeira vez
+bun run dev
 ```
 
-> O Vite sobe na porta `5182` e faz proxy de `/api` para o backend. Abra `http://127.0.0.1:5182`.
+> O Vite sobe na porta `5182` e faz "proxy" de `/api` para o backend (ou seja, encaminha para o servidor toda chamada que comece com `/api`). Abra `http://127.0.0.1:5182`.
 
-Para testar, entre com um usuário de demonstração (a senha padrão do seed é `1234aA@#`). Há empresas e motoristas já cadastrados. Confirme que você consegue logar como **empresa**, ver o painel, e logar como **motorista**.
+Para testar, entre com um usuário de demonstração (a senha padrão é `1234aA@#`; "seed" é o conjunto de dados de exemplo que o projeto já vem com). Há empresas e motoristas já cadastrados. Confirme que você consegue logar como **empresa**, ver o painel, e logar como **motorista**.
 
 Comandos úteis durante o desenvolvimento:
 
 ```bash
 backend/.venv/bin/python -m pytest          # roda os testes do backend
-cd frontend && npx tsc -b --noEmit          # checa erros de tipo do TypeScript
-cd frontend && npm run lint                 # checa o ESLint
+cd frontend && bunx tsc -b --noEmit          # checa erros de tipo do TypeScript
+cd frontend && bun run lint                 # checa o ESLint
 ```
 
 ---
 
 ## As camadas e a ordem de implementação
 
-O backend do GiroChoffer é organizado em camadas: **Rotas → DTOs → Repositórios → SQL → Banco**. O frontend espelha o contrato da API: **api.ts → types.ts → schemas.ts → página → router/menu**.
+O backend do GiroChoffer é organizado em camadas: **Rotas → DTOs → Repositórios → SQL → Banco**. Cada camada tem uma função: a Rota recebe a chamada da tela, o **DTO** (sigla para "Data Transfer Object", ou "objeto de transferência de dados" — é o formato dos dados que entram e saem da API) confere se os dados estão certos, o Repositório conversa com o banco, e o SQL é a linguagem que o banco entende. O frontend segue o mesmo contrato da API: **api.ts → types.ts → schemas.ts → página → router/menu**.
 
-Vamos implementar **de baixo para cima**. Essa ordem evita "ficar travado": cada camada que você cria já tem a camada de baixo pronta para usar.
+Vamos implementar **de baixo para cima**. Essa ordem evita que você fique travado: cada camada que você cria já tem a camada de baixo pronta para usar.
 
 Ordem completa:
 
@@ -86,7 +218,7 @@ Por que de baixo para cima? Porque a rota chama o repositório, o repositório c
 
 **Arquivo:** `backend/sql/favorito_motorista_sql.py` — **ARQUIVO NOVO**
 
-Este arquivo contém apenas as constantes de SQL (texto puro), seguindo exatamente o padrão de `backend/sql/interesse_carga_sql.py`. Veja: usamos `UNIQUE (empresa_id, motorista_id)` para garantir idempotência (não dá para favoritar duas vezes), e `FOREIGN KEY ... ON DELETE CASCADE` para que, ao apagar a empresa ou o motorista, o favorito suma junto.
+Este arquivo contém apenas os comandos de SQL guardados como texto, seguindo exatamente o padrão de `backend/sql/interesse_carga_sql.py`. Veja: usamos `UNIQUE (empresa_id, motorista_id)` para garantir que o mesmo par empresa+motorista não se repita (ou seja, não dá para favoritar o mesmo motorista duas vezes), e `FOREIGN KEY ... ON DELETE CASCADE` para que, ao apagar a empresa ou o motorista, o favorito suma junto automaticamente.
 
 ```python
 """
@@ -162,15 +294,15 @@ ORDER BY fm.data_criacao DESC
 
 Pontos importantes:
 
-- **Nomes das constantes em MAIÚSCULAS** (`CRIAR_TABELA`, `INSERIR`, etc.): é a convenção do projeto.
-- **Todos os valores entram por `?`** (prepared statements). Nunca monte SQL com f-string e o valor dentro — isso abre brecha de SQL injection e o projeto proíbe.
-- O `SELECT` é praticamente igual ao de `interesse_carga`, só trocando `interesse_carga`→`favorito_motorista` e `carga_id`→`empresa_id`. Reaproveitar o formato faz o card do frontend funcionar sem mudanças.
+- **Nomes em MAIÚSCULAS** (`CRIAR_TABELA`, `INSERIR`, etc.): é o jeito que este projeto combina de nomear esses textos de SQL. Seguir o padrão deixa tudo parecido e fácil de achar.
+- **Todos os valores entram por `?`**: isso se chama "prepared statement" (comando preparado). Em vez de grudar o valor digitado pelo usuário direto no texto do SQL, você deixa um `?` no lugar e passa o valor separado. Nunca monte o SQL juntando texto com o valor dentro — isso abre uma brecha de segurança chamada "SQL injection" (quando alguém digita um comando malicioso no lugar de um dado comum), e o projeto proíbe.
+- O `SELECT` (o comando que lê dados) é praticamente igual ao de `interesse_carga`, só trocando `interesse_carga`→`favorito_motorista` e `carga_id`→`empresa_id`. Reaproveitar o mesmo formato faz o card do frontend funcionar sem precisar de mudanças.
 
 ## Passo 1.2 — SQL da tabela `avaliacao`
 
 **Arquivo:** `backend/sql/avaliacao_sql.py` — **ARQUIVO NOVO**
 
-Aqui `carga_id` é **UNIQUE**: uma carga só pode ser avaliada uma vez. Note também o `CHECK (nota >= 1 AND nota <= 5)` no banco, que reforça no nível mais baixo a regra de "nota de 1 a 5".
+Aqui `carga_id` é **UNIQUE** (único): uma carga só pode ser avaliada uma vez. Note também o `CHECK (nota >= 1 AND nota <= 5)`, que é o próprio banco recusando qualquer nota fora do intervalo de 1 a 5 — uma trava de segurança na camada mais baixa, caso algum erro passe pelas camadas de cima.
 
 ```python
 """
@@ -240,15 +372,15 @@ ORDER BY a.data DESC
 
 Pontos importantes:
 
-- `carga_id INTEGER NOT NULL UNIQUE`: trava no banco a regra "uma avaliação por carga".
-- `MEDIA_POR_MOTORISTA` usa `AVG(nota)`; se não houver avaliações, o `AVG` retorna `NULL` (vamos tratar isso no repositório).
-- Na hora de inserir, passamos a data com `agora()` (você verá no repo). O default `CURRENT_TIMESTAMP` existe como rede de segurança, mas o projeto exige `agora()` ao salvar.
+- `carga_id INTEGER NOT NULL UNIQUE`: é o próprio banco garantindo a regra "uma avaliação por carga". Se alguém tentar avaliar a mesma carga de novo, o banco recusa.
+- `MEDIA_POR_MOTORISTA` usa `AVG(nota)`, que calcula a média; se o motorista ainda não tem nenhuma avaliação, o `AVG` retorna `NULL` (um "vazio"). Vamos tratar esse caso no repositório, mais à frente.
+- Na hora de gravar, passamos a data usando a função `agora()` (você verá no repositório). O `CURRENT_TIMESTAMP` que está no `CREATE TABLE` serve como rede de segurança, mas o projeto pede que você sempre use `agora()` ao salvar.
 
 ## Passo 1.3 — Model de domínio da avaliação
 
 **Arquivo:** `backend/model/avaliacao_model.py` — **ARQUIVO NOVO**
 
-O model é um `@dataclass` puro (nunca dict). Espelha as colunas da tabela e inclui campos "derivados" (vindos de JOIN) só para exibição, exatamente como o `Carga` faz com `empresa_nome`.
+O model (o "modelo") representa a avaliação dentro do código Python. Ele é um `@dataclass` puro (uma classe simples feita só para guardar dados) — e não um dicionário solto. Ele tem os mesmos campos da tabela e ainda inclui campos "derivados" (que vêm de um **JOIN**, isto é, de uma consulta que junta dados de mais de uma tabela), usados só para exibição na tela, exatamente como o `Carga` faz com `empresa_nome`.
 
 ```python
 """
@@ -280,13 +412,13 @@ class Avaliacao:
     carga_titulo: Optional[str] = None
 ```
 
-> Não criamos um model para `favorito_motorista`. Igual a `interesse_carga`, o favorito é só um vínculo; suas leituras devolvem "resumo de motorista" como **dict** (para não acoplar este módulo ao módulo de motorista). É exatamente o que o `interesse_carga_repo` faz.
+> Não criamos um model para `favorito_motorista`. Igual a `interesse_carga`, o favorito é só uma ligação entre uma empresa e um motorista; suas leituras devolvem um "resumo de motorista" na forma de **dict** (dicionário: um conjunto de pares nome→valor). Fazemos assim para que este pedaço do código não fique preso (dependente) ao módulo de motorista. É exatamente o que o `interesse_carga_repo` já faz.
 
 ## Passo 1.4 — Repositório `favorito_motorista_repo`
 
 **Arquivo:** `backend/repo/favorito_motorista_repo.py` — **ARQUIVO NOVO**
 
-Este repo é quase um clone de `interesse_carga_repo.py`. Funções de módulo (não classe). A conexão vem sempre de `obter_conexao()` (que já faz commit no sucesso e rollback no erro). A idempotência usa o mesmo truque: `existe()` para a rota responder 409, e o `inserir()` engole `IntegrityError` retornando `None`.
+Este repositório é quase uma cópia de `interesse_carga_repo.py`. São funções soltas no arquivo (não há classe). A conexão com o banco vem sempre de `obter_conexao()` (que já salva as mudanças quando tudo dá certo e desfaz tudo quando dá erro). Para evitar favorito repetido, usamos o mesmo truque: `existe()` permite à rota responder com o código 409 (que significa "conflito"), e o `inserir()`, se o banco reclamar de duplicado (um `IntegrityError`), simplesmente devolve `None` em vez de derrubar o programa.
 
 ```python
 """
@@ -381,14 +513,14 @@ def obter_motoristas_da_empresa(empresa_id: int) -> list[dict]:
 
 Pontos importantes:
 
-- `criar_tabela()` é **obrigatória**: o `main.py` chama essa função no startup. Sem ela, a tabela nunca é criada.
-- `obter_motoristas_da_empresa()` devolve **dicts** com exatamente as mesmas chaves de `MotoristaResumoResponse`. Por isso, na rota, conseguimos fazer `MotoristaResumoResponse(**d)` direto.
+- `criar_tabela()` é **obrigatória**: o `main.py` chama essa função quando o servidor liga (no "startup", a partida do sistema). Sem ela, a tabela nunca é criada no banco.
+- `obter_motoristas_da_empresa()` devolve **dicts** com exatamente os mesmos nomes de campos de `MotoristaResumoResponse`. Por isso, na rota, conseguimos montar o objeto direto com `MotoristaResumoResponse(**d)`.
 
 ## Passo 1.5 — Repositório `avaliacao_repo`
 
 **Arquivo:** `backend/repo/avaliacao_repo.py` — **ARQUIVO NOVO**
 
-Aqui há uma novidade: além de inserir a avaliação, precisamos **recalcular** a média e gravar em `motorista.nota`. Para isso, fazemos um pequeno `UPDATE motorista SET nota = ?` dentro do repo de avaliação (o repo é o lugar certo para falar com o banco). Usamos `agora()` para a data, conforme a regra do projeto.
+Aqui há uma novidade: além de gravar a avaliação, precisamos **recalcular** a média de notas e guardá-la em `motorista.nota`. Para isso, fazemos um pequeno `UPDATE motorista SET nota = ?` (um comando que altera um dado) dentro do repositório de avaliação — afinal, o repositório é o único lugar que deve conversar com o banco. Usamos `agora()` para a data, como manda a regra do projeto.
 
 ```python
 """
@@ -503,15 +635,15 @@ def obter_por_motorista(motorista_id: int) -> list[Avaliacao]:
 
 Pontos importantes:
 
-- `media_por_motorista` trata o `NULL` do `AVG` retornando `0.0`. Sem esse cuidado, um `float(None)` quebraria.
-- `recalcular_nota_motorista` faz o `UPDATE` direto. É um SQL inline curto e específico — aceitável aqui. Ele será chamado pela rota **logo após** inserir a avaliação.
-- `agora()` vem de `util/datetime_util.py`. **Nunca** use `datetime.now()`.
+- `media_por_motorista` trata o caso do `AVG` vir vazio (`NULL`) devolvendo `0.0`. Sem esse cuidado, tentar transformar esse vazio em número (`float(None)`) derrubaria o programa.
+- `recalcular_nota_motorista` faz o `UPDATE` direto, com um comando de SQL curto e bem específico escrito ali mesmo — o que é aceitável neste caso. A rota vai chamá-lo **logo depois** de gravar a avaliação.
+- `agora()` vem de `util/datetime_util.py` e devolve a data/hora no fuso correto da aplicação. **Nunca** use `datetime.now()` no lugar dele.
 
 ## Passo 1.6 — DTO de entrada da avaliação
 
 **Arquivo:** `backend/dtos/avaliacao_dto.py` — **ARQUIVO NOVO**
 
-O DTO valida o corpo do `POST .../avaliar`. Usamos `validar_inteiro_range` (já existe em `dtos/validators.py`) para garantir a nota entre 1 e 5, e `validar_comprimento` para o comentário opcional. Se a validação falhar, o Pydantic levanta `ValueError`, que o FastAPI converte em **422**.
+O DTO confere os dados que chegam no corpo da chamada `POST .../avaliar` (lembre: DTO é o formato dos dados que entram e saem da API). Usamos `validar_inteiro_range` (que já existe em `dtos/validators.py`) para garantir a nota entre 1 e 5, e `validar_comprimento` para limitar o comentário, que é opcional. Se a conferência falhar, o Pydantic (a biblioteca que valida os dados) avisa o erro, e o FastAPI responde com o código **422** (que significa "os dados enviados não estão no formato certo").
 
 ```python
 """
@@ -545,14 +677,14 @@ class AvaliarMotoristaDTO(BaseModel):
 
 Pontos importantes:
 
-- A nota chega no JSON como número; o `int` do Pydantic e o `validar_inteiro_range(1, 5)` cuidam do resto.
-- `validar_comprimento` permite vazio/None (não é obrigatório) e limita o tamanho.
+- A nota chega no JSON (o formato de texto usado para enviar dados entre a tela e o servidor) como número; o `int` do Pydantic e o `validar_inteiro_range(1, 5)` cuidam de conferir o resto.
+- `validar_comprimento` deixa o campo ficar vazio (não é obrigatório) e só limita o tamanho quando há texto.
 
 ## Passo 1.7 — Response (DTO de saída) da avaliação
 
 **Arquivo:** `backend/dtos/responses/avaliacao_response.py` — **ARQUIVO NOVO**
 
-O Response é o que a API devolve em JSON. Segue o padrão: uma `BaseModel` com factory `classmethod de_avaliacao(...)`. Datas viram string ISO (o Pydantic serializa `datetime` automaticamente, mas convertemos para `str` por consistência).
+O Response é o que a API devolve para a tela, em JSON. Ele segue o padrão do projeto: uma `BaseModel` (classe-base do Pydantic) com um método de fábrica `classmethod de_avaliacao(...)` que monta o objeto a partir de uma avaliação. As datas viram texto no formato ISO (um padrão comum de data: ano-mês-dia). O Pydantic até transforma `datetime` sozinho, mas convertemos para `str` por garantia, para que a saída seja sempre igual.
 
 ```python
 """
@@ -602,7 +734,7 @@ class AvaliacaoResponse(BaseModel):
 
 **Arquivo:** `backend/routes/empresa_routes.py` — **EDIÇÃO**
 
-Vamos adicionar **quatro** endpoints à empresa: favoritar, desfavoritar, listar favoritos, e avaliar. Faça três pequenas alterações neste arquivo.
+Vamos adicionar **quatro** endpoints (endereços da API) à empresa: favoritar, desfavoritar, listar favoritos, e avaliar. Faça três pequenas alterações neste arquivo.
 
 ### 1.8.a — Novos imports
 
@@ -655,7 +787,7 @@ from repo import (
 
 ### 1.8.b — Novos rate limiters
 
-Logo após o `empresa_perfil_limiter` (no bloco "Rate Limiters"), adicione dois limitadores. Eles seguem o mesmo molde dos existentes:
+Um "rate limiter" é um limitador que controla quantas vezes alguém pode chamar uma rota num certo tempo, para evitar abuso. Logo após o `empresa_perfil_limiter` (no bloco "Rate Limiters"), adicione dois limitadores. Eles seguem o mesmo molde dos que já existem:
 
 ```python
 empresa_favorito_limiter = DynamicRateLimiter(
@@ -676,11 +808,11 @@ empresa_avaliar_limiter = DynamicRateLimiter(
 
 ### 1.8.c — Endpoints novos
 
-Adicione os endpoints abaixo no fim do arquivo (depois das rotas de perfil). Repare em cada padrão obrigatório, que é idêntico ao das rotas que já existem:
+Adicione os endpoints abaixo no fim do arquivo (depois das rotas de perfil). Repare em cada padrão que é obrigatório seguir, igual ao das rotas que já existem:
 
-- `@router.<metodo>(...)` em cima, `@requer_autenticacao([Perfil.EMPRESA.value])` logo abaixo.
-- `request: Request` é o **primeiro** parâmetro; `usuario_logado: Optional[UsuarioLogado] = None` é o **último**; e no corpo, `assert usuario_logado is not None`.
-- Erros sempre via `raise HTTPException(...)`.
+- `@router.<metodo>(...)` em cima (o "decorador" que define o método e o caminho da rota), e `@requer_autenticacao([Perfil.EMPRESA.value])` logo abaixo (que exige login de empresa).
+- `request: Request` é o **primeiro** parâmetro; `usuario_logado: Optional[UsuarioLogado] = None` é o **último**; e, dentro da função, `assert usuario_logado is not None` (confirma que existe um usuário logado).
+- Erros sempre são avisados com `raise HTTPException(...)`.
 
 ```python
 # =============================================================================
@@ -835,9 +967,9 @@ from model.avaliacao_model import Avaliacao
 
 Pontos importantes:
 
-- O motorista avaliado **não** vem do corpo: ele é o `carga.motorista_escolhido_id`. Isso impede a empresa de avaliar um motorista que não fez o frete.
-- A ordem das checagens importa: 404/403 (a carga é da empresa? — feito por `_obter_carga_da_empresa`), depois 409 (está Concluída?), depois 422 (tem motorista?), depois 409 (já avaliada?).
-- Logo após inserir, chamamos `recalcular_nota_motorista`. É isso que faz a média aparecer atualizada no card.
+- O motorista avaliado **não** é informado no corpo da chamada: ele é sempre o `carga.motorista_escolhido_id`, ou seja, o motorista que de fato fez aquele frete. Assim a empresa não consegue avaliar um motorista que não trabalhou para ela.
+- A ordem das conferências importa: primeiro 404/403 (a carga é mesmo desta empresa? — quem faz isso é `_obter_carga_da_empresa`), depois 409 (a carga está Concluída?), depois 422 (a carga tem um motorista contratado?), e por fim 409 de novo (essa carga já foi avaliada?). Cada número é um código de resposta diferente para cada situação.
+- Logo depois de gravar, chamamos `recalcular_nota_motorista`. É isso que faz a média aparecer atualizada no card do motorista.
 
 ## Passo 1.9 — Rota do Motorista: listar avaliações recebidas
 
@@ -913,7 +1045,7 @@ async def listar_avaliacoes(
 
 **Arquivo:** `backend/main.py` — **EDIÇÃO**
 
-Este é o passo que mais se erra. Se você não registrar a tabela aqui, ela **nunca é criada** no banco, e toda chamada que mexe nela vai falhar com erro de "no such table". Faça duas alterações.
+Este é o passo que mais se erra. Se você não registrar a tabela aqui, ela **nunca é criada** no banco, e toda chamada que mexe nela vai falhar com o erro "no such table" ("não existe essa tabela"). Faça duas alterações.
 
 ### 1.10.a — Importar os repositórios novos
 
@@ -947,7 +1079,7 @@ from repo import (
 
 ### 1.10.b — Registrar na lista `TABELAS`
 
-Encontre a lista `TABELAS`. Adicione as duas tabelas novas **depois** de `motorista` e `carga` (porque elas têm FK para essas tabelas; a ordem importa). Coloque-as logo após `interesse_carga`:
+Encontre a lista `TABELAS`. Adicione as duas tabelas novas **depois** de `motorista` e `carga`. A ordem importa porque elas têm FK (chave estrangeira — uma ligação que aponta para outra tabela) para essas tabelas, e a tabela apontada precisa existir antes. Coloque-as logo após `interesse_carga`:
 
 ```python
 TABELAS = [
@@ -965,9 +1097,9 @@ TABELAS = [
 ]
 ```
 
-> Por que a ordem importa? `favorito_motorista` referencia `empresa` e `motorista`; `avaliacao` referencia `carga`, `empresa` e `motorista`. Como o SQLite cria FKs na hora do `CREATE TABLE`, as tabelas referenciadas precisam já existir. Colocá-las depois de `carga` e `motorista` garante isso.
+> Por que a ordem importa? `favorito_motorista` aponta para `empresa` e `motorista`; `avaliacao` aponta para `carga`, `empresa` e `motorista`. Como o SQLite (o banco de dados deste projeto) cria essas ligações no momento do `CREATE TABLE`, as tabelas apontadas precisam já existir. Colocá-las depois de `carga` e `motorista` garante isso.
 
-> **Não é preciso registrar router novo:** as rotas novas foram adicionadas a routers que **já existem** (`empresa_router` e `motorista_router`), que já estão na lista `ROUTERS`. Se algum dia você criar um router em um **arquivo novo**, aí sim teria que importá-lo e adicioná-lo em `ROUTERS` no `main.py` — é assim que `empresa_router` e `motorista_router` já estão lá.
+> **Não é preciso registrar um router novo:** as rotas novas foram adicionadas a routers que **já existem** (`empresa_router` e `motorista_router`) — um "router" é o arquivo que agrupa rotas parecidas. Eles já estão na lista `ROUTERS`. Se algum dia você criar um router em um **arquivo novo**, aí sim você teria que importá-lo e adicioná-lo em `ROUTERS` no `main.py` — foi assim que `empresa_router` e `motorista_router` chegaram lá.
 
 ### 1.10.c — Reinicie o backend
 
@@ -977,7 +1109,9 @@ Pare o backend (Ctrl+C no Terminal 1) e suba de novo:
 backend/.venv/bin/python backend/main.py
 ```
 
-Procure no log as linhas `Tabela 'favorito_motorista' criada/verificada` e `Tabela 'avaliacao' criada/verificada`. Se elas aparecerem, as tabelas foram criadas. Abra `http://127.0.0.1:8412/docs` e confirme que os endpoints novos aparecem.
+Procure no log (as mensagens que o servidor escreve no terminal) as linhas `Tabela 'favorito_motorista' criada/verificada` e `Tabela 'avaliacao' criada/verificada`. Se elas aparecerem, as tabelas foram criadas. Abra `http://127.0.0.1:8412/docs` e confirme que os endpoints novos aparecem.
+
+![Documentação interativa (Swagger) mostrando os endpoints novos de favoritos e avaliação](img/aluno1/swagger-endpoints-novos.png)
 
 ---
 
@@ -987,7 +1121,7 @@ Procure no log as linhas `Tabela 'favorito_motorista' criada/verificada` e `Tabe
 
 **Arquivo:** `frontend/src/lib/types.ts` — **EDIÇÃO**
 
-Os tipos do frontend têm que bater **exatos** com os Response DTOs do backend. Adicione a interface de avaliação. Coloque, por exemplo, logo após o bloco `// ===== Motorista =====`:
+Os tipos do frontend (que descrevem o formato dos dados no TypeScript) têm que bater **exatos** com os Response DTOs do backend, para os dois lados se entenderem. Adicione a interface de avaliação. Coloque, por exemplo, logo após o bloco `// ===== Motorista =====`:
 
 ```ts
 // ===== Avaliação =====
@@ -1010,7 +1144,7 @@ export interface Avaliacao {
 
 **Arquivo:** `frontend/src/lib/schemas.ts` — **EDIÇÃO**
 
-O schema valida o formulário de avaliação no navegador, espelhando o `AvaliarMotoristaDTO` do backend. Adicione ao fim do arquivo:
+O schema (esquema) confere o formulário de avaliação já no navegador, antes mesmo de enviar para o servidor, espelhando o `AvaliarMotoristaDTO` do backend. Assim o usuário recebe o aviso de erro na hora. Adicione ao fim do arquivo:
 
 ```ts
 // ===== Avaliação (empresa avalia motorista) =====
@@ -1032,16 +1166,16 @@ export type AvaliarMotoristaForm = z.infer<typeof avaliarMotoristaSchema>
 
 Pontos importantes:
 
-- `z.coerce.number()` converte o valor do `<select>`/`<input>` (que chega como string) para número.
-- Os limites `1..5` e `max(500)` espelham exatamente as regras do backend. Se um lado mudar, mude o outro também.
+- `z.coerce.number()` converte o valor do `<select>`/`<input>` (que sempre chega como texto) para número.
+- Os limites `1..5` e `max(500)` repetem exatamente as regras do backend. Se você mudar um lado, mude o outro também, senão eles vão discordar.
 
 ## Passo 2.3 — Botão "Favoritar" no card do motorista
 
 **Arquivo:** `frontend/src/components/giro/MotoristaInteressadoCard.tsx` — **EDIÇÃO**
 
-Vamos adicionar duas coisas ao card: (1) um botão de favoritar/desfavoritar (coração), e (2) já que a média de avaliação (`nota`) vem no `MotoristaResumo`, ela continua aparecendo no card como `⭐ {m.nota}` — não precisa mudar isso, só confirmar que está lá.
+Vamos adicionar duas coisas ao card: (1) um botão de favoritar/desfavoritar (um coração), e (2) já que a média de avaliação (`nota`) vem junto no `MotoristaResumo`, ela continua aparecendo no card como `⭐ {m.nota}` — você não precisa mudar isso, só confirmar que está lá.
 
-Primeiro, amplie as **props** do componente para receber o estado de favorito e o callback. Troque a assinatura:
+Primeiro, amplie as **props** do componente (as "props" são os dados que um componente recebe de quem o usa) para receber o estado de favorito e a função de callback (a função que será chamada quando o usuário clicar). Troque a assinatura:
 
 ```tsx
 export default function MotoristaInteressadoCard({
@@ -1077,7 +1211,7 @@ export default function MotoristaInteressadoCard({
 }) {
 ```
 
-Agora, dentro do `return`, logo **antes** do bloco `{podeEscolher && (...)}`, adicione o botão de favoritar. Ele só aparece se o componente receber `onToggleFavorito`:
+Agora, dentro do `return`, logo **antes** do bloco `{podeEscolher && (...)}`, adicione o botão de favoritar. Ele só aparece se o componente receber a função `onToggleFavorito`:
 
 ```tsx
       {onToggleFavorito && (
@@ -1101,14 +1235,14 @@ Agora, dentro do `return`, logo **antes** do bloco `{podeEscolher && (...)}`, ad
 
 Pontos importantes:
 
-- Os novos parâmetros têm **valor padrão** (`favorito = false`) e o callback é **opcional**. Por isso, as telas que já usam este card (como `EmpresaDetalhesPage`) continuam funcionando sem alteração.
-- O coração preenchido (`♥`) indica favoritado; o vazado (`♡`), não.
+- Os novos parâmetros têm um **valor padrão** (`favorito = false`) e a função de callback é **opcional**. Por isso, as telas que já usam este card (como `EmpresaDetalhesPage`) continuam funcionando sem precisar de nenhuma mudança.
+- O coração cheio (`♥`) indica que o motorista é favorito; o coração vazado (`♡`), que não é.
 
 ## Passo 2.4 — Nova página de favoritos
 
 **Arquivo:** `frontend/src/pages/giro/EmpresaFavoritosPage.tsx` — **ARQUIVO NOVO**
 
-Esta página lista os motoristas favoritos e permite desfavoritar (com confirmação via `pedirConfirmacao`, **nunca** `confirm()` nativo). Ela usa o hook `useFetch` para carregar os dados, e o `api` central para chamar a rota. Feedback sempre via `toast`.
+Esta página lista os motoristas favoritos e permite desfavoritar (sempre pedindo confirmação com `pedirConfirmacao`, e **nunca** com o `confirm()` padrão do navegador, que é feio e não combina com o resto do site). Ela usa o hook `useFetch` para buscar os dados (um "hook" é uma função pronta do React que adiciona um comportamento ao componente — aqui, carregar dados da API). As chamadas passam sempre pelo `api` central, e os avisos ao usuário aparecem como `toast` (aquelas mensagens que surgem por alguns segundos no canto da tela).
 
 ```tsx
 import { useCallback, useState } from 'react'
@@ -1197,13 +1331,21 @@ export default function EmpresaFavoritosPage() {
 
 Pontos importantes:
 
-- `api.get<MotoristaResumo[]>('/empresa/favoritos', ...)`: o caminho é **relativo a `/api`** (não escreva `/api/empresa/favoritos`).
-- Passamos `favorito` (sempre verdadeiro nesta tela, já que todos são favoritos) e `onToggleFavorito` (que aqui significa "remover").
-- O CSRF é tratado automaticamente pelo `api.delete` — você não precisa fazer nada manualmente.
+- `api.get<MotoristaResumo[]>('/empresa/favoritos', ...)`: o caminho é **relativo a `/api`** (não escreva `/api/empresa/favoritos`, pois o `/api` já é colocado automaticamente).
+- Passamos `favorito` (sempre verdadeiro nesta tela, já que todos os motoristas aqui são favoritos) e `onToggleFavorito` (que, nesta página, quer dizer "remover").
+- O CSRF (uma proteção contra pedidos falsos vindos de outros sites) é tratado automaticamente pelo `api.delete` — você não precisa fazer nada à mão.
+
+Veja como deve ficar a página de favoritos pronta:
+
+![Página de favoritos da empresa com o card do motorista favoritado](img/aluno1/pagina-favoritos-card.png)
+
+E o modal de confirmação que aparece ao clicar no coração para remover:
+
+![Modal pedindo confirmação para remover o motorista dos favoritos](img/aluno1/modal-confirmacao-remover.png)
 
 ### Bônus: favoritar a partir do detalhe da carga
 
-Para favoritar a partir da tela de detalhe (`EmpresaDetalhesPage.tsx`), o caminho é chamar `api.post(\`/empresa/favoritos/${motoristaId}\`)` no `onToggleFavorito` do card, mostrar `toast.sucesso(...)` e recarregar. Você precisaria saber quais já são favoritos (carregando `GET /empresa/favoritos` e montando um `Set` de ids). Isso é opcional para a entrega mínima; a página dedicada do Passo 2.4 já cobre o requisito.
+Para favoritar direto da tela de detalhe (`EmpresaDetalhesPage.tsx`), o caminho é chamar `api.post(\`/empresa/favoritos/${motoristaId}\`)` no `onToggleFavorito` do card, mostrar `toast.sucesso(...)` e recarregar. Você precisaria saber quais motoristas já são favoritos (carregando `GET /empresa/favoritos` e guardando os ids num `Set`). Isso é opcional para a entrega mínima; a página dedicada do Passo 2.4 já atende ao que foi pedido.
 
 ## Passo 2.5 — Registrar a rota e o item de menu ⚠️
 
@@ -1232,13 +1374,13 @@ Depois, dentro do grupo `<EmpresaRoute>` → `<AppLayout>` (a lista de `children
             ],
 ```
 
-> Importante: a rota precisa ficar **dentro** do grupo `<EmpresaRoute>` (guard de perfil) e do `<AppLayout>` (layout com o header). Se você colocar fora, a página abre sem cabeçalho ou sem a proteção de perfil.
+> Importante: a rota precisa ficar **dentro** do grupo `<EmpresaRoute>` (o "guard de perfil", que só deixa empresas entrarem) e do `<AppLayout>` (o layout que desenha o cabeçalho). Se você colocar fora, a página abre sem cabeçalho ou sem a proteção que impede outros perfis de acessar.
 
 ### 2.5.b — Item de menu
 
 **Arquivo:** `frontend/src/components/giro/Header.tsx` — **EDIÇÃO**
 
-A navegação depende do perfil, e está no array `navDefs`. Adicione o par `['Favoritos', '/empresa/favoritos']` no ramo da **empresa** (`isEmpresa`):
+A navegação muda conforme o perfil de quem está logado, e fica no array `navDefs`. Adicione o par `['Favoritos', '/empresa/favoritos']` no ramo da **empresa** (`isEmpresa`):
 
 ```tsx
   const navDefs: [string, string][] = isEmpresa
@@ -1257,6 +1399,8 @@ A navegação depende do perfil, e está no array `navDefs`. Adicione o par `['F
 
 Pronto. Agora a empresa vê o link "Favoritos" no topo e consegue navegar até a página.
 
+![Cabeçalho do site com o novo item de menu "Favoritos" no topo](img/aluno1/menu-favoritos-header.png)
+
 ---
 
 ## Como testar
@@ -1272,7 +1416,7 @@ Pronto. Agora a empresa vê o link "Favoritos" no topo e consegue navegar até a
 2. **Suba o frontend** (Terminal 2):
 
    ```bash
-   cd frontend && npm run dev
+   cd frontend && bun run dev
    ```
 
 3. **Favoritar (A):**
@@ -1288,17 +1432,19 @@ Pronto. Agora a empresa vê o link "Favoritos" no topo e consegue navegar até a
    - Logue como o **motorista** avaliado e chame `GET /api/motorista/avaliacoes`: a avaliação deve aparecer.
    - Volte como empresa e abra a carga: a média (`⭐`) do motorista no card deve refletir a nota.
 
+   ![Card do motorista mostrando a nota (média de avaliação) recalculada](img/aluno1/card-nota-recalculada.png)
+
 ### Teste pelo Swagger (`/docs`)
 
 Abra `http://127.0.0.1:8412/docs`. Você verá os endpoints novos:
-`POST/DELETE /empresa/favoritos/{motorista_id}`, `GET /empresa/favoritos`, `POST /empresa/cargas/{id}/avaliar`, `GET /motorista/avaliacoes`. Faça login primeiro (a sessão é por cookie), depois experimente cada um.
+`POST/DELETE /empresa/favoritos/{motorista_id}`, `GET /empresa/favoritos`, `POST /empresa/cargas/{id}/avaliar`, `GET /motorista/avaliacoes`. Faça login primeiro (o sistema lembra quem você é por um cookie, um pequeno arquivo guardado pelo navegador), depois experimente cada um.
 
 ### Checagens automáticas
 
 ```bash
 backend/.venv/bin/python -m pytest          # testes do backend não podem quebrar
-cd frontend && npx tsc -b --noEmit          # zero erros de tipo
-cd frontend && npm run lint                 # zero erros de lint
+cd frontend && bunx tsc -b --noEmit          # zero erros de tipo
+cd frontend && bun run lint                 # zero erros de lint
 ```
 
 ### Exemplo de teste de avaliação (opcional)
@@ -1341,7 +1487,7 @@ def test_media_sem_avaliacoes_eh_zero():
    A rota nova ficou fora do grupo `<EmpresaRoute>` / `<AppLayout>` no `router.tsx` (Passo 2.5.a). Ela tem que estar **dentro** desses dois grupos.
 
 7. **TypeScript reclama de tipo em `MotoristaInteressadoCard`.**
-   Você usou `onToggleFavorito`/`favorito` mas não declarou nas props (Passo 2.3). Confirme que ampliou a assinatura do componente. Rode `npx tsc -b --noEmit` para ver o erro exato.
+   Você usou `onToggleFavorito`/`favorito` mas não declarou nas props (Passo 2.3). Confirme que ampliou a assinatura do componente. Rode `bunx tsc -b --noEmit` para ver o erro exato.
 
 ---
 
@@ -1366,6 +1512,6 @@ Marque cada item conforme concluir:
 - [ ] `frontend/src/pages/giro/EmpresaFavoritosPage.tsx` criado.
 - [ ] `frontend/src/router.tsx` editado: import e rota `/empresa/favoritos` dentro de `<EmpresaRoute>`/`<AppLayout>`.
 - [ ] `frontend/src/components/giro/Header.tsx` editado: item de menu "Favoritos".
-- [ ] `npx tsc -b --noEmit`, `npm run lint` e `pytest` passando.
+- [ ] `bunx tsc -b --noEmit`, `bun run lint` e `pytest` passando.
 - [ ] Fluxo manual testado: favoritar/desfavoritar e avaliar (carga Concluída) com média atualizada.
 ```

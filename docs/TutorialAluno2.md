@@ -6,17 +6,207 @@
 
 ---
 
+## Setup — preparando seu computador do zero
+
+> Esta seção é para quem nunca rodou o projeto antes. Se o seu ambiente já está
+> montado e funcionando, pode pular direto para "O que você vai construir".
+> Vamos do absoluto zero: instalar os programas, baixar o código, ligar tudo.
+> Faça uma etapa de cada vez e confira a saída de cada comando antes de seguir.
+
+Antes de programar qualquer coisa, você precisa de quatro programas instalados
+no computador. Pense neles como as ferramentas básicas da bancada:
+
+- **Git** — guarda o histórico do código e permite baixar o projeto da internet.
+- **Python 3.11 ou mais novo** — a linguagem em que o *backend* (o servidor que
+  fica nos bastidores) foi escrito.
+- **Bun** — o programa que instala e roda as partes do *frontend* (a tela que
+  aparece no navegador). Neste projeto o Bun é o gerenciador oficial. **Não use
+  `npm`.**
+- **VSCode** — o editor de texto onde você vai escrever e ler o código.
+
+### 1. Instalar os programas
+
+Baixe e instale cada um pelos sites oficiais:
+
+- Git: <https://git-scm.com/downloads>
+- Python (escolha a versão 3.11, 3.12 ou 3.13): <https://www.python.org/downloads/>
+- Bun: <https://bun.sh> (no Windows, siga as instruções da página; no Mac/Linux
+  costuma ser um único comando que o site mostra)
+- VSCode: <https://code.visualstudio.com>
+
+> No Windows, quando o instalador do Python perguntar, marque a caixa
+> **"Add Python to PATH"**. Sem isso, o comando `python` não funciona no
+> terminal. É o erro número um de quem está começando.
+
+### 2. Conferir se instalou direito
+
+Abra o **terminal** (no VSCode: menu *Terminal* → *New Terminal*) e rode os três
+comandos abaixo, um por vez. Cada um deve responder com um número de versão. Se
+algum der "comando não encontrado", a instalação daquele programa falhou — volte
+e refaça.
+
+```bash
+python --version
+bun --version
+git --version
+```
+
+> Em alguns sistemas (Mac/Linux) o comando do Python pode ser `python3` em vez
+> de `python`. Se `python --version` não responder, tente `python3 --version`.
+> O importante é a versão começar com **3.11**, **3.12** ou **3.13**.
+
+### 3. Baixar o código do projeto (clonar o repositório)
+
+"Clonar" significa baixar uma cópia completa do projeto, com todo o histórico,
+para o seu computador. Escolha uma pasta onde você guarda seus projetos, abra o
+terminal nela e rode:
+
+```bash
+git clone https://github.com/Artleyfin/girochoffer.git
+cd girochoffer
+```
+
+Agora você está **dentro** da pasta do projeto. Todos os próximos comandos
+partem daqui.
+
+### 4. Criar uma branch para o seu trabalho
+
+Uma **branch** é uma "linha de trabalho paralela": uma cópia do código onde
+você faz suas mudanças sem bagunçar a versão principal (a `main`). Se algo der
+errado, é só descartar a branch e a `main` continua intacta. Por isso a gente
+sempre trabalha numa branch própria, nunca direto na principal.
+
+Crie a sua e já entre nela:
+
+```bash
+git checkout -b minha-feature
+```
+
+> O `-b` cria a branch e te coloca dentro dela de uma vez. A partir daqui, tudo
+> que você editar fica registrado nessa branch separada.
+
+### 5. Preparar o backend (Python)
+
+O backend usa um **ambiente virtual** (a `.venv`): uma caixinha isolada onde as
+bibliotecas do projeto são instaladas, sem misturar com o resto do seu Python.
+Isso evita conflito entre projetos diferentes.
+
+> **Atenção a uma pegadinha:** o projeto tem um arquivo `.python-version`
+> apontando para uma versão muito nova do Python (3.14) que talvez nem exista
+> ainda na sua máquina. Ignore esse arquivo e crie a `.venv` com o **Python
+> 3.11** (ou 3.12/3.13) que você instalou. Os comandos abaixo fazem exatamente
+> isso.
+
+Entre na pasta do backend e crie o ambiente virtual:
+
+```bash
+cd backend
+python -m venv .venv
+```
+
+> Se o seu Python responde por `python3` (caso do Mac/Linux), troque por
+> `python3 -m venv .venv` nesta linha. Quem instalou várias versões pode forçar
+> a 3.11 com `py -3.11 -m venv .venv` (Windows) ou `python3.11 -m venv .venv`
+> (Mac/Linux).
+
+Agora **ative** o ambiente. O comando muda conforme o sistema:
+
+- **Windows (PowerShell):**
+
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+- **Mac/Linux (ou Git Bash no Windows):**
+
+```bash
+source .venv/bin/activate
+```
+
+> Deu certo quando aparece `(.venv)` no começo da linha do terminal. É o sinal
+> de que você está dentro da caixinha isolada.
+
+Com a `.venv` ativa, instale as bibliotecas que o backend precisa:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 6. Preparar o frontend (Bun)
+
+Abra **outro terminal** (deixe o primeiro como está), vá para a pasta do
+frontend e instale as dependências com o Bun:
+
+```bash
+cd frontend
+bun install
+```
+
+> O `bun install` lê a lista de dependências do projeto e baixa tudo numa pasta
+> `node_modules`. É o equivalente ao `pip install` do Python, só que para o
+> frontend.
+
+### 7. Ligar tudo
+
+Você vai precisar de **dois terminais rodando ao mesmo tempo**: um para o
+backend, outro para o frontend.
+
+- **Terminal 1 — backend** (a partir da raiz do projeto, com a `.venv` ativa):
+
+```bash
+backend/.venv/bin/python backend/main.py
+```
+
+- **Terminal 2 — frontend** (dentro de `frontend/`):
+
+```bash
+bun run dev
+```
+
+> O backend sobe na porta **8412** e o frontend na **5182**. Abra o navegador em
+> `http://localhost:5182` para ver a tela, e `http://localhost:8412/docs` para a
+> documentação dos endpoints (vamos usar bastante).
+
+### 8. Extensões do VSCode
+
+Extensões são "complementos" que deixam o editor mais esperto. Abra o painel de
+extensões (ícone de blocos na barra lateral, ou `Ctrl+Shift+X`) e instale:
+
+- **Python** — suporte básico para rodar e entender código Python.
+- **Pylance** — completa o código e aponta erros de Python enquanto você digita.
+- **Python Debugger** — permite pausar o backend e investigar o que está
+  acontecendo passo a passo.
+- **Python Environments** — ajuda a escolher e gerenciar a `.venv` certa.
+- **ESLint** — aponta erros e más práticas no código do frontend (JS/TS).
+- **SQLite3 Editor** — abre e lê o banco de dados do projeto direto no editor.
+- **vscode-icons** — coloca ícones bonitos nos arquivos, facilita achar as coisas.
+- **HTML CSS Support** — autocompleta classes e tags de HTML/CSS.
+
+> Depois de instalar a extensão Python, abra qualquer arquivo `.py` e, no canto
+> inferior do VSCode, selecione o interpretador que aponta para a sua
+> `backend/.venv`. Assim o editor usa o Python certo.
+
+Com tudo isso pronto, você está com o ambiente montado e o projeto rodando.
+Agora sim, vamos ao que você vai construir.
+
+---
+
 ## O que você vai construir
 
 Hoje o catálogo logístico do GiroChoffer (a lista de **tipos de veículo** —
 Caminhão, Carreta, Bitrem... — e a lista de **tipos de carroceria** — Baú,
 Sider, Graneleiro...) é **fixo**: ele é gravado uma única vez no banco pelo
-*seed* e nunca mais muda. Neste tutorial você vai tornar esse catálogo
-**editável por administradores**: o admin vai poder **criar** um novo tipo,
-**renomear** um tipo existente e **ativar/desativar** um tipo (sem apagar do
-banco). Você vai implementar isso **ponta a ponta** (full-stack): banco → SQL →
-repositório → DTO → response → rota → registro no startup → cliente HTTP →
-tipos → Zod → página React → rota/menu do frontend.
+*seed* (o programinha que enche o banco com dados iniciais quando o projeto sobe
+pela primeira vez) e nunca mais muda. Neste tutorial você vai tornar esse
+catálogo **editável por administradores**: o admin vai poder **criar** um novo
+tipo, **renomear** um tipo existente e **ativar/desativar** um tipo (sem apagar
+do banco). Esse conjunto de operações — criar, ler, atualizar e desativar — é o
+que se chama de **CRUD** (do inglês *Create, Read, Update, Delete*); é o
+feijão-com-arroz de quase todo sistema. Você vai implementar isso **ponta a
+ponta** (ou seja, da tela até o banco de dados, passando por tudo no meio):
+banco → SQL → repositório → DTO → response → rota → registro no startup →
+cliente HTTP → tipos → Zod → página React → rota/menu do frontend. Calma: cada
+uma dessas palavras vai ser explicada no momento certo.
 
 Resultado final, depois de tudo pronto:
 
@@ -25,9 +215,17 @@ Resultado final, depois de tudo pronto:
 - Botão **"+ Novo tipo"** para criar (abre um modal).
 - Botão de **editar** (lápis) para renomear.
 - Um **toggle** (chave liga/desliga) para ativar/desativar cada item.
-- Novos endpoints no backend: `POST/PUT/PATCH /api/admin/catalogos/...`,
-  protegidos por **guarda de Admin** e **rate limit**, exatamente no mesmo
-  estilo de `admin_usuarios_routes.py`.
+- Novos **endpoints** no backend: `POST/PUT/PATCH /api/admin/catalogos/...`.
+  Um **endpoint** é um endereço do servidor que o frontend chama para pedir ou
+  enviar dados (tipo uma "porta de atendimento" da API). Esses ficam
+  protegidos por **guarda de Admin** (uma trava que só deixa passar quem está
+  logado como administrador) e **rate limit** (um limite de quantas vezes por
+  minuto dá para chamar, para ninguém abusar), exatamente no mesmo estilo de
+  `admin_usuarios_routes.py`.
+
+A tela pronta fica assim (duas tabelas, com toggle e botão de renomear por linha):
+
+![Tela de Catálogos com as tabelas de tipos de veículo e carrocerias](img/aluno2/tela-catalogos.png)
 
 > As tabelas `tipo_veiculo` e `tipo_carroceria` **já existem** e **já têm** a
 > coluna `ativo`. Você **não vai criar tabela nova** — vai apenas adicionar
@@ -39,7 +237,8 @@ Resultado final, depois de tudo pronto:
 
 ## Pré-requisitos
 
-Você precisa do backend e do frontend **rodando ao mesmo tempo**, em dois
+Se você seguiu a seção de Setup, já tem tudo isto pronto. Vale relembrar: o
+backend e o frontend precisam estar **rodando ao mesmo tempo**, em dois
 terminais separados.
 
 ### 1. Subir o backend (a partir da raiz do projeto)
@@ -48,37 +247,50 @@ terminais separados.
 backend/.venv/bin/python backend/main.py
 ```
 
-> Atenção: o projeto usa o Python do **venv** (`backend/.venv/bin/python`).
-> Não use `python` puro do sistema. O backend sobe na porta **8412** por
-> padrão. A documentação interativa (Swagger) fica em
+> Atenção: o projeto usa o Python da **venv** (aquele ambiente isolado,
+> `backend/.venv/bin/python`). Não use o `python` puro do sistema, senão faltam
+> as bibliotecas. O backend sobe na porta **8412**. A documentação interativa
+> (o **Swagger**, uma página que lista e testa os endpoints) fica em
 > `http://localhost:8412/docs` — você vai usar bastante para testar.
 
 ### 2. Subir o frontend (em outro terminal, a partir de `frontend/`)
 
 ```bash
 cd frontend
-npm run dev
+bun run dev
 ```
 
-> O Vite sobe na porta **5182** e faz *proxy* de `/api` para o backend
-> (`http://127.0.0.1:8412`). Abra o navegador em `http://localhost:5182`.
+> O Vite (a ferramenta que serve o frontend) sobe na porta **5182** e
+> redireciona tudo que começa com `/api` para o backend
+> (`http://127.0.0.1:8412`). Assim, do navegador, parece que tela e servidor
+> estão no mesmo lugar. Abra `http://localhost:5182`.
 
 ### 3. Entrar como administrador
 
 Para acessar a área `/admin` você precisa estar logado com perfil
-**Administrador**. O admin é criado pelo *seed* (`data/admin_seed.json`).
-Faça login com esse usuário antes de testar a tela nova.
+**Administrador**. Esse usuário admin já vem pronto: ele é criado pelo *seed*
+(o tal carregador de dados iniciais, a partir de `data/admin_seed.json`). Faça
+login com ele antes de testar a tela nova.
 
 ---
 
 ## As camadas e a ordem de implementação
 
-Este projeto tem camadas bem separadas. A regra de ouro é: **implemente de
-baixo para cima** (do banco até a tela). Por quê? Porque cada camada de cima
-**depende** da de baixo. Se você começar pela tela, não terá endpoint para
-chamar; se começar pela rota, não terá função de repositório para invocar.
-Construindo de baixo para cima, cada passo já pode ser testado com o anterior
-pronto.
+Este projeto é organizado em **camadas** bem separadas — pense numa pilha de
+andares, onde cada andar tem uma função. A regra de ouro é: **construa de baixo
+para cima** (do banco até a tela). Por quê? Porque cada andar de cima **depende**
+do de baixo. Se você começar pela tela, não vai ter endpoint para ela chamar; se
+começar pela rota, não vai ter função no repositório para ela usar. Indo de
+baixo para cima, cada passo já pode ser testado apoiado no anterior, que já
+ficou pronto.
+
+Antes da tabela, dois termos que vão aparecer bastante:
+
+- **DTO** (*Data Transfer Object*, "objeto de transferência de dados"): é o
+  formato dos dados que **chegam** numa requisição. Ele serve de filtro: valida
+  o que o usuário mandou antes de o sistema confiar naquilo.
+- **Response**: é o formato dos dados que o servidor **devolve** para a tela. O
+  oposto do DTO de entrada.
 
 Ordem que vamos seguir:
 
@@ -112,12 +324,15 @@ Ordem que vamos seguir:
 **Arquivo:** `backend/sql/catalogo_sql.py`
 **Tipo:** EDIÇÃO
 
-Abra o arquivo. Ele tem duas seções: "Tipo de Veículo" e "Tipo de Carroceria".
-Cada seção tem constantes de SQL puro (`CRIAR_TABELA_...`, `INSERIR_...`,
-`OBTER_ATIVOS_...`, etc.). Vamos **acrescentar** quatro constantes novas por
-seção: uma para listar **todos** (ativos e inativos), uma para **renomear**,
-uma para **mudar o ativo** e uma para checar nome duplicado **ignorando** um id
-(usada na renomeação).
+Abra o arquivo. Ele guarda os comandos SQL (a linguagem que conversa com o
+banco de dados) separados do resto do código. Tem duas seções: "Tipo de
+Veículo" e "Tipo de Carroceria". Cada uma tem constantes com SQL puro
+(`CRIAR_TABELA_...`, `INSERIR_...`, `OBTER_ATIVOS_...`, etc.) — guardar o SQL em
+constantes deixa tudo num só lugar, fácil de achar e revisar. Vamos
+**acrescentar** quatro constantes novas por seção: uma para listar **todos**
+(ativos e inativos), uma para **renomear**, uma para **mudar o ativo** e uma
+para checar nome duplicado **ignorando** um id (essa última é usada na
+renomeação).
 
 ### 1a. Tipo de veículo
 
@@ -152,10 +367,13 @@ WHERE id = ?
 """
 ```
 
-> Use sempre os placeholders `?` (prepared statements). **Nunca** monte SQL com
-> f-string colocando o valor direto — isso abre brecha de SQL injection e é
-> proibido no projeto. A ordem dos `?` é a ordem dos parâmetros que você vai
-> passar no `cursor.execute(...)`: primeiro `nome`, depois `id`.
+> Use sempre o `?` no lugar dos valores (isso se chama *prepared statement*: o
+> banco recebe o comando e os valores separados, e encaixa os valores com
+> segurança). **Nunca** monte o SQL grudando o valor direto no texto com
+> f-string — isso abre a porta para o *SQL injection*, um truque em que alguém
+> esconde comando malicioso dentro de um campo de texto. É proibido no projeto.
+> A ordem dos `?` é a mesma ordem dos valores que você vai passar no
+> `cursor.execute(...)`: primeiro `nome`, depois `id`.
 
 Por fim, logo **abaixo** de `EXISTE_NOME_TIPO_VEICULO`, adicione uma variante
 que ignora um id (para renomear sem colidir com o próprio registro):
@@ -168,9 +386,11 @@ WHERE nome = ? AND id <> ?
 """
 ```
 
-> `<>` em SQL significa "diferente de". Esta consulta responde: "existe **outro**
-> tipo (com id diferente) que já usa esse nome?". Sem isso, ao renomear sem
-> mudar o nome, o sistema acharia que é duplicado.
+> `<>` em SQL significa "diferente de". Esta consulta responde a uma pergunta:
+> "existe **outro** tipo (com id diferente) que já usa esse nome?". Por que isso
+> importa? Sem o `id <> ?`, se você abrir um item e salvar sem mudar o nome, o
+> sistema encontraria o próprio item e acharia que é nome duplicado — barrando
+> uma edição válida.
 
 ### 1b. Tipo de carroceria
 
@@ -220,6 +440,11 @@ comandos.
 
 **Arquivo:** `backend/repo/catalogo_repo.py`
 **Tipo:** EDIÇÃO
+
+O **repositório** é a camada que fala com o banco. Em vez de espalhar SQL pelo
+sistema, ele junta tudo em funções com nomes claros (`obter_...`,
+`atualizar_...`). O resto do código chama essas funções e nem precisa saber SQL.
+É essa separação que mantém o projeto organizado.
 
 ### 2a. Importar as novas constantes
 
@@ -277,10 +502,12 @@ def obter_todas_carrocerias() -> list[TipoCarroceria]:
         return [_row_to_tipo_carroceria(row) for row in cursor.fetchall()]
 ```
 
-> Reparou no padrão? `with obter_conexao() as conn:` abre a conexão (com
-> commit/rollback automáticos), pegamos o `cursor`, executamos o SQL e
-> convertemos cada linha em dataclass com a função privada `_row_to_...` que
-> **já existe** no arquivo. Copie esse padrão sempre.
+> Reparou no padrão que se repete? `with obter_conexao() as conn:` abre a
+> conexão com o banco (e fecha sozinho no fim, salvando ou desfazendo as
+> mudanças automaticamente); pegamos o `cursor` (o "cursor" é quem executa o
+> comando e lê o resultado); rodamos o SQL; e transformamos cada linha do banco
+> num objeto Python com a função `_row_to_...`, que **já existe** no arquivo. É
+> sempre essa receita — copie ela.
 
 ### 2c. Funções de renomear (atualizar nome)
 
@@ -303,10 +530,10 @@ def atualizar_carroceria(tipo_carroceria_id: int, nome: str) -> bool:
         return cursor.rowcount > 0
 ```
 
-> `cursor.rowcount > 0` diz se o `UPDATE` realmente afetou alguma linha. Se o id
-> não existir, `rowcount` é `0` e a função retorna `False` — a rota vai usar
-> isso para decidir entre 404 e sucesso. A ordem dos parâmetros (`nome`,
-> depois o `id`) tem que casar com a ordem dos `?` no SQL.
+> `cursor.rowcount` é quantas linhas o `UPDATE` mexeu. Se o id não existir, esse
+> número é `0` e a função devolve `False` — mais adiante a rota usa isso para
+> saber se deve responder "não encontrado" (404) ou sucesso. A ordem dos valores
+> (`nome` e depois o `id`) precisa bater com a ordem dos `?` no SQL.
 
 ### 2d. Funções de ativar/desativar
 
@@ -329,9 +556,10 @@ def atualizar_ativo_carroceria(tipo_carroceria_id: int, ativo: bool) -> bool:
         return cursor.rowcount > 0
 ```
 
-> A coluna `ativo` é `INTEGER` no SQLite (não existe booleano nativo). Por isso
-> convertemos `bool` → inteiro com `1 if ativo else 0`, exatamente como o
-> projeto já faz em `inserir_tipo_veiculo`.
+> O SQLite não tem um tipo "verdadeiro/falso" próprio: a coluna `ativo` é um
+> número inteiro (`INTEGER`). Por isso traduzimos o booleano para número com
+> `1 if ativo else 0` (1 = ativo, 0 = inativo), do mesmo jeito que o projeto já
+> faz em `inserir_tipo_veiculo`.
 
 ### 2e. "Existe nome em outro id" (para a renomeação)
 
@@ -369,10 +597,14 @@ Salve o arquivo.
 **Arquivo:** `backend/dtos/catalogo_dto.py`
 **Tipo:** ARQUIVO NOVO
 
-O DTO de entrada é a "porta de entrada" validada do corpo da requisição. Ele
-usa Pydantic e reaproveita os *validators factory* de `dtos/validators.py`
-(como no `usuario_dto.py`). Quando a validação falha, o Pydantic levanta
-`ValueError`, que vira automaticamente um erro **422** no contrato padrão.
+Lembrando: o **DTO** é o formato dos dados que chegam na requisição. Ele é a
+"porta de entrada" do servidor, e essa porta tem um segurança: antes de deixar
+o dado entrar, confere se ele está no formato certo. Aqui usamos o **Pydantic**
+(a biblioteca que faz essa conferência em Python) e reaproveitamos os
+verificadores prontos de `dtos/validators.py` (o mesmo esquema do
+`usuario_dto.py`). Quando o dado vem errado, o Pydantic reclama e o sistema
+devolve automaticamente um erro **422** (o código que significa "você mandou
+algo inválido").
 
 Crie o arquivo com este conteúdo completo:
 
@@ -403,13 +635,17 @@ class AtualizarAtivoDTO(BaseModel):
     ativo: bool = Field(..., description="Define se o item fica ativo (True) ou inativo (False)")
 ```
 
-> - `Field(...)` com as reticências significa **campo obrigatório**.
-> - `validar_string_obrigatoria(...)` é uma *factory*: ela **retorna** uma
->   função de validação que o `field_validator("nome")` aplica. Esse padrão é
->   idêntico ao usado em `usuario_dto.py` (`field_validator("nome")(validar_nome_pessoa())`).
-> - `tamanho_minimo`/`tamanho_maximo` mantêm o nome entre 2 e 64 caracteres.
-> - O `AtualizarAtivoDTO` recebe só um booleano. Não precisa de validator
->   especial — o Pydantic já garante que `ativo` seja booleano.
+> - `Field(...)` com aquelas reticências (`...`) quer dizer **campo
+>   obrigatório**: sem ele, a requisição é recusada.
+> - `validar_string_obrigatoria(...)` é uma *factory* — uma função que
+>   **fabrica e devolve outra função**, a de validação, já configurada com os
+>   limites que você passou. O `field_validator("nome")` então usa essa função
+>   no campo `nome`. É o mesmo esquema do `usuario_dto.py`
+>   (`field_validator("nome")(validar_nome_pessoa())`).
+> - `tamanho_minimo`/`tamanho_maximo` obrigam o nome a ter entre 2 e 64 letras.
+> - O `AtualizarAtivoDTO` recebe só um verdadeiro/falso. Não precisa de
+>   verificador especial — o Pydantic sozinho já garante que `ativo` seja
+>   booleano.
 
 ---
 
@@ -418,10 +654,11 @@ class AtualizarAtivoDTO(BaseModel):
 **Arquivo:** `backend/dtos/responses/catalogo_response.py`
 **Tipo:** EDIÇÃO
 
-O response atual (`ItemCatalogoResponse`) só tem `id` e `nome` — perfeito para
-o select público, mas o admin precisa ver também se o item está **ativo**.
-Vamos adicionar um response novo, sem mexer no existente (o público continua
-usando `ItemCatalogoResponse`).
+Lembrando: o **response** é o formato dos dados que o servidor **devolve** para
+a tela. O response que já existe (`ItemCatalogoResponse`) só tem `id` e `nome` —
+ótimo para a lista que o público vê, mas o admin precisa enxergar também se o
+item está **ativo**. Em vez de mexer no que já funciona, vamos criar um response
+novo (o público continua com o `ItemCatalogoResponse` de sempre).
 
 No fim do arquivo, **abaixo** da classe `CatalogoResponse`, adicione:
 
@@ -470,8 +707,10 @@ class CatalogoAdminResponse(BaseModel):
 > - Repare que reusamos os imports que **já estão** no topo do arquivo
 >   (`BaseModel`, `TipoVeiculo`, `TipoCarroceria`). Não precisa importar nada
 >   novo.
-> - O padrão de *factory classmethod* `de_<entidade>(...)` é o mesmo do projeto:
->   a rota nunca monta o response na mão, sempre chama `Response.de_xxx(model)`.
+> - Os métodos `de_<entidade>(...)` são *fábricas*: você passa o objeto do banco
+>   e eles montam o response pronto. É o jeito do projeto inteiro — a rota nunca
+>   monta o response na mão, sempre chama `Response.de_xxx(model)`. Assim o
+>   formato de saída fica num lugar só.
 
 ---
 
@@ -480,14 +719,17 @@ class CatalogoAdminResponse(BaseModel):
 **Arquivo:** `backend/routes/admin_catalogos_routes.py`
 **Tipo:** ARQUIVO NOVO
 
-Esta é a peça central. Ela **espelha** `admin_usuarios_routes.py`: mesmo
-`APIRouter` com prefixo, mesmo *rate limiter*, mesma guarda de Admin
+Esta é a peça central: a **rota**, que define os tais endpoints e diz o que
+cada um faz. Em vez de inventar do zero, ela **copia o modelo** de
+`admin_usuarios_routes.py`: mesmo `APIRouter` (o objeto do FastAPI que agrupa as
+rotas) com prefixo, mesmo limite de uso, mesma trava de Admin
 (`@requer_autenticacao([Perfil.ADMIN.value])`), mesmo padrão de
-`usuario_logado` + `assert`, mesmos `HTTPException`.
+`usuario_logado` + `assert`, mesmos `HTTPException` (a forma de devolver erro).
 
-Como temos **dois** catálogos (veículo e carroceria) com o mesmo
-comportamento, vamos parametrizar por um segmento da URL (`tipo_veiculo` ou
-`tipo_carroceria`) e despachar para a função de repo certa. Crie o arquivo:
+Como temos **dois** catálogos (veículo e carroceria) que se comportam igual, em
+vez de escrever tudo duas vezes, a gente coloca o tipo num pedaço da URL
+(`tipo_veiculo` ou `tipo_carroceria`) e, lá dentro, escolhe a função de
+repositório certa conforme esse pedaço. Crie o arquivo:
 
 ```python
 # =============================================================================
@@ -726,24 +968,27 @@ def _para_response(tipo: str, item) -> ItemCatalogoAdminResponse:
     return ItemCatalogoAdminResponse.de_carroceria(item)
 ```
 
-Pontos importantes desta rota (todos copiados do padrão do projeto):
+Pontos importantes desta rota (todos copiados do jeito que o projeto já faz).
+Um **decorator** é aquela linha com `@` em cima de uma função, que adiciona um
+comportamento extra a ela (aqui, "exigir login"):
 
-1. **Ordem dos decorators**: `@router.<metodo>(...)` **em cima**,
-   `@requer_autenticacao([Perfil.ADMIN.value])` **logo abaixo**. Inverter quebra
-   a autenticação.
-2. `request: Request` é o **primeiro** parâmetro. O decorator de auth usa o
-   `request`.
+1. **Ordem dos decorators**: `@router.<metodo>(...)` fica **em cima**,
+   `@requer_autenticacao([Perfil.ADMIN.value])` **logo abaixo**. Trocar a ordem
+   quebra a verificação de login.
+2. `request: Request` é o **primeiro** parâmetro. O decorator de login precisa
+   dele.
 3. `usuario_logado: Optional[UsuarioLogado] = None` na assinatura **e**
-   `assert usuario_logado is not None` no corpo. O decorator injeta o usuário;
-   o `assert` é o padrão fixo que o projeto usa depois do decorator.
-4. **Rate limit**: `checar_rate_limit(admin_catalogos_limiter, request)` em toda
-   mutação, como em `admin_usuarios_routes.py`.
-5. **Erros via `HTTPException`**: 404 (não existe), 409 (nome duplicado), 500
-   (falha de persistência). O contrato `{detail, type, errors}` é montado pelos
-   handlers globais; no 409 montamos `detail` como dict para popular o campo
-   `nome` (igual ao `_conflito_email` do admin de usuários).
-6. **`response_model=...`** sempre presente; a função retorna sempre via a
-   *factory* `ItemCatalogoAdminResponse.de_...`.
+   `assert usuario_logado is not None` logo no início do corpo. O decorator
+   coloca o usuário ali dentro; o `assert` é a linha-padrão que o projeto sempre
+   usa depois do decorator.
+4. **Limite de uso**: `checar_rate_limit(admin_catalogos_limiter, request)` em
+   toda operação que muda dados, igual ao `admin_usuarios_routes.py`.
+5. **Erros pelo `HTTPException`**: 404 (não existe), 409 (nome repetido), 500
+   (deu ruim ao salvar). O formato de erro `{detail, type, errors}` é montado
+   automaticamente; só no 409 a gente monta o `detail` como dicionário para
+   preencher o campo `nome` (igual ao `_conflito_email` do admin de usuários).
+6. **`response_model=...`** está sempre presente, e a função sempre devolve pela
+   fábrica `ItemCatalogoAdminResponse.de_...`.
 
 ---
 
@@ -752,9 +997,11 @@ Pontos importantes desta rota (todos copiados do padrão do projeto):
 **Arquivo:** `backend/main.py`
 **Tipo:** EDIÇÃO
 
-Criar o arquivo de rota **não basta**. O FastAPI só conhece um router depois
-que você o **inclui** no app. Isso acontece em `main.py`, em dois lugares: o
-`import` no topo e a lista `ROUTERS`.
+Atenção, este é o passo que mais gente esquece. Criar o arquivo de rota **não
+basta**: o FastAPI só passa a conhecer um router depois que você o **registra**
+no app. "Startup" é o momento em que o backend liga e monta tudo. Esse registro
+acontece em `main.py`, em dois lugares: o `import` lá no topo e a lista
+`ROUTERS`.
 
 ### 6a. Importar o router
 
@@ -796,11 +1043,14 @@ ROUTERS = [
 
 ### 6c. Conferir no Swagger
 
-Salve, deixe o backend reiniciar e abra `http://localhost:8412/docs`. Procure
-a seção **"Admin - Catálogos"**. Você deve ver `GET /api/admin/catalogos`,
-`POST /api/admin/catalogos/{tipo}`, `PUT /api/admin/catalogos/{tipo}/{id}` e
-`PATCH /api/admin/catalogos/{tipo}/{id}/ativo`. Se **não** aparecer, você
-esqueceu o passo 6a ou 6b.
+Salve, deixe o backend reiniciar e abra `http://localhost:8412/docs` (a página
+do Swagger). Procure a seção **"Admin - Catálogos"**. Você deve ver os quatro
+endpoints: `GET /api/admin/catalogos`, `POST /api/admin/catalogos/{tipo}`,
+`PUT /api/admin/catalogos/{tipo}/{id}` e
+`PATCH /api/admin/catalogos/{tipo}/{id}/ativo`. Se **não** aparecer, é sinal de
+que faltou o passo 6a ou 6b — volte e confira.
+
+![Seção "Admin - Catálogos" no Swagger com os quatro endpoints](img/aluno2/swagger-admin-catalogos.png)
 
 ---
 
@@ -809,9 +1059,12 @@ esqueceu o passo 6a ou 6b.
 **Arquivo:** `frontend/src/lib/types.ts`
 **Tipo:** EDIÇÃO
 
-Os tipos do TypeScript têm que **bater exato** com os Response DTOs do backend.
-O front já tem `CatalogoItem` (id + nome, sem `ativo`). Vamos adicionar a
-versão admin com `ativo`.
+Agora começa o **frontend** (a parte que roda no navegador, escrita em
+TypeScript). Os "tipos" do TypeScript são descrições do formato dos dados — eles
+precisam **bater exatamente** com o que o backend devolve nos responses. Se os
+dois não combinarem, o editor não avisa e a tela quebra em silêncio. O front já
+tem o `CatalogoItem` (id + nome, sem `ativo`). Vamos só acrescentar a versão
+admin, que tem o `ativo`.
 
 Na seção `// ===== Catálogos (referência) =====`, **abaixo** das interfaces
 `CatalogoItem`/`Catalogo`, adicione:
@@ -830,9 +1083,11 @@ export interface CatalogoAdmin {
 ```
 
 > Os nomes dos campos (`tipos_veiculo`, `carrocerias`, `id`, `nome`, `ativo`)
-> têm que ser **idênticos** aos do JSON que o backend devolve. Se você escrever
-> `tiposVeiculo` aqui (camelCase), o `data.tipos_veiculo` vem `undefined` e a
-> tela quebra. Resposta do backend é **snake_case**.
+> têm que ser **iguaizinhos** aos do JSON que o backend manda. O backend escreve
+> tudo em **snake_case** (palavras_separadas_por_underline). Se você escrever
+> `tiposVeiculo` (no estilo camelCase, com letra maiúscula no meio), o
+> `data.tipos_veiculo` vem `undefined` ("vazio") e a tela quebra. Copie os nomes
+> exatos.
 
 ---
 
@@ -841,8 +1096,10 @@ export interface CatalogoAdmin {
 **Arquivo:** `frontend/src/lib/schemas.ts`
 **Tipo:** EDIÇÃO
 
-O Zod valida o formulário no navegador antes de enviar (espelhando o validator
-do backend). No fim do arquivo, na seção de admin (perto de
+O **Zod** é uma biblioteca que confere o formulário **no navegador**, antes de
+mandar nada para o servidor. É a mesma checagem do DTO do backend, só que feita
+mais cedo — assim o usuário vê o erro na hora, sem esperar a viagem até o
+servidor e de volta. No fim do arquivo, na parte de admin (perto de
 `adminEditarUsuarioSchema`), adicione:
 
 ```ts
@@ -857,10 +1114,11 @@ export const catalogoItemSchema = z.object({
 export type CatalogoItemForm = z.infer<typeof catalogoItemSchema>
 ```
 
-> Os limites (2 a 64) batem com o `validar_string_obrigatoria(tamanho_minimo=2,
-> tamanho_maximo=64)` que você colocou no DTO do passo 3. Sempre espelhe os dois
-> lados; se o front deixar passar algo que o back rejeita, o usuário só verá o
-> erro depois de enviar (422). Espelhando, ele vê na hora.
+> Os limites (2 a 64) são os mesmos do `validar_string_obrigatoria(tamanho_minimo=2,
+> tamanho_maximo=64)` que você pôs no DTO do passo 3. Mantenha os dois lados
+> sempre iguais: se o front deixar passar algo que o backend recusa, o usuário só
+> descobre o erro depois de enviar (o tal 422). Com os dois iguais, ele vê na
+> hora.
 
 ---
 
@@ -869,10 +1127,12 @@ export type CatalogoItemForm = z.infer<typeof catalogoItemSchema>
 **Arquivo:** `frontend/src/pages/giro/AdminCatalogoPage.tsx`
 **Tipo:** ARQUIVO NOVO
 
-Esta página **espelha** `AdminUsuariosPage.tsx`: usa `useFetch` para carregar a
-lista, modal para criar/editar, `toast` para feedback, e os mesmos estilos
-inline com tokens de `@/lib/theme`. A diferença é que mostramos **duas** tabelas
-(tipos de veículo e carrocerias) e temos um **toggle** de ativo.
+Esta é a tela em si, escrita em React. Ela **copia o modelo** de
+`AdminUsuariosPage.tsx`: usa `useFetch` para buscar a lista do servidor, uma
+janelinha (*modal*) para criar/editar, o `toast` para mostrar avisos no canto da
+tela, e os mesmos estilos do `@/lib/theme`. A diferença é que aqui mostramos
+**duas** tabelas (tipos de veículo e carrocerias) e cada linha tem um **toggle**
+(aquele botão de liga/desliga) para ativar ou desativar o item.
 
 Crie o arquivo com este conteúdo completo:
 
@@ -1219,17 +1479,21 @@ const modalCard: CSSProperties = {
 
 Pontos importantes:
 
-1. **`useFetch`** carrega `GET /api/admin/catalogos` e devolve
-   `{data, carregando, erro, recarregar}`. Caminho é **relativo a `/api`** —
-   note que escrevemos só `/admin/catalogos`.
-2. **Toda chamada via `api`** (`api.get/post/put/patch`). Nunca `fetch` cru —
-   o `api` cuida do cookie, do CSRF e do contrato de erro.
-3. **camelCase no front, snake_case no body.** O corpo enviado usa as chaves
-   exatas que o backend espera: `{ nome }` e `{ ativo }`.
-4. **Feedback só com `toast`** (`toast.sucesso/erro`). Nunca `alert()` nativo.
-5. Depois de cada mutação chamamos **`recarregar()`** para atualizar a lista.
-6. Erros 422 do backend chegam em `err.errors` (snake_case, chave `nome`);
-   `mapApi` joga para o estado de erros do form.
+1. **`useFetch`** busca o `GET /api/admin/catalogos` e te devolve
+   `{data, carregando, erro, recarregar}` (os dados, mais avisos de "está
+   carregando" e "deu erro", mais uma função para recarregar). O endereço é
+   contado a partir de `/api` — por isso escrevemos só `/admin/catalogos`.
+2. **Toda chamada passa pelo `api`** (`api.get/post/put/patch`). Nunca use o
+   `fetch` cru do navegador — o `api` já cuida do cookie de login, do token de
+   segurança (CSRF) e do formato dos erros para você.
+3. **Nomes no estilo certo de cada lado.** O corpo que você envia usa exatamente
+   as chaves que o backend espera: `{ nome }` e `{ ativo }`.
+4. **Avisos só com `toast`** (`toast.sucesso/erro`), aquela mensagenzinha que
+   aparece e some. Nunca o `alert()` feio do navegador.
+5. Depois de cada mudança a gente chama **`recarregar()`** para a lista mostrar
+   o estado novo.
+6. Os erros 422 do backend chegam em `err.errors` (em snake_case, na chave
+   `nome`); a função `mapApi` joga esse erro para baixo do campo no formulário.
 
 ---
 
@@ -1238,8 +1502,9 @@ Pontos importantes:
 **Arquivo:** `frontend/src/router.tsx`
 **Tipo:** EDIÇÃO
 
-Assim como no backend, criar a página **não basta**: o React Router precisa
-conhecê-la. São duas mudanças: o `import` e a entrada no grupo `<AdminRoute>`.
+Igual ao backend, criar a página **não basta**: o React Router (o sistema que
+decide qual tela mostrar para cada endereço) precisa conhecê-la. São duas
+mudanças: o `import` e a entrada no grupo `<AdminRoute>`.
 
 ### 10a. Importar a página
 
@@ -1272,10 +1537,11 @@ Dentro dos `children` do `<AdminLayout />`, adicione a rota nova:
       },
 ```
 
-> A página fica **dentro** de `<AdminRoute>` (guarda que exige perfil
-> Administrador) e de `<AdminLayout>` (a casca com a sidebar). Se você colocar
-> fora do `<AdminRoute>`, qualquer usuário acessaria a tela; se colocar fora do
-> `<AdminLayout>`, a sidebar some.
+> A página fica **dentro** de `<AdminRoute>` (a trava que só deixa entrar quem é
+> Administrador) e de `<AdminLayout>` (a moldura da tela, com o menu lateral, a
+> *sidebar*). Por que importa? Se você puser fora do `<AdminRoute>`, qualquer
+> usuário entraria na tela; se puser fora do `<AdminLayout>`, o menu lateral
+> some.
 
 ---
 
@@ -1284,8 +1550,8 @@ Dentro dos `children` do `<AdminLayout />`, adicione a rota nova:
 **Arquivo:** `frontend/src/components/giro/AdminLayout.tsx`
 **Tipo:** EDIÇÃO
 
-Para o admin **chegar** na tela pelo menu lateral, adicione um item ao array
-`NAV`, no topo do componente:
+Falta o admin conseguir **chegar** na tela pelo menu lateral. Para isso, adicione
+um item ao array `NAV` (a lista de itens do menu), no topo do componente:
 
 ```tsx
 const NAV: { label: string; path: string; icon: string }[] = [
@@ -1315,7 +1581,7 @@ admin.
 2. **Suba o frontend** (em outro terminal):
    ```bash
    cd frontend
-   npm run dev
+   bun run dev
    ```
 3. Abra `http://localhost:8412/docs` e confirme a seção **"Admin - Catálogos"**
    com os 4 endpoints. Se faltar, revise o **Passo 6**.
@@ -1324,15 +1590,23 @@ admin.
    (Tipos de veículo, Carrocerias) com os itens do seed.
 6. **Criar**: clique "+ Novo tipo" numa seção, digite um nome (ex.: `Truck`),
    confirme. Toast verde "Item criado." e o item aparece na lista.
+
+   ![Item "Truck" criado com toast verde "Item criado."](img/aluno2/crud-item-criado.png)
+
 7. **Renomear**: clique no lápis de um item, mude o nome, salve. Toast "Item
    renomeado." e o nome muda.
 8. **Ativar/desativar**: clique no toggle. Ele muda de cor; o item fica
-   inativo/ativo. Toast confirma.
+   inativo/ativo. Toast confirma. (Itens inativos continuam na lista do admin.)
+
+   ![Toggle desativando um item, com toast "Item desativado."](img/aluno2/toggle-ativo-inativo.png)
+
 9. **Validação de duplicado**: tente criar um item com nome que já existe.
    Você deve ver um toast de erro vermelho ("Já existe..."), vindo do **409**
    do backend.
 10. **Validação de nome curto**: tente salvar com 1 caractere. O Zod barra
     antes de enviar e mostra a mensagem embaixo do campo.
+
+    ![Mensagem do Zod "O nome deve ter no mínimo 2 caracteres" abaixo do campo](img/aluno2/validacao-zod.png)
 
 ### Teste rápido pelo Swagger (sem a tela)
 
@@ -1346,11 +1620,13 @@ clique em **"Try it out"**, ponha `tipo` = `tipo_veiculo` e o corpo:
 Você deve receber **201** com `{ "id": ..., "nome": "Truck", "ativo": true }`.
 Repetindo o mesmo nome deve dar **409**.
 
-> **Importante sobre o login no Swagger**: como as rotas exigem Admin, você
-> precisa estar com a sessão de admin ativa (o cookie de sessão). O jeito mais
-> simples é logar pela tela do SPA primeiro (mesma origem em dev) e depois usar
-> o `/docs`. Mutações também exigem o header CSRF; pela tela do SPA isso é
-> automático.
+> **Importante sobre o login no Swagger**: como essas rotas exigem Admin, você
+> precisa estar com a sessão de admin ativa (o tal cookie de login guardado no
+> navegador). O jeito mais fácil é primeiro logar pela tela do site (o "SPA", a
+> aplicação que roda no navegador) e só depois abrir o `/docs` — em
+> desenvolvimento os dois ficam no mesmo endereço, então o login vale para os
+> dois. As operações que mudam dados também pedem o token de segurança CSRF; pela
+> tela do site isso é resolvido sozinho.
 
 ### Padrão de testes do projeto (opcional)
 
@@ -1360,11 +1636,12 @@ O backend usa **pytest** (a partir de `backend/`):
 backend/.venv/bin/python -m pytest tests/integration
 ```
 
-Um teste de integração simples para a criação seguiria o estilo existente:
-autenticar como admin, `POST /api/admin/catalogos/tipo_veiculo` com
-`{"nome": "Truck"}` e checar `status_code == 201` e o JSON de resposta. Olhe os
-testes existentes em `backend/tests/integration/` para copiar o *fixture* de
-cliente autenticado.
+Um teste de integração simples para a criação seguiria o estilo que já existe:
+logar como admin, mandar `POST /api/admin/catalogos/tipo_veiculo` com
+`{"nome": "Truck"}` e conferir se voltou `status_code == 201` e o JSON certo.
+Dá uma olhada nos testes que já estão em `backend/tests/integration/` para
+copiar o *fixture* (o pedacinho de preparação que já entrega um cliente logado
+como admin, pronto para usar).
 
 ---
 
