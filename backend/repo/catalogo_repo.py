@@ -24,10 +24,18 @@ from sql.catalogo_sql import (
     INSERIR_TIPO_CARROCERIA,
     OBTER_ATIVOS_TIPO_VEICULO,
     OBTER_ATIVOS_TIPO_CARROCERIA,
+    OBTER_TODOS_TIPO_VEICULO,
+    OBTER_TODOS_TIPO_CARROCERIA,
     OBTER_POR_ID_TIPO_VEICULO,
     OBTER_POR_ID_TIPO_CARROCERIA,
+    ATUALIZAR_TIPO_VEICULO,
+    ATUALIZAR_TIPO_CARROCERIA,
+    ATUALIZAR_ATIVO_TIPO_VEICULO,
+    ATUALIZAR_ATIVO_TIPO_CARROCERIA,
     EXISTE_NOME_TIPO_VEICULO,
     EXISTE_NOME_TIPO_CARROCERIA,
+    EXISTE_NOME_TIPO_VEICULO_OUTRO_ID,
+    EXISTE_NOME_TIPO_CARROCERIA_OUTRO_ID,
     CONTAR_TIPO_VEICULO,
     CONTAR_TIPO_CARROCERIA,
 )
@@ -120,6 +128,20 @@ def obter_carrocerias_ativas() -> list[TipoCarroceria]:
         cursor.execute(OBTER_ATIVOS_TIPO_CARROCERIA)
         return [_row_to_tipo_carroceria(row) for row in cursor.fetchall()]
 
+def obter_todos_tipos_veiculo() -> list[TipoVeiculo]:
+    """Retorna TODOS os tipos de veículo (ativos e inativos), ordenados por id."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_TODOS_TIPO_VEICULO)
+        return [_row_to_tipo_veiculo(row) for row in cursor.fetchall()]
+
+
+def obter_todas_carrocerias() -> list[TipoCarroceria]:
+    """Retorna TODAS as carrocerias (ativas e inativas), ordenadas por id."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_TODOS_TIPO_CARROCERIA)
+        return [_row_to_tipo_carroceria(row) for row in cursor.fetchall()]
 
 def obter_tipo_veiculo(tipo_veiculo_id: int) -> Optional[TipoVeiculo]:
     """Retorna um tipo de veículo pelo ID, ou None se não existir."""
@@ -156,7 +178,52 @@ def existe_nome_carroceria(nome: str) -> bool:
         row = cursor.fetchone()
         return (row["total"] if row else 0) > 0
 
+def atualizar_tipo_veiculo(tipo_veiculo_id: int, nome: str) -> bool:
+    """Renomeia um tipo de veículo. Retorna True se alguma linha foi alterada."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(ATUALIZAR_TIPO_VEICULO, (nome, tipo_veiculo_id))
+        return cursor.rowcount > 0
 
+
+def atualizar_carroceria(tipo_carroceria_id: int, nome: str) -> bool:
+    """Renomeia uma carroceria. Retorna True se alguma linha foi alterada."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(ATUALIZAR_TIPO_CARROCERIA, (nome, tipo_carroceria_id))
+        return cursor.rowcount > 0
+
+def atualizar_ativo_tipo_veiculo(tipo_veiculo_id: int, ativo: bool) -> bool:
+    """Ativa/desativa um tipo de veículo. Retorna True se alterou alguma linha."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(ATUALIZAR_ATIVO_TIPO_VEICULO, (1 if ativo else 0, tipo_veiculo_id))
+        return cursor.rowcount > 0
+
+
+def atualizar_ativo_carroceria(tipo_carroceria_id: int, ativo: bool) -> bool:
+    """Ativa/desativa uma carroceria. Retorna True se alterou alguma linha."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(ATUALIZAR_ATIVO_TIPO_CARROCERIA, (1 if ativo else 0, tipo_carroceria_id))
+        return cursor.rowcount > 0
+    
+def existe_nome_tipo_veiculo_outro_id(nome: str, tipo_veiculo_id: int) -> bool:
+    """True se OUTRO tipo de veículo (id diferente) já usa esse nome."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(EXISTE_NOME_TIPO_VEICULO_OUTRO_ID, (nome, tipo_veiculo_id))
+        row = cursor.fetchone()
+        return (row["total"] if row else 0) > 0
+
+
+def existe_nome_carroceria_outro_id(nome: str, tipo_carroceria_id: int) -> bool:
+    """True se OUTRA carroceria (id diferente) já usa esse nome."""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(EXISTE_NOME_TIPO_CARROCERIA_OUTRO_ID, (nome, tipo_carroceria_id))
+        row = cursor.fetchone()
+        return (row["total"] if row else 0) > 0
 # =============================================================================
 # Seed inicial (idempotente)
 # =============================================================================

@@ -9,6 +9,7 @@ import { colors, fonts } from '@/lib/theme'
 const NAV: { label: string; path: string; icon: string }[] = [
   { label: 'Dashboard', path: '/admin', icon: '◧' },
   { label: 'Usuários', path: '/admin/usuarios', icon: '☰' },
+  { label: 'Catálogos', path: '/admin/catalogos', icon: '▤' },
 ]
 
 export default function AdminLayout() {

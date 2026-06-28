@@ -17,6 +17,7 @@ import RecuperarSenhaPage from './pages/giro/RecuperarSenhaPage'
 // Admin
 import AdminDashboardPage from './pages/giro/AdminDashboardPage'
 import AdminUsuariosPage from './pages/giro/AdminUsuariosPage'
+import AdminCatalogoPage from './pages/giro/AdminCatalogoPage'
 
 // Empresa
 import EmpresaPainelPage from './pages/giro/EmpresaPainelPage'
@@ -113,6 +114,7 @@ export const router = createBrowserRouter([
       },
 
       // ===== Admin =====
+      // ===== Admin =====
       {
         element: <AdminRoute />,
         children: [
@@ -121,11 +123,11 @@ export const router = createBrowserRouter([
             children: [
               { path: '/admin', element: <AdminDashboardPage /> },
               { path: '/admin/usuarios', element: <AdminUsuariosPage /> },
+              { path: '/admin/catalogos', element: <AdminCatalogoPage /> },  // <-- NOVO
             ],
           },
         ],
       },
-
       // ===== Autenticado (qualquer perfil) =====
       {
         element: <ProtectedRoute />,

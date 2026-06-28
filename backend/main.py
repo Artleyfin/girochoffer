@@ -50,6 +50,7 @@ from routes.catalogo_routes import router as catalogo_router
 from routes.empresa_routes import router as empresa_router
 from routes.motorista_routes import router as motorista_router
 from routes.admin_dashboard_routes import router as admin_dashboard_router
+from routes.admin_catalogos_routes import router as admin_catalogos_router
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -149,6 +150,7 @@ ROUTERS = [
     (admin_config_router, ["Admin - Configurações"], "admin de configurações"),
     (admin_backups_router, ["Admin - Backups"], "admin de backups"),
     (admin_usuarios_router, ["Admin - Usuários"], "admin de usuários"),
+    (admin_catalogos_router, ["Admin - Catálogos"], "admin de catálogos"),  # <-- NOVO
     (catalogo_router, ["Catalogos"], "catalogos"),
     (empresa_router, ["Empresa"], "empresa"),
     (motorista_router, ["Motorista"], "motorista"),

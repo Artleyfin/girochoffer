@@ -43,3 +43,43 @@ class CatalogoResponse(BaseModel):
                 ItemCatalogoResponse.de_carroceria(c) for c in carrocerias
             ],
         )
+
+class ItemCatalogoAdminResponse(BaseModel):
+    """Item de catálogo para a área admin (inclui o status ativo)."""
+
+    id: int
+    nome: str
+    ativo: bool
+
+    @classmethod
+    def de_tipo_veiculo(cls, tipo: TipoVeiculo) -> "ItemCatalogoAdminResponse":
+        """Constrói o response a partir de um TipoVeiculo."""
+        return cls(id=tipo.id, nome=tipo.nome, ativo=tipo.ativo)
+
+    @classmethod
+    def de_carroceria(cls, tipo: TipoCarroceria) -> "ItemCatalogoAdminResponse":
+        """Constrói o response a partir de um TipoCarroceria."""
+        return cls(id=tipo.id, nome=tipo.nome, ativo=tipo.ativo)
+
+
+class CatalogoAdminResponse(BaseModel):
+    """Catálogo completo para o admin (inclui itens ativos E inativos)."""
+
+    tipos_veiculo: list[ItemCatalogoAdminResponse]
+    carrocerias: list[ItemCatalogoAdminResponse]
+
+    @classmethod
+    def de_listas(
+        cls,
+        tipos_veiculo: list[TipoVeiculo],
+        carrocerias: list[TipoCarroceria],
+    ) -> "CatalogoAdminResponse":
+        """Constrói o response a partir das listas de entidades de domínio."""
+        return cls(
+            tipos_veiculo=[
+                ItemCatalogoAdminResponse.de_tipo_veiculo(t) for t in tipos_veiculo
+            ],
+            carrocerias=[
+                ItemCatalogoAdminResponse.de_carroceria(c) for c in carrocerias
+            ],
+        )

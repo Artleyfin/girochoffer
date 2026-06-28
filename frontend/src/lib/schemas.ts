@@ -245,6 +245,16 @@ export const adminEditarUsuarioSchema = z.object({
 })
 export type AdminEditarUsuarioForm = z.infer<typeof adminEditarUsuarioSchema>
 
+/** Criar/renomear item de catálogo (tipo de veículo ou carroceria). */
+export const catalogoItemSchema = z.object({
+  nome: z
+    .string()
+    .trim()
+    .min(2, 'O nome deve ter no mínimo 2 caracteres')
+    .max(64, 'O nome deve ter no máximo 64 caracteres'),
+})
+export type CatalogoItemForm = z.infer<typeof catalogoItemSchema>
+
 // ===== Avaliação (empresa avalia motorista) =====
 
 export const avaliarMotoristaSchema = z.object({

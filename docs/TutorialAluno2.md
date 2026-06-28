@@ -1695,40 +1695,40 @@ como admin, pronto para usar).
 Marque cada caixa só depois de conferir de verdade.
 
 **Backend**
-- [ ] `catalogo_sql.py`: adicionadas `OBTER_TODOS_*`, `ATUALIZAR_*`,
+- [x] `catalogo_sql.py`: adicionadas `OBTER_TODOS_*`, `ATUALIZAR_*`,
       `ATUALIZAR_ATIVO_*` e `EXISTE_NOME_*_OUTRO_ID` para os dois catálogos.
-- [ ] `catalogo_repo.py`: importadas as constantes novas.
-- [ ] `catalogo_repo.py`: criadas `obter_todos_tipos_veiculo`,
+- [x] `catalogo_repo.py`: importadas as constantes novas.
+- [x] `catalogo_repo.py`: criadas `obter_todos_tipos_veiculo`,
       `obter_todas_carrocerias`, `atualizar_tipo_veiculo`,
       `atualizar_carroceria`, `atualizar_ativo_tipo_veiculo`,
       `atualizar_ativo_carroceria`, `existe_nome_tipo_veiculo_outro_id`,
       `existe_nome_carroceria_outro_id`.
-- [ ] `dtos/catalogo_dto.py` (NOVO): `CatalogoItemDTO` e `AtualizarAtivoDTO`.
-- [ ] `dtos/responses/catalogo_response.py`: `ItemCatalogoAdminResponse` e
+- [x] `dtos/catalogo_dto.py` (NOVO): `CatalogoItemDTO` e `AtualizarAtivoDTO`.
+- [x] `dtos/responses/catalogo_response.py`: `ItemCatalogoAdminResponse` e
       `CatalogoAdminResponse`.
-- [ ] `routes/admin_catalogos_routes.py` (NOVO): router `/admin/catalogos` com
+- [x] `routes/admin_catalogos_routes.py` (NOVO): router `/admin/catalogos` com
       `GET`, `POST /{tipo}`, `PUT /{tipo}/{id}`, `PATCH /{tipo}/{id}/ativo`,
       guarda Admin e rate limit.
-- [ ] `main.py`: **import** do `admin_catalogos_router` **e** tupla na lista
+- [x] `main.py`: **import** do `admin_catalogos_router` **e** tupla na lista
       `ROUTERS`.
-- [ ] No `/docs` aparece a seção **"Admin - Catálogos"** com os 4 endpoints.
+- [x] No `/docs` aparece a seção **"Admin - Catálogos"** com os 4 endpoints.
 
 **Frontend**
-- [ ] `types.ts`: `CatalogoItemAdmin` e `CatalogoAdmin`.
-- [ ] `schemas.ts`: `catalogoItemSchema` (+ tipo `CatalogoItemForm`).
-- [ ] `pages/giro/AdminCatalogoPage.tsx` (NOVO): lista, criar, renomear,
+- [x] `types.ts`: `CatalogoItemAdmin` e `CatalogoAdmin`.
+- [x] `schemas.ts`: `catalogoItemSchema` (+ tipo `CatalogoItemForm`).
+- [x] `pages/giro/AdminCatalogoPage.tsx` (NOVO): lista, criar, renomear,
       toggle, usando `api`, `useFetch` e `toast`.
-- [ ] `router.tsx`: **import** da página **e** rota `/admin/catalogos` dentro de
+- [x] `router.tsx`: **import** da página **e** rota `/admin/catalogos` dentro de
       `<AdminRoute>` + `<AdminLayout>`.
-- [ ] `AdminLayout.tsx`: item "Catálogos" no array `NAV`.
+- [x] `AdminLayout.tsx`: item "Catálogos" no array `NAV`.
 
 **Teste**
-- [ ] Logado como Admin, a tela `/admin/catalogos` lista os dois catálogos.
-- [ ] Criar funciona (201 + toast verde).
-- [ ] Renomear funciona.
-- [ ] Toggle de ativo funciona.
-- [ ] Nome duplicado dá erro 409 (toast vermelho).
-- [ ] Nome curto é barrado pelo Zod antes de enviar.
+- [x] Logado como Admin, a tela `/admin/catalogos` lista os dois catálogos.
+- [x] Criar funciona (201 + toast verde).
+- [x] Renomear funciona.
+- [x] Toggle de ativo funciona.
+- [x] Nome duplicado dá erro 409 (toast vermelho).
+- [x] Nome curto é barrado pelo Zod antes de enviar.
 
 Se todas as caixas estão marcadas, a feature está completa e funcionando.
 Bom trabalho!

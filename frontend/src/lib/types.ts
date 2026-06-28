@@ -45,13 +45,14 @@ export interface Usuario {
 }
 
 // ===== Catálogos (referência) =====
-export interface CatalogoItem {
+export interface CatalogoItemAdmin {
   id: number
   nome: string
+  ativo: boolean
 }
-export interface Catalogo {
-  tipos_veiculo: CatalogoItem[]
-  carrocerias: CatalogoItem[]
+export interface CatalogoAdmin {
+  tipos_veiculo: CatalogoItemAdmin[]
+  carrocerias: CatalogoItemAdmin[]
 }
 
 // ===== Veículo =====
