@@ -110,6 +110,18 @@ export interface Motorista {
   veiculos: Veiculo[]
 }
 
+export interface Avaliacao {
+  id: number
+  carga_id: number
+  empresa_id: number
+  motorista_id: number
+  nota: number
+  comentario?: string | null
+  data?: string | null
+  empresa_nome?: string | null
+  carga_titulo?: string | null
+}
+
 // ===== Carga =====
 export interface CargaResumo {
   id: number

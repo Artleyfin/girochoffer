@@ -244,3 +244,19 @@ export const adminEditarUsuarioSchema = z.object({
   email: emailSchema,
 })
 export type AdminEditarUsuarioForm = z.infer<typeof adminEditarUsuarioSchema>
+
+// ===== Avaliação (empresa avalia motorista) =====
+
+export const avaliarMotoristaSchema = z.object({
+  nota: z.coerce
+    .number({ message: 'Informe a nota' })
+    .int('A nota deve ser um número inteiro')
+    .min(1, 'A nota mínima é 1')
+    .max(5, 'A nota máxima é 5'),
+  comentario: z
+    .string()
+    .trim()
+    .max(500, 'O comentário deve ter no máximo 500 caracteres')
+    .optional(),
+})
+export type AvaliarMotoristaForm = z.infer<typeof avaliarMotoristaSchema>

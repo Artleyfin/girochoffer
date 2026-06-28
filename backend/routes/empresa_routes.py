@@ -28,6 +28,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 # DTOs (entrada)
 from dtos.carga_dto import NovaCargaDTO, EscolherMotoristaDTO
 from dtos.empresa_dto import AtualizarEmpresaDTO
+from dtos.avaliacao_dto import AvaliarMotoristaDTO
 
 # Schemas (saída)
 from dtos.responses.carga_response import (
@@ -38,14 +39,23 @@ from dtos.responses.carga_response import (
 from dtos.responses.comum import PaginaResponse
 from dtos.responses.empresa_response import EmpresaResponse
 from dtos.responses.motorista_response import MotoristaResumoResponse
+from dtos.responses.avaliacao_response import AvaliacaoResponse
+from dtos.responses.comum import MensagemResponse
 
 # Models
 from model.carga_model import Carga, StatusCarga
+from model.avaliacao_model import Avaliacao
 from model.empresa_model import Empresa
 from model.usuario_logado_model import UsuarioLogado
 
 # Repositories
-from repo import carga_repo, empresa_repo, interesse_carga_repo
+from repo import (
+    carga_repo,
+    empresa_repo,
+    interesse_carga_repo,
+    favorito_motorista_repo,
+    avaliacao_repo,
+)
 
 # Utilities
 from util.api_helpers import checar_rate_limit
@@ -92,6 +102,20 @@ empresa_perfil_limiter = DynamicRateLimiter(
     padrao_max=30,
     padrao_minutos=10,
     nome="empresa_perfil",
+)
+empresa_favorito_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_empresa_favorito_max",
+    chave_minutos="rate_limit_empresa_favorito_minutos",
+    padrao_max=60,
+    padrao_minutos=10,
+    nome="empresa_favorito",
+)
+empresa_avaliar_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_empresa_avaliar_max",
+    chave_minutos="rate_limit_empresa_avaliar_minutos",
+    padrao_max=30,
+    padrao_minutos=10,
+    nome="empresa_avaliar",
 )
 
 
@@ -402,3 +426,140 @@ async def atualizar_perfil(
 
     atualizada = empresa_repo.obter_por_usuario_id(usuario_logado.id)
     return EmpresaResponse.de_empresa(atualizada)
+
+# =============================================================================
+# Favoritar motorista (N:N empresa <-> motorista)
+# =============================================================================
+
+@router.post("/favoritos/{motorista_id}", response_model=MensagemResponse)
+@requer_autenticacao([Perfil.EMPRESA.value])
+async def favoritar_motorista(
+    request: Request,
+    motorista_id: int,
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
+    """Marca um motorista como favorito da empresa logada (idempotente; 409 se já existe)."""
+    assert usuario_logado is not None
+    checar_rate_limit(empresa_favorito_limiter, request)
+
+    empresa = _obter_empresa_logada(usuario_logado)
+
+    if favorito_motorista_repo.existe(empresa.id, motorista_id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este motorista já está nos seus favoritos.",
+        )
+
+    favorito_id = favorito_motorista_repo.inserir(empresa.id, motorista_id)
+    if not favorito_id:
+        # Corrida: outro request inseriu entre o existe() e o inserir().
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este motorista já está nos seus favoritos.",
+        )
+
+    logger.info(f"Empresa {empresa.id} favoritou o motorista {motorista_id}")
+    return MensagemResponse(message="Motorista adicionado aos favoritos.")
+
+
+@router.delete("/favoritos/{motorista_id}", response_model=MensagemResponse)
+@requer_autenticacao([Perfil.EMPRESA.value])
+async def desfavoritar_motorista(
+    request: Request,
+    motorista_id: int,
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
+    """Remove um motorista dos favoritos da empresa logada (404 se não era favorito)."""
+    assert usuario_logado is not None
+    checar_rate_limit(empresa_favorito_limiter, request)
+
+    empresa = _obter_empresa_logada(usuario_logado)
+
+    if not favorito_motorista_repo.remover(empresa.id, motorista_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Este motorista não estava nos seus favoritos.",
+        )
+
+    logger.info(f"Empresa {empresa.id} removeu o motorista {motorista_id} dos favoritos")
+    return MensagemResponse(message="Motorista removido dos favoritos.")
+
+
+@router.get("/favoritos", response_model=list[MotoristaResumoResponse])
+@requer_autenticacao([Perfil.EMPRESA.value])
+async def listar_favoritos(
+    request: Request,
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
+    """Lista os motoristas favoritados pela empresa logada."""
+    assert usuario_logado is not None
+
+    empresa = _obter_empresa_logada(usuario_logado)
+
+    favoritos_dicts = favorito_motorista_repo.obter_motoristas_da_empresa(empresa.id)
+    return [MotoristaResumoResponse(**d) for d in favoritos_dicts]
+
+
+# =============================================================================
+# Avaliar motorista (apenas carga Concluída)
+# =============================================================================
+
+@router.post("/cargas/{id}/avaliar", response_model=AvaliacaoResponse, status_code=status.HTTP_201_CREATED)
+@requer_autenticacao([Perfil.EMPRESA.value])
+async def avaliar_motorista(
+    request: Request,
+    id: int,
+    dto: AvaliarMotoristaDTO,
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
+    """Avalia o motorista que fez o frete. Só permitido se a carga estiver Concluída."""
+    assert usuario_logado is not None
+    checar_rate_limit(empresa_avaliar_limiter, request)
+
+    empresa = _obter_empresa_logada(usuario_logado)
+    carga = _obter_carga_da_empresa(id, empresa)
+
+    if carga.status != StatusCarga.CONCLUIDA:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Só é possível avaliar uma carga já concluída.",
+        )
+
+    if carga.motorista_escolhido_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Esta carga não tem um motorista contratado para avaliar.",
+        )
+
+    if avaliacao_repo.existe_por_carga(id):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Esta carga já foi avaliada.",
+        )
+
+    avaliacao = Avaliacao(
+        id=0,
+        carga_id=id,
+        empresa_id=empresa.id,
+        motorista_id=carga.motorista_escolhido_id,
+        nota=dto.nota,
+        comentario=dto.comentario,
+    )
+    avaliacao_id = avaliacao_repo.inserir(avaliacao)
+    if not avaliacao_id:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Erro ao registrar a avaliação. Tente novamente.",
+        )
+
+    # Recalcula e grava a média do motorista (motorista.nota).
+    avaliacao_repo.recalcular_nota_motorista(carga.motorista_escolhido_id)
+
+    logger.info(
+        f"Empresa {empresa.id} avaliou a carga {id} "
+        f"(motorista {carga.motorista_escolhido_id}, nota {dto.nota})"
+    )
+
+    criada = avaliacao_repo.obter_por_motorista(carga.motorista_escolhido_id)
+    # A avaliação recém-criada é a mais recente (lista ordenada por data DESC).
+    return AvaliacaoResponse.de_avaliacao(criada[0])

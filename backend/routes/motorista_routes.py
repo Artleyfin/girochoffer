@@ -29,6 +29,7 @@ from dtos.motorista_dto import AtualizarMotoristaDTO
 from dtos.responses.carga_response import CargaResumoResponse, CargaDetalheResponse
 from dtos.responses.comum import MensagemResponse, PaginaResponse
 from dtos.responses.motorista_response import MotoristaResponse
+from dtos.responses.avaliacao_response import AvaliacaoResponse
 
 # Models
 from model.carga_model import StatusCarga
@@ -42,6 +43,13 @@ from repo import (
     interesse_carga_repo,
     motorista_repo,
     veiculo_repo,
+)
+from repo import (
+    carga_repo,
+    interesse_carga_repo,
+    motorista_repo,
+    veiculo_repo,
+    avaliacao_repo,
 )
 
 # Utilities
@@ -83,7 +91,13 @@ motorista_perfil_limiter = DynamicRateLimiter(
     padrao_minutos=10,
     nome="motorista_perfil",
 )
-
+motorista_avaliacoes_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_motorista_avaliacoes_max",
+    chave_minutos="rate_limit_motorista_avaliacoes_minutos",
+    padrao_max=60,
+    padrao_minutos=1,
+    nome="motorista_avaliacoes",
+)
 
 # =============================================================================
 # Schemas de saída específicos desta rota
@@ -296,6 +310,23 @@ async def minhas_cargas(
         concluidas=concluidas,
     )
 
+# =============================================================================
+# Avaliações recebidas
+# =============================================================================
+
+@router.get("/avaliacoes", response_model=list[AvaliacaoResponse])
+@requer_autenticacao([Perfil.MOTORISTA.value])
+async def listar_avaliacoes(
+    request: Request,
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
+    """Lista as avaliações recebidas pelo motorista logado (mais recentes primeiro)."""
+    assert usuario_logado is not None
+    checar_rate_limit(motorista_avaliacoes_limiter, request)
+    motorista = _obter_motorista_logado(usuario_logado)
+
+    avaliacoes = avaliacao_repo.obter_por_motorista(motorista.id)
+    return [AvaliacaoResponse.de_avaliacao(a) for a in avaliacoes]
 
 # =============================================================================
 # Perfil do motorista

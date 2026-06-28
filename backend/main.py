@@ -35,6 +35,9 @@ from repo import (
     veiculo_repo,
     carga_repo,
     interesse_carga_repo,
+    favorito_motorista_repo,
+    avaliacao_repo,
+    
 )
 
 # Rotas (API JSON)
@@ -102,6 +105,8 @@ TABELAS = [
     (veiculo_repo, "veiculo"),
     (carga_repo, "carga"),
     (interesse_carga_repo, "interesse_carga"),
+    (favorito_motorista_repo, "favorito_motorista"),   # <-- NOVO
+    (avaliacao_repo, "avaliacao"),                      # <-- NOVO
     (configuracao_repo, "configuracao"),
 ]
 

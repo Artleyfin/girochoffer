@@ -20,6 +20,7 @@ export default function Header() {
     ? [
         ['Painel', '/empresa'],
         ['Nova carga', '/empresa/nova'],
+        ['Favoritos', '/empresa/favoritos'],   // <-- NOVO
         ['Meu perfil', '/perfil'],
       ]
     : [

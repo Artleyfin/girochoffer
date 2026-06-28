@@ -22,6 +22,8 @@ import AdminUsuariosPage from './pages/giro/AdminUsuariosPage'
 import EmpresaPainelPage from './pages/giro/EmpresaPainelPage'
 import EmpresaNovaCargaPage from './pages/giro/EmpresaNovaCargaPage'
 import EmpresaDetalhesPage from './pages/giro/EmpresaDetalhesPage'
+import EmpresaFavoritosPage from './pages/giro/EmpresaFavoritosPage'   // <-- NOVO
+
 
 // Motorista
 import MotoristaPainelPage from './pages/giro/MotoristaPainelPage'
@@ -88,6 +90,7 @@ export const router = createBrowserRouter([
             children: [
               { path: '/empresa', element: <EmpresaPainelPage /> },
               { path: '/empresa/nova', element: <EmpresaNovaCargaPage /> },
+              { path: '/empresa/favoritos', element: <EmpresaFavoritosPage /> },   // <-- NOVO
               { path: '/empresa/carga/:id', element: <EmpresaDetalhesPage /> },
             ],
           },

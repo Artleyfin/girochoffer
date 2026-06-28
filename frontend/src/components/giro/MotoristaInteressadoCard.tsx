@@ -9,11 +9,15 @@ export default function MotoristaInteressadoCard({
   escolhido = false,
   podeEscolher = false,
   onEscolher,
+  favorito = false,
+  onToggleFavorito,
 }: {
   motorista: MotoristaResumo
   escolhido?: boolean
   podeEscolher?: boolean
   onEscolher?: () => void
+  favorito?: boolean
+  onToggleFavorito?: () => void
 }) {
   const m = motorista
   const inicial = (m.nome.trim()[0] ?? '?').toUpperCase()
@@ -80,6 +84,23 @@ export default function MotoristaInteressadoCard({
         >
           ✓ Contratado
         </span>
+      )}
+            {onToggleFavorito && (
+        <button
+          onClick={onToggleFavorito}
+          title={favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '22px',
+            lineHeight: 1,
+            color: favorito ? '#E53E3E' : colors.muted,
+            flex: 'none',
+          }}
+        >
+          {favorito ? '♥' : '♡'}
+        </button>
       )}
       {podeEscolher && (
         <Button

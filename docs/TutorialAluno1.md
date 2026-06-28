@@ -1495,23 +1495,23 @@ def test_media_sem_avaliacoes_eh_zero():
 
 Marque cada item conforme concluir:
 
-- [ ] `backend/sql/favorito_motorista_sql.py` criado (com `UNIQUE` e FKs `ON DELETE CASCADE`).
-- [ ] `backend/sql/avaliacao_sql.py` criado (com `carga_id UNIQUE` e `CHECK (nota 1..5)`).
-- [ ] `backend/model/avaliacao_model.py` criado (`@dataclass Avaliacao`).
-- [ ] `backend/repo/favorito_motorista_repo.py` criado (`criar_tabela`, `existe`, `inserir`, `remover`, `obter_motoristas_da_empresa`).
-- [ ] `backend/repo/avaliacao_repo.py` criado (`criar_tabela`, `existe_por_carga`, `inserir`, `media_por_motorista`, `recalcular_nota_motorista`, `obter_por_motorista`).
-- [ ] `backend/dtos/avaliacao_dto.py` criado (`AvaliarMotoristaDTO`, nota 1..5).
-- [ ] `backend/dtos/responses/avaliacao_response.py` criado (`AvaliacaoResponse.de_avaliacao`).
-- [ ] `backend/routes/empresa_routes.py` editado: imports, rate limiters, 4 endpoints (favoritar, desfavoritar, listar favoritos, avaliar).
-- [ ] `backend/routes/motorista_routes.py` editado: import, rate limiter, endpoint `GET /avaliacoes`.
-- [ ] `backend/main.py` editado: repos importados **e** tabelas registradas em `TABELAS` (na ordem correta).
-- [ ] Backend reiniciado; log mostra as duas tabelas criadas; `/docs` mostra os endpoints novos.
-- [ ] `frontend/src/lib/types.ts` editado: interface `Avaliacao`.
-- [ ] `frontend/src/lib/schemas.ts` editado: `avaliarMotoristaSchema`.
-- [ ] `frontend/src/components/giro/MotoristaInteressadoCard.tsx` editado: props e botão de favorito.
-- [ ] `frontend/src/pages/giro/EmpresaFavoritosPage.tsx` criado.
-- [ ] `frontend/src/router.tsx` editado: import e rota `/empresa/favoritos` dentro de `<EmpresaRoute>`/`<AppLayout>`.
-- [ ] `frontend/src/components/giro/Header.tsx` editado: item de menu "Favoritos".
-- [ ] `bunx tsc -b --noEmit`, `bun run lint` e `pytest` passando.
-- [ ] Fluxo manual testado: favoritar/desfavoritar e avaliar (carga Concluída) com média atualizada.
+- [x] `backend/sql/favorito_motorista_sql.py` criado (com `UNIQUE` e FKs `ON DELETE CASCADE`).
+- [x] `backend/sql/avaliacao_sql.py` criado (com `carga_id UNIQUE` e `CHECK (nota 1..5)`).
+- [x] `backend/model/avaliacao_model.py` criado (`@dataclass Avaliacao`).
+- [x] `backend/repo/favorito_motorista_repo.py` criado (`criar_tabela`, `existe`, `inserir`, `remover`, `obter_motoristas_da_empresa`).
+- [x] `backend/repo/avaliacao_repo.py` criado (`criar_tabela`, `existe_por_carga`, `inserir`, `media_por_motorista`, `recalcular_nota_motorista`, `obter_por_motorista`).
+- [x] `backend/dtos/avaliacao_dto.py` criado (`AvaliarMotoristaDTO`, nota 1..5).
+- [x] `backend/dtos/responses/avaliacao_response.py` criado (`AvaliacaoResponse.de_avaliacao`).
+- [x] `backend/routes/empresa_routes.py` editado: imports, rate limiters, 4 endpoints (favoritar, desfavoritar, listar favoritos, avaliar).
+- [x] `backend/routes/motorista_routes.py` editado: import, rate limiter, endpoint `GET /avaliacoes`.
+- [x] `backend/main.py` editado: repos importados **e** tabelas registradas em `TABELAS` (na ordem correta).
+- [x] Backend reiniciado; log mostra as duas tabelas criadas; `/docs` mostra os endpoints novos.
+- [x] `frontend/src/lib/types.ts` editado: interface `Avaliacao`.
+- [x] `frontend/src/lib/schemas.ts` editado: `avaliarMotoristaSchema`.
+- [x] `frontend/src/components/giro/MotoristaInteressadoCard.tsx` editado: props e botão de favorito.
+- [x] `frontend/src/pages/giro/EmpresaFavoritosPage.tsx` criado.
+- [x] `frontend/src/router.tsx` editado: import e rota `/empresa/favoritos` dentro de `<EmpresaRoute>`/`<AppLayout>`.
+- [x] `frontend/src/components/giro/Header.tsx` editado: item de menu "Favoritos".
+- [x] `bunx tsc -b --noEmit`, `bun run lint` e `pytest` passando.
+- [x] Fluxo manual testado: favoritar/desfavoritar e avaliar (carga Concluída) com média atualizada.
 ```

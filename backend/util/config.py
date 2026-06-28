@@ -14,7 +14,7 @@ load_dotenv()
 # === Configurações da Aplicação ===
 APP_NAME = os.getenv("APP_NAME", "Sistema Web")
 BASE_URL = os.getenv("BASE_URL", "http://localhost:8412")
-SECRET_KEY = os.getenv("SECRET_KEY", "sua-chave-secreta-super-segura-mude-isso-em-producao")
+SECRET_KEY = os.getenv("SECRET_KEY", "lPnTUnlP96jHg9JBUMV95xg761PBX3qX69G67D1V4")
 
 # === Validação de Segurança ===
 # Verifica se SECRET_KEY padrão está sendo usada em produção
